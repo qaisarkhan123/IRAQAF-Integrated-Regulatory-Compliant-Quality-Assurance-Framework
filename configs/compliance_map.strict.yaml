@@ -1,0 +1,71 @@
+frameworks:
+
+  EU_AI_ACT:
+    clauses:
+      - id: "Art9_Data_Governance"
+        description: "Data governance, bias testing, dataset documentation"
+        weight: 10
+        any_of:
+          - { module: "L3", min_score: 95 }
+          - { metric: "L3.metrics.DPG", max: 0.05 }
+          - { metric: "L3.metrics.EOD", max: 0.05 }
+
+      - id: "Art13_Transparency"
+        description: "Explainability & transparency of model decisions"
+        weight: 10
+        any_of:
+          - { module: "L4", min_score: 90 }
+          - { metric: "L4.metrics.deletion_drop", gte: 0.15 }
+          - { metric: "L4.metrics.stability_tau", gte: 0.85 }
+
+      - id: "Art14_Human_Oversight"
+        description: "Human oversight via dashboards / overrides"
+        weight: 8
+        any_of:
+          - { exists: "AGG" }
+
+      - id: "Art15_Robustness"
+        description: "Monitoring, logging, operational robustness"
+        weight: 8
+        any_of:
+          - { module: "L5", min_score: 85 }
+          - { metric: "L5.metrics.logging_coverage", gte: 0.95 }
+          - { metric: "L5.metrics.alert_latency_h", lte: 1.0 }
+
+  GDPR:
+    clauses:
+      - id: "Art5_Data_Principles"
+        description: "Lawfulness, fairness, transparency; data minimization & retention"
+        weight: 10
+        any_of:
+          - { module: "L2", min_score: 90 }
+      - id: "Art22_Automated_Decisions"
+        description: "Right to meaningful information about logic"
+        weight: 8
+        any_of:
+          - { module: "L4", min_score: 90 }
+
+  HIPAA:
+    clauses:
+      - id: "Security_Integrity"
+        description: "Access logging & integrity controls"
+        weight: 6
+        any_of:
+          - { metric: "L5.metrics.logging_coverage", gte: 0.95 }
+
+  ISO_IEC_42001:
+    clauses:
+      - id: "AI_Risk_Management"
+        description: "Systematic AI risk management & governance"
+        weight: 8
+        any_of:
+          - { module: "AGG", min_score: 88 }
+          - { exists: "AGG" }
+
+  SaMD:
+    clauses:
+      - id: "Quality_Management"
+        description: "QMS, traceability, change control"
+        weight: 6
+        any_of:
+          - { exists: "L1" }

@@ -1,0 +1,14 @@
+{
+  "module": "L4",
+  "version": "0.1",
+  "metrics": {
+    "infidelity": 0.09,
+    "stability_tau": 0.87
+  },
+  "score": 91.0,
+  "band": "green",
+  "evidence": [
+    "notebooks/explain.ipynb"
+  ],
+  "notes": ""
+}

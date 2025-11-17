@@ -1,0 +1,138 @@
+name: IRAQAF Continuous Compliance Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run compliance checks daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  compliance-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install iraqaf
+
+    - name: Run IRAQAF Quality Assessment
+      id: iraqaf
+      run: |
+        python scripts/run_compliance_check.py \
+          --output reports/compliance_$(date +%Y%m%d_%H%M%S).json \
+          --format json
+      continue-on-error: true
+
+    - name: Parse IRAQAF Results
+      id: parse-results
+      run: |
+        python scripts/parse_iraqaf_results.py \
+          --input reports/compliance_*.json \
+          --threshold 75 \
+          --output compliance_report.md
+
+    - name: Comment on PR
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('compliance_report.md', 'utf8');
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: report
+          });
+
+    - name: Upload IRAQAF Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: iraqaf-compliance-reports
+        path: |
+          reports/compliance_*.json
+          compliance_report.md
+
+    - name: Fail if compliance threshold not met
+      run: |
+        python scripts/check_compliance_threshold.py \
+          --input reports/compliance_*.json \
+          --threshold 75 \
+          --fail-on-low-score
+
+    - name: Archive reports for dashboard
+      if: always()
+      run: |
+        mkdir -p dashboard_data
+        cp reports/compliance_*.json dashboard_data/
+        tar -czf compliance_reports_$(date +%Y%m%d_%H%M%S).tar.gz dashboard_data/
+
+    - name: Upload to S3 (optional)
+      if: always()
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        pip install boto3
+        python scripts/upload_to_s3.py \
+          --file compliance_reports_*.tar.gz \
+          --bucket iraqaf-compliance-reports \
+          --prefix github-actions/
+
+    - name: Slack Notification
+      if: always()
+      uses: slackapi/slack-github-action@v1
+      with:
+        webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+        payload: |
+          {
+            "text": "IRAQAF Compliance Check: ${{ job.status }}",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*IRAQAF Compliance Check*\nStatus: ${{ job.status }}\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref }}"
+                }
+              }
+            ]
+          }
+
+  deployment-gate:
+    runs-on: ubuntu-latest
+    needs: compliance-check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Download compliance report
+      uses: actions/download-artifact@v3
+      with:
+        name: iraqaf-compliance-reports
+
+    - name: Verify deployment readiness
+      run: |
+        python scripts/verify_deployment_readiness.py \
+          --compliance-report compliance_report.md \
+          --required-modules L1,L2,L3 \
+          --min-score 80
+
+    - name: Approval gate
+      if: github.event_name == 'push'
+      run: |
+        echo "✅ Compliance check passed. Ready for deployment."

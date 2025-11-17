@@ -1,0 +1,24 @@
+{
+  "module": "L4",
+  "version": "1.0",
+  "metrics": {
+    "baseline_metric": 1.0,
+    "masked_metric": 1.0,
+    "deletion_drop": 0.0,
+    "stability_tau": 1.0,
+    "infidelity": 1.0,
+    "top_k": 1,
+    "feature_importance": {
+      "f1": 0.2916666666666667,
+      "f2": 0.25,
+      "f3": 0.25,
+      "f4": 0.25
+    }
+  },
+  "score": 40.0,
+  "band": "red",
+  "evidence": [
+    "data/explain_demo.csv"
+  ],
+  "notes": "L4 permutation-importance deletion test"
+}

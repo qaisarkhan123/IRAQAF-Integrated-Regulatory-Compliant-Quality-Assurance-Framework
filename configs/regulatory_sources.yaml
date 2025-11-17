@@ -1,0 +1,201 @@
+# Regulatory Sources Configuration
+# Monitors healthcare regulations for real-time changes
+
+monitoring_schedule:
+  # Options: hourly, daily (hour), weekly (day_of_week, hour), custom_cron
+  type: daily
+  hour: 2  # 2 AM UTC
+  timezone: UTC
+
+regulatory_sources:
+  # GDPR - Official Journal of the EU
+  gdpr:
+    name: "GDPR Official Journal"
+    enabled: true
+    type: rss
+    url: "https://eur-lex.europa.eu/rss/oj-l-all.xml"
+    update_frequency_hours: 24
+    description: "Official updates to GDPR and related EU regulations"
+    mapping:
+      modules: ["L1-Governance", "L2-Privacy"]
+      focus_areas:
+        - data_protection
+        - data_subject_rights
+        - consent_management
+        - data_transfer
+
+  # HIPAA - HHS Official Sources
+  hipaa:
+    name: "HIPAA HHS"
+    enabled: true
+    type: api
+    url: "https://www.hhs.gov/hipaa/for-professionals/"
+    api_endpoint: "https://www.hhs.gov/hipaa/for-professionals/"
+    update_frequency_hours: 48
+    description: "US Health Insurance Portability and Accountability Act updates"
+    mapping:
+      modules: ["L2-Privacy", "L5-Operations"]
+      focus_areas:
+        - phi_protection
+        - breach_notification
+        - audit_controls
+        - business_associate_agreements
+
+  # EU AI Act
+  eu_ai_act:
+    name: "EU AI Act Portal"
+    enabled: true
+    type: rss
+    url: "https://eur-lex.europa.eu/rss/oj-c-all.xml"
+    update_frequency_hours: 48
+    description: "EU Regulation on artificial intelligence"
+    mapping:
+      modules: ["L3-Fairness", "L4-Explainability", "L1-Governance"]
+      focus_areas:
+        - risk_assessment
+        - transparency_requirements
+        - human_oversight
+        - bias_mitigation
+
+  # SOC2
+  soc2:
+    name: "SOC2 Standards"
+    enabled: false
+    type: web
+    url: "https://www.aicpa-cima.com/topic/service-organization-control-soc-2"
+    update_frequency_hours: 168  # Weekly
+    description: "Service Organization Control standards"
+    mapping:
+      modules: ["L1-Governance", "L5-Operations"]
+      focus_areas:
+        - access_controls
+        - monitoring
+        - change_management
+
+  # California CCPA
+  ccpa:
+    name: "CCPA Updates"
+    enabled: true
+    type: rss
+    url: "https://oag.ca.gov/privacy/ccpa"
+    update_frequency_hours: 168
+    description: "California Consumer Privacy Act updates"
+    mapping:
+      modules: ["L1-Governance", "L2-Privacy"]
+      focus_areas:
+        - consumer_rights
+        - opt_out_mechanisms
+        - data_sale_restrictions
+
+# NLP Change Detection Settings
+nlp_settings:
+  similarity_threshold: 0.75  # 0-1, lower = more sensitive
+  
+  # Severity classification thresholds
+  severity_thresholds:
+    critical: 0.50      # Similarity < 50%
+    high: 0.70         # Similarity < 70%
+    medium: 0.85       # Similarity < 85%
+    low: 0.95          # Similarity < 95%
+  
+  # Extract key topics from regulations
+  extract_topics: true
+  top_topics_count: 5
+  
+  # Track regulatory history
+  track_history: true
+
+# IRAQAF Synchronization
+iraqaf_sync:
+  # Auto-update trace_map.yaml when regulations change
+  auto_update_trace_map: true
+  
+  # Trigger re-evaluation of affected modules
+  auto_trigger_reeval: false  # Manual review recommended
+  
+  # Generate impact reports
+  generate_impact_reports: true
+  
+  # Send alerts to dashboard
+  dashboard_alerts: true
+  
+  # Module impact mapping
+  module_mappings:
+    GDPR:
+      primary: ["L1-Governance", "L2-Privacy"]
+      secondary: ["L5-Operations"]
+    HIPAA:
+      primary: ["L2-Privacy", "L5-Operations"]
+      secondary: ["L1-Governance"]
+    EU-AI-Act:
+      primary: ["L3-Fairness", "L4-Explainability"]
+      secondary: ["L1-Governance"]
+    SOC2:
+      primary: ["L1-Governance", "L5-Operations"]
+      secondary: ["L4-Explainability"]
+
+# Notification Settings
+notifications:
+  # Alert on new regulations
+  alert_on_new: true
+  
+  # Alert on significant changes
+  alert_on_changes: true
+  
+  # Minimum severity to alert
+  min_severity: "MEDIUM"  # CRITICAL, HIGH, MEDIUM, LOW
+  
+  # Notification methods
+  methods:
+    # Streamlit dashboard alerts
+    dashboard: true
+    
+    # Slack notifications
+    slack:
+      enabled: false
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#compliance-alerts"
+    
+    # Email notifications
+    email:
+      enabled: false
+      to_addresses: ["compliance@example.com"]
+      smtp_server: "smtp.gmail.com"
+      smtp_port: 587
+
+# Caching and Storage
+caching:
+  # Cache directory
+  data_directory: "regulatory_data"
+  
+  # Cache TTL in hours
+  cache_ttl_hours: 24
+  
+  # Keep historical data
+  retention_days: 90
+  
+  # Compression for large files
+  compress_cache: true
+
+# Rate Limiting (to respect source servers)
+rate_limiting:
+  # Max concurrent requests
+  max_concurrent: 3
+  
+  # Delay between requests (seconds)
+  request_delay: 2
+  
+  # Timeout per request (seconds)
+  request_timeout: 10
+  
+  # Retry failed requests
+  max_retries: 3
+  retry_delay_seconds: 5
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "regulatory_data/monitoring.log"
+  max_file_size: 10485760  # 10 MB
+  backup_count: 5

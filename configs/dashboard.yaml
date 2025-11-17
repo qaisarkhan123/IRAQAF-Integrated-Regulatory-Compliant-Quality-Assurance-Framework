@@ -1,0 +1,135 @@
+# =============================================================================
+# IRAQAF Dashboard Configuration
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# File Upload Settings
+# -----------------------------------------------------------------------------
+evidence:
+  max_file_size_mb: 50
+  max_files_per_upload: 10
+  allowed_extensions:
+    - pdf
+    - csv
+    - png
+    - jpg
+    - jpeg
+    - txt
+    - docx
+    - xlsx
+    - json
+    - yaml
+    - yml
+
+# -----------------------------------------------------------------------------
+# Cache Settings
+# -----------------------------------------------------------------------------
+cache:
+  ttl_seconds: 300
+  max_cache_size_mb: 500
+  max_memory_mb: 500
+
+# -----------------------------------------------------------------------------
+# Performance Monitoring
+# -----------------------------------------------------------------------------
+performance:
+  enable_monitoring: true
+  log_slow_operations: true
+  slow_operation_threshold_ms: 1000
+
+# -----------------------------------------------------------------------------
+# Security & Rate Limiting
+# -----------------------------------------------------------------------------
+security:
+  enable_rate_limiting: true
+  enable_input_validation: true
+  enable_audit_logging: true
+
+rate_limits:
+  prometheus:
+    max_calls: 60
+    window_seconds: 60
+  file_upload:
+    max_calls: 10
+    window_seconds: 60
+  export:
+    max_calls: 20
+    window_seconds: 60
+  api_calls:
+    max_calls: 100
+    window_seconds: 60
+
+# -----------------------------------------------------------------------------
+# Policy Thresholds (L5 Operations)
+# -----------------------------------------------------------------------------
+policies:
+  latency_slo: 1.0              # Max latency in seconds
+  error_rate_threshold: 5.0     # Max error rate percentage
+  refresh_interval_s: 60        # Auto-refresh interval
+
+# -----------------------------------------------------------------------------
+# Project Paths (relative to project root)
+# -----------------------------------------------------------------------------
+paths:
+  evidence_dir: evidence
+  reports_dir: reports
+  configs_dir: configs
+  logs_dir: logs
+  data_dir: data
+  temp_dir: temp
+
+# -----------------------------------------------------------------------------
+# Logging Configuration
+# -----------------------------------------------------------------------------
+logging:
+  level: INFO                   # DEBUG, INFO, WARNING, ERROR
+  max_file_size_mb: 10
+  backup_count: 5
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# -----------------------------------------------------------------------------
+# UI Settings
+# -----------------------------------------------------------------------------
+ui:
+  default_theme: Auto           # Auto, Light, Dark
+  enable_animations: true
+  compact_mode: false
+  show_timestamps: true
+  decimal_places: 2
+
+# -----------------------------------------------------------------------------
+# Module Settings
+# -----------------------------------------------------------------------------
+modules:
+  L1:
+    enable_clause_tagging: true
+    auto_sync_evidence: true
+  L2:
+    alert_on_breach: true
+  L3:
+    fairness_threshold_dpg: 0.05
+    fairness_threshold_eod: 0.10
+  L4:
+    deletion_drop_target: 0.15
+    stability_tau_target: 0.85
+  L5:
+    enable_live_monitoring: true
+    prometheus_timeout_seconds: 10
+
+# -----------------------------------------------------------------------------
+# Export Settings
+# -----------------------------------------------------------------------------
+export:
+  default_format: json          # json, csv, xlsx, pdf
+  include_metadata: true
+  compress_large_exports: true
+  max_export_size_mb: 100
+
+# -----------------------------------------------------------------------------
+# Advanced Settings (change with caution)
+# -----------------------------------------------------------------------------
+advanced:
+  enable_debug_mode: false
+  profiling_enabled: false
+  strict_validation: true
+  allow_experimental_features: false

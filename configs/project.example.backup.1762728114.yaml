@@ -1,0 +1,45 @@
+META:
+  dataset_version: "demo-0.1"
+  last_train_date: "2025-11-06"
+  data_owner: "M3S, University of Oulu"
+L1:
+  compliance_map: configs/compliance_map.yaml
+  reports_dir: reports
+  notes: Demo compliance mapping across EU AI Act, GDPR, HIPAA, ISO/IEC, SaMD
+  evidence:
+  - docs/intended_use.pdf
+  - docs/pms_plan.pdf
+L2:
+  metrics: {}
+  score_hint: 90
+  evidence:
+  - configs/security.yaml
+L3:
+  csv_path: data/fairness_example.csv
+  label_col: y_true
+  pred_col: y_pred
+  group_col: group
+  use_prob: false
+  notes: Balanced demo run
+  evidence:
+  - data/fairness_example.csv
+L4:
+  csv_path: data/explain_demo.csv
+  label_col: y
+  feature_cols:
+  - f1
+  - f2
+  - f3
+  - f4
+  test_size: 0.3
+  top_k: 1
+  notes: L4 permutation-importance deletion test
+  evidence:
+  - data/explain_demo.csv
+L5:
+  metrics:
+    logging_coverage: 0.97
+    alert_latency_h: 0.8
+  score_hint: 88
+  evidence:
+  - logs/telemetry.csv

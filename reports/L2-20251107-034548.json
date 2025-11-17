@@ -1,0 +1,11 @@
+{
+  "module": "L2",
+  "version": "0.1",
+  "metrics": {},
+  "score": 90.0,
+  "band": "green",
+  "evidence": [
+    "configs/security.yaml"
+  ],
+  "notes": ""
+}

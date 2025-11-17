@@ -1,0 +1,18 @@
+{
+  "L1": [
+    "docs/intended_use.pdf",
+    "docs/pms_plan.pdf"
+  ],
+  "L2": [
+    "configs/security.yaml"
+  ],
+  "L3": [
+    "data/fairness_example.csv"
+  ],
+  "L4": [
+    "data/explain_demo.csv"
+  ],
+  "L5": [
+    "logs/telemetry.csv"
+  ]
+}

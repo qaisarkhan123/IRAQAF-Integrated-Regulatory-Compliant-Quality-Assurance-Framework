@@ -1,0 +1,117 @@
+trace_map:
+  GDPR:
+    Art5_Data_Principles:
+      description: "Lawfulness, fairness and transparency"
+      metrics:
+        - L1.metrics.policy_coverage
+        - L2.metrics.encryption_coverage
+    Art22_Automated_Decisions:
+      description: "Automated decision-making"
+      metrics:
+        - L4.metrics.feature_importance
+
+  EU_AI_ACT:
+    Art9_Data_Governance:
+      description: "Data governance requirements"
+      metrics:
+        - L3.metrics.DPG
+        - L3.metrics.EOD
+    Art13_Transparency:
+      description: "Transparency requirements"
+      metrics:
+        - L4.metrics.shap_importance
+
+  HIPAA:
+    Security_Rule:
+      description: "Security standards for PHI"
+      metrics:
+        - L2.metrics.encryption_coverage
+        - L5.metrics.logging_coverage
+
+  ISO_IEC_42001:
+    AI_Risk_Management:
+      description: "AI risk management"
+      metrics:
+        - L1.metrics.risk_register_age_days
+
+  SaMD:
+    Quality_Management:
+      description: "Medical device quality management"
+      metrics:
+        - L1.metrics.audit_completeness
+
+  ISO_13485:
+    Design_Control:
+      description: "Medical device design control requirements"
+      metrics:
+        - L1.metrics.policy_coverage
+        - L4.metrics.feature_importance
+    Risk_Management:
+      description: "Medical device risk management"
+      metrics:
+        - L1.metrics.risk_register_age_days
+        - L3.metrics.DPG
+    Traceability:
+      description: "Medical device traceability and identification"
+      metrics:
+        - L5.metrics.logging_coverage
+
+  ISO_14971:
+    Hazard_Analysis:
+      description: "Application of risk management to medical devices - Hazard analysis"
+      metrics:
+        - L1.metrics.risk_register_age_days
+        - L1.metrics.audit_completeness
+    Risk_Evaluation:
+      description: "Risk evaluation and control"
+      metrics:
+        - L3.metrics.DPG
+        - L4.metrics.shap_importance
+    Risk_Monitoring:
+      description: "Risk monitoring and post-market surveillance"
+      metrics:
+        - L5.metrics.logging_coverage
+
+  ISO_27001:
+    Information_Security_Policies:
+      description: "Information security policies and objectives"
+      metrics:
+        - L1.metrics.policy_coverage
+    Access_Control:
+      description: "Access control and user authentication"
+      metrics:
+        - L2.metrics.encryption_coverage
+        - L5.metrics.logging_coverage
+    Cryptography:
+      description: "Cryptography and data protection"
+      metrics:
+        - L2.metrics.encryption_coverage
+
+  ISO_27799:
+    Healthcare_Privacy:
+      description: "Information security management in health - Health data confidentiality"
+      metrics:
+        - L2.metrics.encryption_coverage
+        - L1.metrics.policy_coverage
+    Access_Control_Healthcare:
+      description: "Healthcare specific access control"
+      metrics:
+        - L2.metrics.encryption_coverage
+        - L5.metrics.logging_coverage
+
+  IEC_62304:
+    Software_Planning:
+      description: "Medical device software lifecycle processes"
+      metrics:
+        - L1.metrics.policy_coverage
+        - L1.metrics.audit_completeness
+    Software_Development:
+      description: "Software development process"
+      metrics:
+        - L4.metrics.feature_importance
+        - L1.metrics.audit_completeness
+    Software_Verification:
+      description: "Software verification and validation"
+      metrics:
+        - L1.metrics.audit_completeness
+        - L5.metrics.logging_coverage

@@ -1,0 +1,6 @@
+
+L3:
+  metrics:
+    DPG: 0.05
+    EOD: 0.05
+  notes: "Example fairness eval config"
