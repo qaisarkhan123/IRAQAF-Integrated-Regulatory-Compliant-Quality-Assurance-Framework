@@ -8173,18 +8173,32 @@ def _hash_bytes(b: bytes) -> str:
 
 ix = _load_index()
 
-# File upload and module selection with enhanced styling
-st.markdown("<h4 style='margin: 20px 0 12px 0; color: #1F2937; font-weight: 700;'>📂 Upload Files</h4>",
-            unsafe_allow_html=True)
-upload_col, module_col = st.columns([2, 1], gap="large")
+# ============================================================================
+# UNIFIED EVIDENCE & EXPORT SECTION (Redesigned for Clarity)
+# ============================================================================
+st.markdown("""
+<div style="margin-top: 50px; margin-bottom: 30px;">
+    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">📎 Evidence Management & Export</h2>
+    <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Upload evidence files, manage module assignments, sync to config, and export reports</p>
+</div>
+""", unsafe_allow_html=True)
 
-with upload_col:
+# Create organized tabs for different functions
+evidence_tabs = st.tabs(
+    ["📤 Upload & Pin", "📚 Evidence Index", "🔄 Sync & Export"])
+
+# ============================================================================
+# TAB 1: UPLOAD & PIN
+# ============================================================================
+with evidence_tabs[0]:
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #F3E8FF 0%, #FAF5FF 100%); border: 2px dashed #A78BFA; border-radius: 12px; padding: 20px; text-align: center;">
-        <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: #6D28D9; font-weight: 600;">🎯 Drag & Drop or Click to Upload</p>
-        <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #7C3AED;">Limit 50MB per file • PDF, CSV, PNG, TXT, DOCX</p>
+    <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px dashed #3B82F6; border-radius: 14px; padding: 28px; text-align: center; margin-bottom: 24px;">
+        <div style="font-size: 2.5rem; margin-bottom: 8px;">📁</div>
+        <p style="margin: 0 0 4px 0; font-size: 1rem; font-weight: 700; color: #1E40AF;">Drag & Drop Evidence Files</p>
+        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #1E3A8A;">PDF, CSV, PNG, TXT, DOCX • Max 50MB per file</p>
     </div>
     """, unsafe_allow_html=True)
+
     uploads = st.file_uploader(
         "Upload evidence files",
         type=["pdf", "csv", "png", "txt", "docx"],
@@ -8193,322 +8207,338 @@ with upload_col:
         label_visibility="collapsed"
     )
 
-with module_col:
-    st.markdown("<h5 style='margin: 0 0 12px 0; color: #1F2937; font-weight: 700;'>📌 Pin to Modules</h5>",
+    if uploads:
+        st.success(f"✅ {len(uploads)} file(s) ready to upload", icon="✅")
+
+        # Show file list
+        with st.expander("📋 Files to upload", expanded=True):
+            for f in uploads:
+                size_mb = f.size / (1024 * 1024)
+                st.caption(f"📄 {f.name} ({size_mb:.1f} MB)")
+
+    st.divider()
+
+    # Module selection
+    st.markdown("<h4 style='margin: 16px 0 12px 0; color: #1F2937; font-weight: 700;'>📌 Assign to Modules</h4>",
                 unsafe_allow_html=True)
+    st.caption("Select which compliance modules this evidence applies to")
+
     modules_to_pin = st.multiselect(
-        "Pin uploaded files to module(s)",
+        "Modules",
         options=list(MODULE_LABELS.keys()),
         default=["L1"],
-        format_func=lambda m: f"{m} • {MODULE_LABELS[m]}",
-        help="Each selected module receives a reference to every uploaded file.",
+        format_func=lambda m: f"🏛️ {m} • {MODULE_LABELS[m]}",
         disabled=_LOCK,
         label_visibility="collapsed"
     )
 
-# Action buttons with enhanced styling
-st.markdown("<h4 style='margin: 20px 0 12px 0; color: #1F2937; font-weight: 700;'>💾 Actions</h4>",
-            unsafe_allow_html=True)
-act_col1, act_col2, act_col3 = st.columns([1, 1, 1], gap="small")
+    st.divider()
 
-with act_col1:
-    if st.button("💾 Save & Pin Files", disabled=_LOCK, width="stretch", type="primary"):
-        if not uploads:
-            st.warning("❌ No files uploaded.")
-        elif not modules_to_pin:
-            st.warning("❌ Pick at least one module to pin.")
-        else:
-            with progress_tracker("Saving evidence files", total=len(uploads)) as tracker:
-                successful, failed = batch_process_evidence_files(
-                    uploads, modules_to_pin, EVID_DIR)
+    # Action buttons
+    col1, col2, col3 = st.columns(3)
 
-                # Update index for successful saves
-                for fname, paths in successful:
-                    for mid, path in paths:
-                        ix.setdefault(mid, [])
-                        if path not in ix[mid]:
-                            ix[mid].append(path)
+    with col1:
+        if st.button("💾 Save & Pin Files", disabled=_LOCK, width="stretch", type="primary", key="save_pin_btn"):
+            if not uploads:
+                st.error("❌ Upload files first")
+            elif not modules_to_pin:
+                st.error("❌ Select at least one module")
+            else:
+                with progress_tracker("Saving evidence files", total=len(uploads)) as tracker:
+                    successful, failed = batch_process_evidence_files(
+                        uploads, modules_to_pin, EVID_DIR)
 
-                # Save updated index
-                if successful:
-                    _save_index(ix)
-
-                    # Record operation for undo/redo
-                    all_saved_paths = []
+                    # Update index for successful saves
                     for fname, paths in successful:
-                        all_saved_paths.extend(paths)
+                        for mid, path in paths:
+                            ix.setdefault(mid, [])
+                            if path not in ix[mid]:
+                                ix[mid].append(path)
 
-                    record_evidence_operation('add', {
-                        'files': all_saved_paths,
-                        'timestamp': datetime.now().isoformat()
-                    })
+                    # Save updated index
+                    if successful:
+                        _save_index(ix)
 
-                    st.success(
-                        f"✅ Saved {len(successful)} file(s): {', '.join(f[0] for f in successful)}")
-                # Show failures if any
-                if failed:
-                    with st.expander(f"⚠️ {len(failed)} file(s) failed", expanded=True):
-                        for fname, error in failed:
-                            st.error(f"❌ {fname}: {error}")
+                        # Record operation for undo/redo
+                        all_saved_paths = []
+                        for fname, paths in successful:
+                            all_saved_paths.extend(paths)
 
-with act_col2:
-    if st.button("📂 Open Folder", width="stretch"):
-        st.info(f"📁 `{EVID_DIR.resolve()}`")
+                        record_evidence_operation('add', {
+                            'files': all_saved_paths,
+                            'timestamp': datetime.now().isoformat()
+                        })
 
-with act_col3:
-    st.info(f"📋 {len(uploads)} file(s) ready" if uploads else "📭 No files")
+                        st.success(
+                            f"✅ Saved {len(successful)} file(s) to {', '.join(modules_to_pin)}")
+                    # Show failures if any
+                    if failed:
+                        with st.expander(f"⚠️ {len(failed)} file(s) failed", expanded=True):
+                            for fname, error in failed:
+                                st.error(f"❌ {fname}: {error}")
 
-# Undo/Redo controls
-init_evidence_history()
-undo_count = len(st.session_state.evidence_history['undo_stack'])
-redo_count = len(st.session_state.evidence_history['redo_stack'])
+    with col2:
+        if st.button("📂 Open Folder", width="stretch", key="open_folder_btn"):
+            st.info(f"📁 Evidence folder:\n`{EVID_DIR.resolve()}`")
 
-if undo_count > 0 or redo_count > 0:
-    st.markdown("**History**")
-    undo_col, redo_col = st.columns(2)
+    with col3:
+        # Undo/Redo controls
+        init_evidence_history()
+        undo_count = len(st.session_state.evidence_history['undo_stack'])
+        redo_count = len(st.session_state.evidence_history['redo_stack'])
 
-    with undo_col:
-        undo_disabled = undo_count == 0 or _LOCK
-        if st.button(
-            f"? Undo ({undo_count})",
-            disabled=undo_disabled,
-            width="stretch",
-            key="evidence_undo_btn",
-            help="Undo last evidence operation"
-        ):
-            if undo_evidence_operation():
-                st.success("✅ Undone!")
-                st.rerun()
-            else:
-                st.error("❌ Undo failed")
+        if undo_count > 0 or redo_count > 0:
+            with st.expander("⏱️ History", expanded=False):
+                h1, h2 = st.columns(2)
+                with h1:
+                    undo_disabled = undo_count == 0 or _LOCK
+                    if st.button(
+                        f"↶ Undo ({undo_count})",
+                        disabled=undo_disabled,
+                        width="stretch",
+                        key="evidence_undo_btn",
+                        help="Undo last operation"
+                    ):
+                        if undo_evidence_operation():
+                            st.success("✅ Undone!")
+                            st.rerun()
 
-    with redo_col:
-        redo_disabled = redo_count == 0 or _LOCK
-        if st.button(
-            f"? Redo ({redo_count})",
-            disabled=redo_disabled,
-            width="stretch",
-            key="evidence_redo_btn",
-            help="Redo last undone operation"
-        ):
-            if redo_evidence_operation():
-                st.success("✅ Redone!")
-                st.rerun()
-            else:
-                st.error("❌ Redo failed")
+                with h2:
+                    redo_disabled = redo_count == 0 or _LOCK
+                    if st.button(
+                        f"↷ Redo ({redo_count})",
+                        disabled=redo_disabled,
+                        width="stretch",
+                        key="evidence_redo_btn",
+                        help="Redo last operation"
+                    ):
+                        if redo_evidence_operation():
+                            st.success("✅ Redone!")
+                            st.rerun()
 
-with st.expander("📚 Current Evidence Index (per module)", expanded=False):
+# ============================================================================
+# TAB 2: EVIDENCE INDEX
+# ============================================================================
+with evidence_tabs[1]:
     if ix:
-        # Display as organized cards per module
-        for module_id, files in sorted(ix.items()):
-            st.markdown(
-                f"<h5 style='margin-top: 12px; margin-bottom: 8px; color: #1F2937; font-weight: 700;'>{module_id} • {MODULE_LABELS.get(module_id, 'Unknown')}</h5>", unsafe_allow_html=True)
+        st.success(
+            f"✅ {sum(len(files) for files in ix.values())} file(s) indexed")
+
+        # Display organized by module
+        for module_id in ["L1", "L2", "L3", "L4", "L5"]:
+            files = ix.get(module_id, [])
             if files:
-                for file_path in files:
-                    file_name = Path(file_path).name
-                    st.markdown(
-                        f"<div style='padding: 8px 12px; background: #F3F4F6; border-radius: 8px; margin-bottom: 6px; font-size: 0.9rem;'>📄 {file_name}</div>", unsafe_allow_html=True)
-            else:
-                st.caption(f"No evidence files for {module_id}")
+                with st.expander(f"🏛️ {module_id} • {MODULE_LABELS.get(module_id, 'Unknown')} ({len(files)} file{'s' if len(files) != 1 else ''})", expanded=True):
+                    for file_path in files:
+                        file_name = Path(file_path).name
+                        col_name, col_action = st.columns([4, 1])
+                        with col_name:
+                            st.caption(f"📄 {file_name}")
+                        with col_action:
+                            if st.button("🗑️", key=f"del_{module_id}_{file_name}", help="Remove file", width="stretch"):
+                                if module_id in ix and file_path in ix[module_id]:
+                                    ix[module_id].remove(file_path)
+                                    _save_index(ix)
+                                    st.success("✅ Removed")
+                                    st.rerun()
     else:
-        st.caption("📭 No evidence files pinned yet")
+        st.info(
+            "📭 No evidence files indexed yet. Upload files in the **Upload & Pin** tab to get started.")
 
+# ============================================================================
+# TAB 3: SYNC & EXPORT
+# ============================================================================
+with evidence_tabs[2]:
+    sync_export_tabs = st.tabs(["🔄 Sync to Config", "📊 Export Reports"])
 
-close_card()
-
-# =========================
-# 🔄 Sync to YAML + Export (Enhanced)
-# =========================
-st.markdown("""
-<div style="margin-top: 40px; margin-bottom: 30px;">
-    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">🔄 Sync to Config & Export</h2>
-    <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Merge evidence pins into your project YAML and export reports in multiple formats</p>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="background: linear-gradient(135deg, #ECFDF5 0%, #E0FFDD 100%); border: 2px solid #10B981; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-        <div>
-            <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 700; color: #065F46;">🔄 Sync to YAML</p>
-            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Merges pins into `evidence: [...]` under each module. Auto-deduplicates and creates keys if missing.</p>
+    # Sync to YAML sub-tab
+    with sync_export_tabs[0]:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #ECFDF5 0%, #E0FFDD 100%); border: 2px solid #10B981; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
+            <p style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 700; color: #065F46;">🔄 Sync Evidence to Project Config</p>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #047857;">Merges pinned files into `evidence: [...]` under each module in your YAML config. Auto-deduplicates existing entries.</p>
         </div>
-        <div>
-            <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 700; color: #065F46;">⬇️ Export Reports</p>
-            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Download compliance data in JSON, CSV, or DOCX format for stakeholders</p>
+        """, unsafe_allow_html=True)
+
+        def _sync_to_yaml(yaml_path="configs/project.example.yaml"):
+            yaml_path = Path(yaml_path)
+            if not yaml_path.exists():
+                st.error(f"Config not found: {yaml_path}")
+                return False
+            try:
+                import yaml
+            except Exception:
+                st.error("Missing PyYAML. `pip install pyyaml`")
+                return False
+
+            with open(yaml_path, "r", encoding="utf-8") as fh:
+                try:
+                    cfg = yaml.safe_load(fh) or {}
+                except Exception as e:
+                    st.error(f"YAML parse error: {e}")
+                    return False
+
+            for mid in MODULE_LABELS.keys():
+                cfg.setdefault(mid, {})
+                ev = cfg[mid].get("evidence", [])
+                if ev is None:
+                    ev = []
+                if not isinstance(ev, list):
+                    ev = [str(ev)]
+                for rel in ix.get(mid, []):
+                    if rel not in ev:
+                        ev.append(rel)
+                cfg[mid]["evidence"] = sorted(ev)
+
+            backup = yaml_path.with_suffix(f".backup.{int(time.time())}.yaml")
+            shutil.copyfile(yaml_path, backup)
+            with open(yaml_path, "w", encoding="utf-8") as fh:
+                yaml.safe_dump(cfg, fh, sort_keys=False)
+            st.success(f"✅ Synced to {yaml_path}\n📁 Backup: {backup.name}")
+            return True
+
+        col1, col2 = st.columns([1, 2])
+        with col1:
+            if st.button("🔄 Sync to YAML", disabled=_LOCK, width="stretch", type="primary", key="sync_yaml_btn"):
+                try:
+                    if _sync_to_yaml():
+                        st.balloons()
+                except Exception as e:
+                    show_error_inline(e, "YAML sync failed")
+
+        with col2:
+            st.markdown(
+                "<p style='margin: 0; padding-top: 8px; font-size: 0.85rem; color: #6B7280;'>💡 After syncing, re-run L1/L2 modules to include evidence references in reports</p>",
+                unsafe_allow_html=True)
+
+    # Export Reports sub-tab
+    with sync_export_tabs[1]:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FEF9E7 100%); border: 2px solid #F59E0B; border-radius: 14px; padding: 20px; margin-bottom: 24px;">
+            <p style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 700; color: #92400E;">📥 Generate & Download Reports</p>
+            <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #B45309;">Create comprehensive reports in multiple formats (JSON, CSV, DOCX) for stakeholders</p>
         </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-card("🔄 Sync to `configs/project.example.yaml`",
-     "")
+        # Show available export formats
+        export_col1, export_col2, export_col3 = st.columns(3)
 
+        with export_col1:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px solid #3B82F6; border-radius: 12px; padding: 16px; text-align: center;">
+                <div style="font-size: 1.8rem;">📄</div>
+                <p style="margin: 8px 0 4px 0; font-weight: 700; color: #1E40AF; font-size: 0.9rem;">Word Report</p>
+                <p style="margin: 0; font-size: 0.8rem; color: #1E3A8A;">DOCX format with full details</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-def _sync_to_yaml(yaml_path="configs/project.example.yaml"):
-    yaml_path = Path(yaml_path)
-    if not yaml_path.exists():
-        st.error(f"Config not found: {yaml_path}")
-        return False
-    try:
-        import yaml
-    except Exception:
-        st.error("Missing PyYAML. `pip install pyyaml`")
-        return False
+            if st.button("Generate DOCX", width="stretch", key="gen_docx", type="primary"):
+                with st.spinner("📋 Building document..."):
+                    def build_docx(report_bundle: dict) -> bytes:
+                        try:
+                            from docx import Document
+                        except Exception:
+                            st.error(
+                                "`python-docx` not installed. Run: `pip install python-docx`")
+                            return b""
+                        doc = Document()
+                        doc.add_heading("IRAQAF QA Report", level=1)
+                        doc.add_paragraph(
+                            "Automatically generated from the latest IRAQAF run.")
 
-    with open(yaml_path, "r", encoding="utf-8") as fh:
-        try:
-            cfg = yaml.safe_load(fh) or {}
-        except Exception as e:
-            st.error(f"YAML parse error: {e}")
-            return False
+                        agg_rep = report_bundle.get("AGG")
+                        if agg_rep:
+                            doc.add_heading("Aggregate (GQAS)", level=2)
+                            doc.add_paragraph(f"GQAS: {agg_rep.get('gqas')}")
+                            doc.add_paragraph(
+                                f"Floors met: {agg_rep.get('floors_met')}")
 
-    for mid in MODULE_LABELS.keys():
-        cfg.setdefault(mid, {})
-        ev = cfg[mid].get("evidence", [])
-        if ev is None:
-            ev = []
-        if not isinstance(ev, list):
-            ev = [str(ev)]
-        for rel in ix.get(mid, []):
-            if rel not in ev:
-                ev.append(rel)
-        cfg[mid]["evidence"] = sorted(ev)
+                        doc.add_heading("Modules", level=2)
+                        for m in ["L1", "L2", "L3", "L4", "L5"]:
+                            rep_m = report_bundle.get(m)
+                            if not rep_m:
+                                continue
+                            doc.add_heading(NAMES[m], level=3)
+                            doc.add_paragraph(
+                                f"Score: {rep_m['score']}  |  Band: {rep_m['band']}")
+                            doc.add_paragraph("Metrics:")
+                            doc.add_paragraph(json.dumps(
+                                rep_m.get("metrics", {}), indent=2))
 
-    backup = yaml_path.with_suffix(f".backup.{int(time.time())}.yaml")
-    shutil.copyfile(yaml_path, backup)
-    with open(yaml_path, "w", encoding="utf-8") as fh:
-        yaml.safe_dump(cfg, fh, sort_keys=False)
-    st.success(f"Synced to {yaml_path}  ?  Backup: {backup.name}")
-    return True
+                        bio = BytesIO()
+                        doc.save(bio)
+                        return bio.getvalue()
 
-
-sync_col1, sync_col2 = st.columns([1, 2])
-with sync_col1:
-    if st.button("🔄 Sync to YAML", disabled=_LOCK, width="stretch", type="primary"):
-        try:
-            if _sync_to_yaml():
-                st.success("✅ Evidence synced to project config!")
-        except Exception as e:
-            show_error_inline(e, "YAML sync failed")
-with sync_col2:
-    st.markdown(
-        "<p style='margin: 0; padding-top: 8px; font-size: 0.85rem; color: #6B7280;'>💡 After syncing, re-run L1/L2 modules so reports include the new evidence references.</p>", unsafe_allow_html=True)
-
-# Inline export card
-
-
-# =============================================================================
-# EXPORT PRESETS (Enhanced)
-# =============================================================================
-
-st.markdown("""
-<div style="margin-top: 32px; margin-bottom: 24px;">
-    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; font-weight: 800; color: #1F2937;">💾 Quick Export Presets</h3>
-    <p style="margin: 0; font-size: 0.95rem; color: #6B7280;">One-click exports in multiple formats for different audiences</p>
-</div>
-""", unsafe_allow_html=True)
-
-preset_col1, preset_col2, preset_col3 = st.columns(3, gap="large")
-
-with preset_col1:
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px solid #3B82F6; border-radius: 12px; padding: 24px; text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">📊</div>
-        <div style="font-weight: 700; color: #1E40AF; margin-bottom: 4px;">Executive Summary</div>
-        <div style="font-size: 0.85rem; color: #1E3A8A; margin-bottom: 16px;">High-level GQAS & floors</div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.info("💡 Use the **📥 Export & Reports** section in the sidebar for all export options (CSV, PDF, JSON)")
-
-close_card()
-
-# =========================
-# 🧾 Auto-Report (Word) - Enhanced
-# =========================
-st.markdown("""
-<div style="margin-top: 40px; margin-bottom: 30px;">
-    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">🧾 Auto-Report</h2>
-    <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Generate a comprehensive Word document report with the latest IRAQAF bundle</p>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="background: linear-gradient(135deg, #FEF3C7 0%, #FEF9E7 100%); border: 2px solid #F59E0B; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-    <p style="margin: 0; font-size: 0.9rem; color: #92400E; font-weight: 600;">💾 Export comprehensive report</p>
-    <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #B45309;">Includes GQAS score, module details, metrics, and timestamps. Requires `python-docx` package.</p>
-</div>
-""", unsafe_allow_html=True)
-
-card("🧾 Generate Word Report", "")
-
-
-def build_docx(report_bundle: dict) -> bytes:
-    try:
-        from docx import Document  # type: ignore
-    except Exception:
-        st.error("`python-docx` not installed. `pip install python-docx`")
-        return b""
-    doc = Document()
-    doc.add_heading("IRAQAF QA Report", level=1)
-    doc.add_paragraph("Automatically generated from the latest IRAQAF run.")
-
-    agg_rep = report_bundle.get("AGG")
-    if agg_rep:
-        doc.add_heading("Aggregate (GQAS)", level=2)
-        doc.add_paragraph(f"GQAS: {agg_rep.get('gqas')}")
-        doc.add_paragraph(f"Floors met: {agg_rep.get('floors_met')}")
-
-    doc.add_heading("Modules", level=2)
-    for m in ["L1", "L2", "L3", "L4", "L5"]:
-        rep_m = report_bundle.get(m)
-        if not rep_m:
-            continue
-        doc.add_heading(NAMES[m], level=3)
-        doc.add_paragraph(f"Score: {rep_m['score']}  |  Band: {rep_m['band']}")
-        doc.add_paragraph("Metrics:")
-        doc.add_paragraph(json.dumps(rep_m.get("metrics", {}), indent=2))
-
-    bio = BytesIO()
-    doc.save(bio)
-    return bio.getvalue()
-
-
-dl_slot = st.empty()
-if audit_mode:
-    st.warning("🔒 Report generation disabled in Audit Mode.")
-    st.button("Generate Word Report", key="gen_docx_disabled",
-              disabled=_LOCK, width="stretch")
-else:
-    gen_col, info_col = st.columns([2, 1], gap="small")
-    with gen_col:
-        if st.button("📄 Generate Word Report", key="gen_docx", width="stretch", type="primary"):
-            with st.spinner("🔨 Building document..."):
-                payload = build_docx(latest)
-                if payload:
-                    with dl_slot:
-                        st.download_button("⬇️ Download IRAQAF_Report.docx",
-                                           data=payload,
-                                           file_name="IRAQAF_Report.docx",
+                    payload = build_docx(latest)
+                    if payload:
+                        st.download_button("⬇️ Download Report", data=payload, file_name="IRAQAF_Report.docx",
                                            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                           key="dl_docx",
-                                           width="stretch")
-                        st.success("✅ Report ready!")
-    with info_col:
-        st.caption("💡 Requires python-docx")
+                                           key="dl_docx", width="stretch")
+                        st.success("✅ Ready to download!")
 
-close_card()
+        with export_col2:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px solid #3B82F6; border-radius: 12px; padding: 16px; text-align: center;">
+                <div style="font-size: 1.8rem;">📊</div>
+                <p style="margin: 8px 0 4px 0; font-weight: 700; color: #1E40AF; font-size: 0.9rem;">JSON Export</p>
+                <p style="margin: 0; font-size: 0.8rem; color: #1E3A8A;">Structured data format</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-if not agg:
-    st.info("Run all modules to create an aggregate report.")
+            if st.button("Export as JSON", width="stretch", key="export_json"):
+                if latest:
+                    json_data = json.dumps(latest, indent=2).encode("utf-8")
+                    st.download_button("⬇️ Download JSON", data=json_data, file_name=f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                                       mime="application/json", key="dl_json", width="stretch")
+                else:
+                    st.warning("No data to export yet")
 
-# =========================
-#  📄 HTML/PDF Report Export
-# =========================
-card("📄 HTML/PDF Report Export")
+        with export_col3:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px solid #3B82F6; border-radius: 12px; padding: 16px; text-align: center;">
+                <div style="font-size: 1.8rem;">📈</div>
+                <p style="margin: 8px 0 4px 0; font-weight: 700; color: #1E40AF; font-size: 0.9rem;">CSV Export</p>
+                <p style="margin: 0; font-size: 0.8rem; color: #1E3A8A;">Spreadsheet format</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if st.button("Export as CSV", width="stretch", key="export_csv"):
+                if latest:
+                    # Flatten latest into CSV rows
+                    rows = []
+                    for module_id in ["L1", "L2", "L3", "L4", "L5"]:
+                        module_data = latest.get(module_id, {})
+                        if module_data:
+                            rows.append({
+                                "Module": module_id,
+                                "Score": module_data.get("score", ""),
+                                "Band": module_data.get("band", ""),
+                                "Status": module_data.get("status", "")
+                            })
+                    if rows:
+                        df = pd.DataFrame(rows)
+                        csv_data = df.to_csv(index=False).encode("utf-8")
+                        st.download_button("⬇️ Download CSV", data=csv_data, file_name=f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                                           mime="text/csv", key="dl_csv", width="stretch")
+                else:
+                    st.warning("No data to export yet")
 
 
+# ============================================================================
+# MATURITY RADAR (Moved here for better organization)
+# ============================================================================
+st.markdown("---")
+st.markdown("""
+<div style="margin-top: 40px; margin-bottom: 30px;">
+    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">📡 Maturity Radar</h2>
+    <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Visual representation of module scores (L1–L5) across the compliance framework</p>
+</div>
+""", unsafe_allow_html=True)
+
+
+# Keep the radar visualization rendering from the original code
 def _render_html_report(bundle: dict) -> str:
+    """Render an HTML report from the bundle."""
     gqas = (bundle.get("AGG") or {}).get("gqas")
     rows = []
     for mid in ["L1", "L2", "L3", "L4", "L5"]:
@@ -8542,38 +8572,10 @@ td,th{{border:1px solid #e5e7eb;padding:8px}} th{{background:#f6f9ff;text-align:
 </body></html>"""
 
 
-html_blob = _render_html_report(latest)
-h1, h2 = st.columns([1, 1])
-with h1:
-    st.download_button("📥 Download HTML report",
-                       data=html_blob.encode("utf-8"),
-                       file_name="IRAQAF_Report.html",
-                       mime="text/html",
-                       width="stretch",
-                       disabled=_LOCK)
-with h2:
-    if st.checkbox("Also generate PDF (requires pdfkit + wkhtmltopdf)", value=False, disabled=_LOCK):
-        try:
-            import pdfkit
-            pdf_bytes = pdfkit.from_string(html_blob, False)
-            st.download_button("⬇📥 Download PDF report", data=pdf_bytes,
-                               file_name="IRAQAF_Report.pdf", mime="application/pdf", disabled=_LOCK)
-        except Exception as e:
-            show_error_inline(e, "PDF export unavailable")
-
-close_card()
-
-# =========================
-# 📡 Maturity Radar (L1–L5)
-# =========================
-card("📡 Maturity Radar (L1–L5)",
-     "Polar plot of module scores (0–100). Hover for values.")
-
+# Render the radar chart
 radar_rep = {m: (latest.get(m) or {}).get("score")
              for m in ["L1", "L2", "L3", "L4", "L5"]}
-if not any(isinstance(v, (int, float)) for v in radar_rep.values()):
-    st.info("No module scores available for radar.")
-else:
+if any(isinstance(v, (int, float)) for v in radar_rep.values()):
     # Prepare a closed polygon in polar coordinates, then project to XY.
     names = ["L1", "L2", "L3", "L4", "L5"]
     scores = [float(radar_rep.get(m) or 0.0) for m in names]
