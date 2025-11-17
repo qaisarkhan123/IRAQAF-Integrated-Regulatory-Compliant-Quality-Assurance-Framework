@@ -8419,77 +8419,8 @@ with preset_col1:
         <div style="font-size: 0.85rem; color: #1E3A8A; margin-bottom: 16px;">High-level GQAS & floors</div>
     </div>
     """, unsafe_allow_html=True)
+    st.info("💡 Use the **📥 Export & Reports** section in the sidebar for all export options (CSV, PDF, JSON)")
 
-    if st.button("📥 Export Executive", width="stretch", key="export_exec_preset", type="primary"):
-        export_data = {
-            "GQAS": agg.get("gqas"),
-            "Floors": {
-                "L1": latest.get("L1", {}).get("score"),
-                "L2": latest.get("L2", {}).get("score"),
-                "L3": latest.get("L3", {}).get("score"),
-                "L4": latest.get("L4", {}).get("score"),
-                "L5": latest.get("L5", {}).get("score"),
-            },
-            "Generated": datetime.now().isoformat(),
-            "Risk_Profile": risk_profile if 'risk_profile' in locals() else "High"
-        }
-        st.download_button(
-            "⬇️ Download JSON",
-            data=json.dumps(export_data, indent=2).encode("utf-8"),
-            file_name=f"executive_summary_{datetime.now().strftime('%Y%m%d')}.json",
-            mime="application/json",
-            key="dl_exec_summary",
-            width="stretch"
-        )
-
-with preset_col2:
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%); border: 2px solid #6B7280; border-radius: 12px; padding: 24px; text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">🔬</div>
-        <div style="font-weight: 700; color: #374151; margin-bottom: 4px;">Technical Deep Dive</div>
-        <div style="font-size: 0.85rem; color: #6B7280; margin-bottom: 16px;">Full metrics & analysis</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.button("📥 Export Technical", width="stretch", key="export_tech_preset", type="primary"):
-        st.download_button(
-            "⬇️ Download JSON",
-            data=json.dumps(latest, indent=2).encode("utf-8"),
-            file_name=f"technical_report_{datetime.now().strftime('%Y%m%d')}.json",
-            mime="application/json",
-            key="dl_tech_report",
-            width="stretch"
-        )
-
-with preset_col3:
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #ECFDF5 0%, #E0FFDD 100%); border: 2px solid #10B981; border-radius: 12px; padding: 24px; text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">📋</div>
-        <div style="font-weight: 700; color: #065F46; margin-bottom: 4px;">Compliance Only</div>
-        <div style="font-size: 0.85rem; color: #047857; margin-bottom: 16px;">L1 governance data</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.button("📥 Export Compliance", width="stretch", key="export_compliance_preset", type="primary"):
-        compliance_data = {
-            "L1_Governance": latest.get("L1", {}),
-            "Generated": datetime.now().isoformat()
-        }
-        st.download_button(
-            "⬇️ Download JSON",
-            data=json.dumps(compliance_data, indent=2).encode("utf-8"),
-            file_name=f"compliance_report_{datetime.now().strftime('%Y%m%d')}.json",
-            mime="application/json",
-            key="dl_compliance_report",
-            width="stretch"
-        )
-
-st.markdown("---")
-
-# Original export buttons
-agg_json = json.dumps(agg, indent=2).encode("utf-8")
-csv_df = pd.DataFrame(score_rows)
-x1, x2 = st.columns(2)
 close_card()
 
 # =========================
