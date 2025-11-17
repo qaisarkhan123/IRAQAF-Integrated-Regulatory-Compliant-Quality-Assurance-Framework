@@ -1,7 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """Test script to verify all 11 security categories are working"""
 
 import sys
+import os
+
 from dashboard.security_monitor import SecurityMonitor
 import json
 
@@ -14,7 +17,7 @@ def main():
     monitor = SecurityMonitor()
     scan = monitor.start_scan("Test API Server", scan_type="full")
 
-    print(f"\n✅ Scan Completed: {scan.scan_id}")
+    print(f"\n[OK] Scan Completed: {scan.scan_id}")
     print(f"Overall Security Score: {scan.overall_score}/100")
 
     # Display all 11 categories
@@ -26,7 +29,7 @@ def main():
     print(f"Total Categories: {len(categories)}\n")
 
     for i, (category, result) in enumerate(scan.results.items(), 1):
-        status_icon = "✅" if result["status"] == "passed" else "⚠️" if result["status"] == "warning" else "❌"
+        status_icon = "[OK]" if result["status"] == "passed" else "[WARN]" if result["status"] == "warning" else "[FAIL]"
         score = result.get("score", 0)
         print(
             f"{i:2d}. {category.replace('_', ' ').title():30s} {status_icon} {score:3d}/100  ({result['status'].upper()})")
@@ -38,12 +41,12 @@ def main():
 
     for category, result in scan.results.items():
         print(
-            f"\n📌 {category.upper().replace('_', ' ')} ({result['score']}/100)")
+            f"\n[*] {category.upper().replace('_', ' ')} ({result['score']}/100)")
         details = result.get("details", {})
         for key, value in list(details.items())[:3]:  # Show first 3 details
-            print(f"   • {key}: {value}")
+            print(f"   * {key}: {value}")
         if len(details) > 3:
-            print(f"   • ... and {len(details)-3} more")
+            print(f"   * ... and {len(details)-3} more")
 
     # Show recommendations
     print("\n" + "-"*70)
@@ -65,13 +68,13 @@ def main():
 
     for framework, status in compliance.items():
         if isinstance(status, bool):
-            icon = "✅" if status else "❌"
+            icon = "[OK]" if status else "[FAIL]"
             print(f"{icon} {framework.upper().replace('_', ' ')}: {status}")
         else:
-            print(f"📊 {framework.upper().replace('_', ' ')}: {status}")
+            print(f"[*] {framework.upper().replace('_', ' ')}: {status}")
 
     print("\n" + "="*70)
-    print("✅ ALL 11 CATEGORIES VERIFIED AND WORKING!")
+    print("[OK] ALL 11 CATEGORIES VERIFIED AND WORKING!")
     print("="*70 + "\n")
 
 
