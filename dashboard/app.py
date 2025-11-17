@@ -59,6 +59,19 @@ from helpers import (
 )
 from validation import SCHEMA_VERSION, validate_incidents, validate_report
 
+# Export, Alerts & RBAC Enhancements
+try:
+    from export_alerts_rbac import (
+        ExportManager, AlertManager, RBACManager,
+        render_export_section, render_alerts_section,
+        render_role_based_dashboard, initialize_enhancements
+    )
+    ENHANCEMENTS_AVAILABLE = True
+except Exception as e:
+    ENHANCEMENTS_AVAILABLE = False
+    logger = logging.getLogger("iraqaf_dashboard")
+    logger.warning(f"Enhancements module not available: {e}")
+
 # L2 Privacy/Security Monitor Integration
 try:
     from l2_monitor_integration import show_l2_privacy_security_monitor
@@ -1792,7 +1805,10 @@ with st.sidebar.expander("🔧 Settings", expanded=False):
             st.session_state[key] = value
         st.success("🔄 Settings reset to defaults")
         st.rerun()
-# Add to sidebar (after Settings)
+
+# Add Export & Alerts to sidebar (after Settings)
+if ENHANCEMENTS_AVAILABLE:
+    render_export_section()
 
 with st.sidebar.expander("❓ Help & Documentation", expanded=False):
     # Quick Navigation Section
@@ -2295,6 +2311,11 @@ if _LOCK:
 # ====== STREAMLIT DASHBOARD FOR IRAQAF REPORTS ======
 st.title("🧠 IRAQAF – Quality Assurance Scores")
 
+# Initialize enhancements (Export, Alerts, RBAC)
+if ENHANCEMENTS_AVAILABLE:
+    initialize_enhancements()
+    render_role_based_dashboard()
+
 # Check if this is first visit
 if 'first_visit' not in st.session_state:
     st.session_state['first_visit'] = True
@@ -2443,6 +2464,12 @@ if st.session_state['hide_quickstart']:
             # Expand it when shown again
             st.session_state['first_visit'] = True
             st.rerun()
+
+# ============================================================================
+# ALERTS & NOTIFICATIONS SECTION
+# ============================================================================
+if ENHANCEMENTS_AVAILABLE:
+    render_alerts_section()
 
 # ============================================================================
 # MODULE OVERVIEW GRID (First-Time User Experience)
