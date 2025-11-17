@@ -63,8 +63,8 @@ def show_login():
             if st.button("🔓 Login", use_container_width=True, type="primary"):
                 auth_manager = st.session_state.auth_manager
                 
-                if auth_manager.authenticate_user(username, password):
-                    user = auth_manager.get_user(username)
+                success, user = auth_manager.authenticate(username, password)
+                if success:
                     st.session_state.current_user = user
                     st.session_state.logged_in = True
                     st.success(f"✅ Welcome, {user['username']}!")

@@ -1,0 +1,101 @@
+{
+  "scans": [
+    {
+      "scan_id": "SCAN-07a1157b15a6",
+      "framework": "API Server",
+      "timestamp": "2025-11-17T14:54:13.903466",
+      "scan_type": "full",
+      "results": {
+        "encryption": {
+          "status": "passed",
+          "details": {
+            "tls_version": "1.3",
+            "cipher_suites": [
+              "TLS_AES_256_GCM_SHA384",
+              "TLS_CHACHA20_POLY1305_SHA256"
+            ],
+            "certificate_validity": "valid",
+            "key_exchange": "ECDHE",
+            "data_at_rest": "AES-256-GCM"
+          },
+          "score": 95
+        },
+        "authentication": {
+          "status": "passed",
+          "details": {
+            "mfa_enabled": true,
+            "password_policy": "strong",
+            "session_timeout": "30 minutes",
+            "authentication_method": "OAuth 2.0 + JWT",
+            "2fa_available": true,
+            "biometric_auth": false
+          },
+          "score": 88
+        },
+        "data_protection": {
+          "status": "passed",
+          "details": {
+            "pii_classification": "enabled",
+            "data_masking": "active",
+            "backup_encryption": "enabled",
+            "retention_policy": "configured",
+            "gdpr_compliant": true,
+            "data_minimization": "implemented"
+          },
+          "score": 92
+        },
+        "access_control": {
+          "status": "passed",
+          "details": {
+            "role_based_access": true,
+            "principle_of_least_privilege": true,
+            "access_logging": "enabled",
+            "privilege_escalation_monitoring": true,
+            "user_audit_trail": "6 months",
+            "admin_separation": true
+          },
+          "score": 90
+        },
+        "vulnerability": {
+          "status": "passed",
+          "details": {
+            "critical_vulnerabilities": 0,
+            "high_vulnerabilities": 0,
+            "last_patch": "2 weeks ago",
+            "vulnerability_scanning": "continuous",
+            "penetration_testing": "quarterly"
+          },
+          "score": 100
+        },
+        "compliance": {
+          "status": "passed",
+          "details": {
+            "gdpr_compliant": true,
+            "hipaa_ready": true,
+            "pci_dss_compliant": false,
+            "iso27001_certified": true,
+            "sox_compliant": true,
+            "last_audit": "2024-10-15"
+          },
+          "score": 87
+        }
+      },
+      "overall_score": 92,
+      "recommendations": [
+        {
+          "priority": "medium",
+          "category": "monitoring",
+          "recommendation": "Implement continuous security monitoring",
+          "impact": "Early detection of security incidents"
+        },
+        {
+          "priority": "medium",
+          "category": "training",
+          "recommendation": "Conduct security awareness training quarterly",
+          "impact": "Reduced human-related security risks"
+        }
+      ],
+      "scan_duration": 0
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "admin": {
+    "username": "admin",
+    "password_hash": "22312f10a53ea18140219d9a7d73fb6eddaf805f360ebfe9bc80294ce360eb82",
+    "role": "admin",
+    "display_name": "Administrator",
+    "domain": null,
+    "created_at": "2025-11-17T14:40:40.078299",
+    "is_active": true,
+    "last_login": "2025-11-17T15:32:35.680193"
+  },
+  "analyst_test": {
+    "username": "analyst_test",
+    "password_hash": "a126d949fbb93523aed798ecec219eb6f2ac5d6faffbc9ca7c6e70abbf2dcf1c",
+    "role": "analyst",
+    "display_name": "Test Analyst",
+    "domain": null,
+    "created_at": "2025-11-17T14:41:18.066163",
+    "is_active": true,
+    "last_login": "2025-11-17T14:41:18.066163"
+  }
+}
