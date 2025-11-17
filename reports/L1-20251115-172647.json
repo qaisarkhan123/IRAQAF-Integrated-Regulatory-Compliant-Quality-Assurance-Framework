@@ -1,0 +1,736 @@
+{
+  "module": "L1",
+  "version": "1.0",
+  "metrics": {
+    "coverage_percent": 96.4,
+    "framework_breakdown": [
+      {
+        "framework": "EU_AI_ACT",
+        "coverage_percent": 100.0,
+        "earned": 36.0,
+        "weight": 36.0,
+        "covered_clauses": 4,
+        "total_clauses": 4
+      },
+      {
+        "framework": "GDPR",
+        "coverage_percent": 55.56,
+        "earned": 10.0,
+        "weight": 18.0,
+        "covered_clauses": 1,
+        "total_clauses": 2
+      },
+      {
+        "framework": "HIPAA",
+        "coverage_percent": 100.0,
+        "earned": 6.0,
+        "weight": 6.0,
+        "covered_clauses": 1,
+        "total_clauses": 1
+      },
+      {
+        "framework": "ISO_IEC_42001",
+        "coverage_percent": 100.0,
+        "earned": 8.0,
+        "weight": 8.0,
+        "covered_clauses": 1,
+        "total_clauses": 1
+      },
+      {
+        "framework": "SaMD",
+        "coverage_percent": 100.0,
+        "earned": 6.0,
+        "weight": 6.0,
+        "covered_clauses": 1,
+        "total_clauses": 1
+      },
+      {
+        "framework": "ISO_13485",
+        "coverage_percent": 100.0,
+        "earned": 27.0,
+        "weight": 27.0,
+        "covered_clauses": 3,
+        "total_clauses": 3
+      },
+      {
+        "framework": "ISO_14971",
+        "coverage_percent": 100.0,
+        "earned": 27.0,
+        "weight": 27.0,
+        "covered_clauses": 3,
+        "total_clauses": 3
+      },
+      {
+        "framework": "ISO_27001",
+        "coverage_percent": 100.0,
+        "earned": 29.0,
+        "weight": 29.0,
+        "covered_clauses": 3,
+        "total_clauses": 3
+      },
+      {
+        "framework": "ISO_27799",
+        "coverage_percent": 100.0,
+        "earned": 28.0,
+        "weight": 28.0,
+        "covered_clauses": 3,
+        "total_clauses": 3
+      },
+      {
+        "framework": "IEC_62304",
+        "coverage_percent": 100.0,
+        "earned": 37.0,
+        "weight": 37.0,
+        "covered_clauses": 4,
+        "total_clauses": 4
+      }
+    ],
+    "clauses": [
+      {
+        "framework": "EU_AI_ACT",
+        "id": "Art9_Data_Governance",
+        "description": "Data governance, bias testing, dataset documentation",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L3",
+              "min_score": 95
+            },
+            {
+              "metric": "L3.metrics.DPG",
+              "max": 0.05
+            },
+            {
+              "metric": "L3.metrics.EOD",
+              "max": 0.05
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "EU_AI_ACT",
+        "id": "Art13_Transparency",
+        "description": "Explainability & transparency of model decisions",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L4",
+              "min_score": 90
+            },
+            {
+              "metric": "L4.metrics.deletion_drop",
+              "gte": 0.15
+            },
+            {
+              "metric": "L4.metrics.stability_tau",
+              "gte": 0.85
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "EU_AI_ACT",
+        "id": "Art14_Human_Oversight",
+        "description": "Human oversight via dashboards / overrides",
+        "weight": 8.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "AGG"
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "EU_AI_ACT",
+        "id": "Art15_Robustness",
+        "description": "Monitoring, logging, operational robustness",
+        "weight": 8.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L5",
+              "min_score": 85
+            },
+            {
+              "metric": "L5.metrics.logging_coverage",
+              "gte": 0.95
+            },
+            {
+              "metric": "L5.metrics.alert_latency_h",
+              "lte": 1.0
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "GDPR",
+        "id": "Art5_Data_Principles",
+        "description": "Lawfulness, fairness, transparency; data minimization & retention",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L2",
+              "min_score": 90
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "GDPR",
+        "id": "Art22_Automated_Decisions",
+        "description": "Right to meaningful information about logic",
+        "weight": 8.0,
+        "passed": false,
+        "why_failed": "L4 score does not meet \u2265 90 (actual: 40.0)",
+        "hint": "Improve L4 to meet \u2265 90, or relax this clause for demos.",
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L4",
+              "min_score": 90
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "HIPAA",
+        "id": "Security_Integrity",
+        "description": "Access logging & integrity controls",
+        "weight": 6.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "metric": "L5.metrics.logging_coverage",
+              "gte": 0.95
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_IEC_42001",
+        "id": "AI_Risk_Management",
+        "description": "Systematic AI risk management & governance",
+        "weight": 8.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "AGG",
+              "min_score": 88
+            },
+            {
+              "exists": "AGG"
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "SaMD",
+        "id": "Quality_Management",
+        "description": "QMS, traceability, change control",
+        "weight": 6.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "L1"
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_13485",
+        "id": "Design_Control",
+        "description": "Medical device design control requirements and procedures",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L1",
+              "min_score": 85
+            },
+            {
+              "module": "AGG",
+              "min_score": 85
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_13485",
+        "id": "Risk_Management",
+        "description": "Medical device risk management throughout lifecycle",
+        "weight": 9.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L1",
+              "min_score": 80
+            },
+            {
+              "exists": "L1"
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_13485",
+        "id": "Documentation_Control",
+        "description": "Document control, records management, traceability",
+        "weight": 8.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "L1"
+            },
+            {
+              "module": "L5",
+              "min_score": 85
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_14971",
+        "id": "Risk_Analysis",
+        "description": "Risk analysis and evaluation for medical devices",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L1",
+              "min_score": 85
+            },
+            {
+              "module": "AGG",
+              "min_score": 80
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_14971",
+        "id": "Risk_Control",
+        "description": "Risk control measures and residual risk evaluation",
+        "weight": 9.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L1",
+              "min_score": 85
+            },
+            {
+              "exists": "L1"
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_14971",
+        "id": "Risk_Monitoring",
+        "description": "Post-production information and risk monitoring",
+        "weight": 8.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L5",
+              "min_score": 85
+            },
+            {
+              "metric": "L5.metrics.logging_coverage",
+              "gte": 0.9
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_27001",
+        "id": "Access_Control",
+        "description": "Information access control and user rights management",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L5",
+              "min_score": 85
+            },
+            {
+              "metric": "L5.metrics.logging_coverage",
+              "gte": 0.95
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_27001",
+        "id": "Cryptography",
+        "description": "Cryptographic controls for data protection",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L2",
+              "min_score": 90
+            },
+            {
+              "metric": "L2.metrics.encryption_coverage",
+              "gte": 0.95
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_27001",
+        "id": "Incident_Management",
+        "description": "Information security incident handling and response",
+        "weight": 9.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "L5"
+            },
+            {
+              "module": "L5",
+              "min_score": 80
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_27799",
+        "id": "Health_Data_Security",
+        "description": "Health information security controls and safeguards",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L2",
+              "min_score": 92
+            },
+            {
+              "module": "L5",
+              "min_score": 85
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_27799",
+        "id": "Privacy_by_Design",
+        "description": "Privacy by design for health data systems",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "module": "L2",
+              "min_score": 90
+            },
+            {
+              "module": "L3",
+              "min_score": 85
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "ISO_27799",
+        "id": "Patient_Consent",
+        "description": "Patient consent management and data subject rights",
+        "weight": 8.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "L1"
+            },
+            {
+              "module": "L4",
+              "min_score": 85
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "IEC_62304",
+        "id": "Software_Development",
+        "description": "Software development planning and implementation",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "L1"
+            },
+            {
+              "module": "L1",
+              "min_score": 85
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "IEC_62304",
+        "id": "Software_Testing",
+        "description": "Software testing, verification, and validation",
+        "weight": 10.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "L5"
+            },
+            {
+              "module": "L5",
+              "min_score": 85
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "IEC_62304",
+        "id": "Software_Maintenance",
+        "description": "Software maintenance and release management procedures",
+        "weight": 9.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "L5"
+            },
+            {
+              "module": "L5",
+              "min_score": 80
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      },
+      {
+        "framework": "IEC_62304",
+        "id": "Problem_Resolution",
+        "description": "Problem resolution and change management controls",
+        "weight": 8.0,
+        "passed": true,
+        "why_failed": null,
+        "hint": null,
+        "logic": {
+          "all_of": null,
+          "any_of": [
+            {
+              "exists": "L5"
+            },
+            {
+              "module": "L1",
+              "min_score": 75
+            }
+          ]
+        },
+        "evidence_links": [
+          "docs/intended_use.pdf",
+          "docs/pms_plan.pdf"
+        ]
+      }
+    ],
+    "evidence_modules": [
+      "AGG",
+      "L1",
+      "L2",
+      "L3",
+      "L4",
+      "L5"
+    ]
+  },
+  "score": 96.4,
+  "band": "green",
+  "evidence": [
+    "reports",
+    "configs/compliance_map.yaml"
+  ],
+  "notes": "Demo compliance mapping across EU AI Act, GDPR, HIPAA, ISO/IEC, SaMD"
+}

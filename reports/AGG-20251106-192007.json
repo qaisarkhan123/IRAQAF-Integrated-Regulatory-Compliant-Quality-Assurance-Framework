@@ -1,0 +1,13 @@
+{
+  "module": "AGG",
+  "version": "0.1",
+  "scores": {
+    "CRS": 92.0,
+    "SAI": 90.0,
+    "FI": 0.0,
+    "TS": 91.0,
+    "OPS": 88.0
+  },
+  "gqas": 72.55,
+  "floors_met": false
+}
