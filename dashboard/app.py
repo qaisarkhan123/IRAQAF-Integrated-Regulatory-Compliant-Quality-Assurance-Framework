@@ -136,7 +136,7 @@ try:
     _proj_root = Path(__file__).parent.parent
     if str(_proj_root) not in sys.path:
         sys.path.insert(0, str(_proj_root))
-    
+
     from scripts.system_integration import get_coordinator, initialize_coordinator
     from scripts.database_layer import DatabaseQueries, init_db
     from scripts.realtime_monitor import get_monitor, initialize_monitor, EventType
@@ -922,23 +922,25 @@ init_session_state()
 if SYSTEM_INTEGRATION_AVAILABLE:
     try:
         if st.session_state.get("system_coordinator") is None:
-            db_url = os.getenv("DATABASE_URL", "sqlite:///iraqaf_compliance.db")
-            coordinator = initialize_coordinator(db_url=db_url, start_monitoring=True)
+            db_url = os.getenv(
+                "DATABASE_URL", "sqlite:///iraqaf_compliance.db")
+            coordinator = initialize_coordinator(
+                db_url=db_url, start_monitoring=True)
             st.session_state["system_coordinator"] = coordinator
-            
+
             monitor = get_monitor()
             logger.info(f"Monitor type on creation: {type(monitor).__name__}")
-            
+
             # Wrap the monitor to handle missing methods (due to Streamlit serialization)
             class MonitorWrapper:
                 def __init__(self, wrapped):
                     self.wrapped = wrapped
                     self._cached_stats = None
                     self._cached_events = []
-                
+
                 def __getattr__(self, name):
                     return getattr(self.wrapped, name)
-                
+
                 def get_statistics(self):
                     """Get statistics with fallback handling."""
                     try:
@@ -953,7 +955,7 @@ if SYSTEM_INTEGRATION_AVAILABLE:
                         "event_counts": {},
                         "is_monitoring": True
                     }
-                
+
                 def get_recent_events(self, count=10):
                     """Get recent events with fallback handling."""
                     try:
@@ -962,10 +964,10 @@ if SYSTEM_INTEGRATION_AVAILABLE:
                     except:
                         pass
                     return []
-            
+
             wrapped_monitor = MonitorWrapper(monitor)
             st.session_state["realtime_monitor"] = wrapped_monitor
-            
+
             logger.info("✅ System integration initialized successfully")
     except Exception as e:
         logger.warning(f"Could not initialize system integration: {e}")
@@ -1882,74 +1884,81 @@ if SYSTEM_INTEGRATION_AVAILABLE and st.session_state.get("system_integration_ena
     with st.sidebar.expander("🔌 System Integration Status", expanded=True):
         coordinator = st.session_state.get("system_coordinator")
         monitor = st.session_state.get("realtime_monitor")
-        
+
         if coordinator and monitor:
             try:
                 # Debug info
                 monitor_type = type(monitor).__name__
-                
+
                 # Check if monitor has required methods
                 has_get_stats = hasattr(monitor, 'get_statistics')
                 has_get_events = hasattr(monitor, 'get_recent_events')
-                
+
                 if not has_get_stats or not has_get_events:
                     st.warning(f"⚠️ Monitor type issue: {monitor_type}")
                     st.caption(f"has_get_statistics: {has_get_stats}")
                     st.caption(f"has_get_recent_events: {has_get_events}")
                 else:
                     status = coordinator.get_system_status()
-                    
+
                     # Status indicators
                     col1, col2 = st.columns(2)
-                    
+
                     with col1:
-                        is_active = monitor.get_statistics().get("is_monitoring", False) if has_get_stats else False
+                        is_active = monitor.get_statistics().get(
+                            "is_monitoring", False) if has_get_stats else False
                         if is_active:
                             st.markdown("✅ **Monitor Active**")
                         else:
                             st.markdown("🔴 **Monitor Inactive**")
-                    
+
                     with col2:
                         db_ok = status.get("database_connected", False)
                         if db_ok:
                             st.markdown("✅ **DB Connected**")
                         else:
                             st.markdown("🔴 **DB Error**")
-                    
+
                     # Quick stats
                     st.markdown("---")
-                    
+
                     col_a, col_b, col_c = st.columns(3)
-                    
+
                     with col_a:
                         changes = status.get("total_regulatory_changes", 0)
-                        st.metric("Changes", changes, label_visibility="collapsed")
-                    
+                        st.metric("Changes", changes,
+                                  label_visibility="collapsed")
+
                     with col_b:
                         alerts = status.get("open_alerts", 0)
-                        st.metric("Alerts", alerts, label_visibility="collapsed")
-                    
+                        st.metric("Alerts", alerts,
+                                  label_visibility="collapsed")
+
                     with col_c:
                         compliance = status.get("average_compliance_score", 0)
-                        st.metric("Compliance", f"{compliance:.0f}%", label_visibility="collapsed")
-                    
+                        st.metric(
+                            "Compliance", f"{compliance:.0f}%", label_visibility="collapsed")
+
                     st.markdown("---")
-                    
+
                     # Last event
                     try:
                         if has_get_events:
                             recent_events = monitor.get_recent_events(1)
                             if recent_events:
-                                last_event = recent_events[0].to_dict() if hasattr(recent_events[0], 'to_dict') else recent_events[0]
-                                st.caption(f"📌 Last Event: {last_event.get('event_type', 'Unknown')}")
-                                st.caption(f"🕐 {last_event.get('timestamp', 'N/A')}")
+                                last_event = recent_events[0].to_dict() if hasattr(
+                                    recent_events[0], 'to_dict') else recent_events[0]
+                                st.caption(
+                                    f"📌 Last Event: {last_event.get('event_type', 'Unknown')}")
+                                st.caption(
+                                    f"🕐 {last_event.get('timestamp', 'N/A')}")
                     except:
                         pass
-                    
+
                     # Action buttons
                     if st.button("🔄 Refresh Now", width="stretch", key="sidebar_refresh_status"):
                         st.rerun()
-                    
+
             except Exception as e:
                 st.warning(f"⚠️ Status unavailable: {str(e)[:80]}")
         else:
@@ -3024,7 +3033,8 @@ def display_smart_insights(latest: dict, risk_profile: str = "High"):
 
                             # Get failed clauses
                             clauses = metrics.get("clauses", []) or []
-                            failed = [c for c in clauses if not c.get("passed")]
+                            failed = [
+                                c for c in clauses if not c.get("passed")]
                             if failed:
                                 for clause in failed[:2]:  # Show top 2 failures
                                     issues.append({
@@ -3050,11 +3060,12 @@ def display_smart_insights(latest: dict, risk_profile: str = "High"):
 
                         if issues:
                             # Render issues as modern cards
-                            st.markdown(f"<div style='margin-top: 12px;'>", unsafe_allow_html=True)
-                            
+                            st.markdown(
+                                f"<div style='margin-top: 12px;'>", unsafe_allow_html=True)
+
                             # Create columns for metric cards
                             cols = st.columns(min(len(issues), 4), gap="small")
-                            
+
                             for idx, issue in enumerate(issues):
                                 with cols[idx % len(cols)]:
                                     if issue["type"] == "clause":
@@ -3086,7 +3097,7 @@ def display_smart_insights(latest: dict, risk_profile: str = "High"):
                                             metric_color = "#F59E0B"
                                             metric_bg = "#FEF3C7"
                                             metric_light = "#FFFBEB"
-                                        
+
                                         card_html = f"""
                                         <div style="
                                             background: linear-gradient(135deg, {metric_light} 0%, {metric_bg} 100%);
@@ -3110,8 +3121,9 @@ def display_smart_insights(latest: dict, risk_profile: str = "High"):
                                             ">Below Target</div>
                                         </div>
                                         """
-                                    st.markdown(card_html, unsafe_allow_html=True)
-                            
+                                    st.markdown(
+                                        card_html, unsafe_allow_html=True)
+
                             st.markdown("</div>", unsafe_allow_html=True)
 
     # Show passing modules
@@ -7234,7 +7246,7 @@ else:
                 </div>
             </div>
             """, unsafe_allow_html=True)
-            
+
             # Show report metadata for debugging
             with st.expander("🔍 Report Metadata (for troubleshooting)"):
                 col_meta1, col_meta2 = st.columns(2)
@@ -7378,10 +7390,9 @@ def _failed_clauses_summary(l1_report: dict, max_items: int = 6):
     return fails[:max_items]
 
 
-
 # Initialize 'latest' if not defined (module-level code guard)
-if 'latest' not in dir():
-    latest = None
+# Always reset latest to None to ensure it doesn't carry over from previous runs
+latest = None
 
 # Gather data - only if 'latest' is available
 if latest is not None:
@@ -7610,7 +7621,8 @@ if latest is not None:
                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                                width="stretch")
         except Exception:
-            st.caption("Tip: `pip install python-docx` to enable Word export here.")
+            st.caption(
+                "Tip: `pip install python-docx` to enable Word export here.")
 
     st.markdown("""
     <div style="margin-top: 40px; margin-bottom: 30px;">
@@ -7625,7 +7637,8 @@ if latest is not None:
             "Generate with LLM", value=False, disabled=_LOCK, help="Requires OPENAI_API_KEY environment variable")
     with col_tip:
         if not use_llm:
-            st.markdown("<p style='margin: 0; font-size: 0.85rem; color: #6B7280; padding-top: 8px;'>Toggle on if you have an API key configured</p>", unsafe_allow_html=True)
+            st.markdown(
+                "<p style='margin: 0; font-size: 0.85rem; color: #6B7280; padding-top: 8px;'>Toggle on if you have an API key configured</p>", unsafe_allow_html=True)
 
     if use_llm and not _LOCK:
         try:
@@ -7670,398 +7683,522 @@ else:
     # If 'latest' data is not available, show placeholder
     st.info("📊 Dashboard Ready: Upload or generate a security report to view assessment results")
 
-# =========================
-# Bottom Panels (polished)
-# Evidence Tray & Pins • Sync to YAML • Exports • Radar
-# =========================
+if 'agg' in locals() and 'score_rows' in locals():
+    # =========================
+    # Bottom Panels (polished)
+    # Evidence Tray & Pins • Sync to YAML • Exports • Radar
+    # =========================
 
-# ---------- Enhanced style helpers ----------
-st.markdown("""
-<style>
-/* Section headers */
-.block-title {
-  font-weight: 800;
-  font-size: 1.3rem;
-  margin: 0 0 8px;
-  color: #1F2937;
-}
-.block-subtle {
-  color: #6B7280;
-  font-size: 0.9rem;
-  margin-top: -4px;
-  line-height: 1.4;
-}
-
-/* Modern Card Design */
-.iraqaf-card {
-  background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%);
-  border: 2px solid #E5E7EB;
-  border-radius: 14px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
-}
-.iraqaf-card:hover {
-  border-color: #D1D5DB;
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Pill buttons */
-button[kind="secondary"] { border-radius: 999px; }
-
-/* Enhanced expanders */
-.iraqaf-expander > div {
-  border: 2px solid #E5E7EB;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%);
-}
-
-/* Status indicators */
-.status-success { color: #10B981; font-weight: 700; }
-.status-warning { color: #F59E0B; font-weight: 700; }
-.status-error { color: #EF4444; font-weight: 700; }
-</style>
-""", unsafe_allow_html=True)
-
-
-def card(title: str, subtitle: str | None = None):
-    """Render opening HTML for a styled card container with title and optional subtitle."""
-    st.markdown(f"<div class='iraqaf-card'><div class='block-title'>{title}</div>" +
-                (f"<div class='block-subtle'>{subtitle}</div>" if subtitle else ""),
-                unsafe_allow_html=True)
-
-
-def close_card():
-    """Close the card container opened by card()."""
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-# =========================
-# 📎 Evidence Tray & File Pins
-# =========================
-card("📎 Evidence Tray & Pins",
-     "Drop files, select module(s), and Save 📎 evidence/. Then Sync to YAML to add paths under each module’s `evidence:` list.")
-
-EVID_DIR = config.evidence_dir
-INDEX_PATH = config.index_path
-EVID_DIR.mkdir(exist_ok=True)
-INDEX_PATH.parent.mkdir(exist_ok=True)
-
-MODULE_LABELS = {
-    "L1": "Governance & Regulatory",
-    "L2": "Privacy & Security",
-    "L3": "Fairness & Ethics",
-    "L4": "Explainability & Transparency",
-    "L5": "Operations & Monitoring",
-}
-
-
-def _load_index() -> dict:
-    """Thread-safe index loading with file locking."""
-    if not INDEX_PATH.exists():
-        return {}
-
-    lock_path = INDEX_PATH.with_suffix('.lock')
-
-    try:
-        with FileLock(str(lock_path), timeout=10):
-            with open(INDEX_PATH, "r", encoding="utf-8") as fh:
-                data = json.load(fh)
-                return data if isinstance(data, dict) else {}
-    except FileNotFoundError:
-        return {}
-    except json.JSONDecodeError as e:
-        logger.error(f"Corrupted evidence index: {e}")
-        # Backup corrupted file
-        backup_path = INDEX_PATH.with_suffix(
-            f'.backup.{int(time.time())}.json')
-        INDEX_PATH.rename(backup_path)
-        logger.info(f"Backed up corrupted index to {backup_path}")
-        return {}
-    except Exception as e:
-        logger.error(f"Failed to load evidence index: {e}")
-        return {}
-
-
-_index_lock = threading.Lock()
-
-
-def _save_index(ix: dict):
-    """Thread-safe index saving with file locking (cross-platform)."""
-    lock_path = INDEX_PATH.with_suffix('.lock')
-
-    with _index_lock:  # In-process lock
-        with FileLock(str(lock_path), timeout=10):  # Cross-process lock
-            temp_path = INDEX_PATH.with_suffix('.tmp')
-            try:
-                with open(temp_path, "w", encoding="utf-8") as fh:
-                    json.dump(ix, fh, indent=2)
-                temp_path.replace(INDEX_PATH)  # Atomic rename
-            except Exception as e:
-                if temp_path.exists():
-                    temp_path.unlink()  # Clean up temp file
-                raise
-
-
-def _sanitize_name(name: str) -> str:
-    keep = "._-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    return "".join(c if c in keep else "_" for c in name)
-# ============================================================================
-# UNDO/REDO FUNCTIONALITY FOR EVIDENCE OPERATIONS
-# ============================================================================
-
-
-def init_evidence_history():
-    """Initialize undo/redo stacks for evidence operations."""
-    if 'evidence_history' not in st.session_state:
-        st.session_state.evidence_history = {
-            'undo_stack': [],
-            'redo_stack': [],
-            'max_history': 20
-        }
-
-
-def record_evidence_operation(operation_type: str, data: dict):
-    """
-    Record an evidence operation for undo/redo.
-
-    Args:
-        operation_type: Type of operation (add, remove, update)
-        data: Operation data (file paths, module IDs, etc.)
-    """
-    init_evidence_history()
-
-    operation = {
-        'type': operation_type,
-        'data': data,
-        'timestamp': datetime.now().isoformat()
+    # ---------- Enhanced style helpers ----------
+    st.markdown("""
+    <style>
+    /* Section headers */
+    .block-title {
+      font-weight: 800;
+      font-size: 1.3rem;
+      margin: 0 0 8px;
+      color: #1F2937;
+    }
+    .block-subtle {
+      color: #6B7280;
+      font-size: 0.9rem;
+      margin-top: -4px;
+      line-height: 1.4;
     }
 
-    # Add to undo stack
-    st.session_state.evidence_history['undo_stack'].append(operation)
+    /* Modern Card Design */
+    .iraqaf-card {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%);
+      border: 2px solid #E5E7EB;
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s ease;
+    }
+    .iraqaf-card:hover {
+      border-color: #D1D5DB;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
 
-    # Clear redo stack (new operation invalidates redo)
-    st.session_state.evidence_history['redo_stack'] = []
+    /* Pill buttons */
+    button[kind="secondary"] { border-radius: 999px; }
 
-    # Limit history size
-    max_history = st.session_state.evidence_history['max_history']
-    if len(st.session_state.evidence_history['undo_stack']) > max_history:
-        st.session_state.evidence_history['undo_stack'].pop(0)
+    /* Enhanced expanders */
+    .iraqaf-expander > div {
+      border: 2px solid #E5E7EB;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%);
+    }
 
+    /* Status indicators */
+    .status-success { color: #10B981; font-weight: 700; }
+    .status-warning { color: #F59E0B; font-weight: 700; }
+    .status-error { color: #EF4444; font-weight: 700; }
+    </style>
+    """, unsafe_allow_html=True)
 
-def undo_evidence_operation() -> bool:
-    """Undo the last evidence operation. Returns True if successful."""
-    init_evidence_history()
+    def card(title: str, subtitle: str | None = None):
+        """Render opening HTML for a styled card container with title and optional subtitle."""
+        st.markdown(f"<div class='iraqaf-card'><div class='block-title'>{title}</div>" +
+                    (f"<div class='block-subtle'>{subtitle}</div>" if subtitle else ""),
+                    unsafe_allow_html=True)
 
-    undo_stack = st.session_state.evidence_history['undo_stack']
-    if not undo_stack:
-        return False
+    def close_card():
+        """Close the card container opened by card()."""
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    operation = undo_stack.pop()
-    st.session_state.evidence_history['redo_stack'].append(operation)
+    # =========================
+    # 📎 Evidence Tray & File Pins
+    # =========================
+    card("📎 Evidence Tray & Pins",
+         "Drop files, select module(s), and Save 📎 evidence/. Then Sync to YAML to add paths under each module’s `evidence:` list.")
 
-    try:
-        if operation['type'] == 'add':
-            # Remove the files that were added
-            for module_id, file_path in operation['data']['files']:
-                ix = _load_index()
-                if module_id in ix and file_path in ix[module_id]:
-                    ix[module_id].remove(file_path)
-                    _save_index(ix)
+    EVID_DIR = config.evidence_dir
+    INDEX_PATH = config.index_path
+    EVID_DIR.mkdir(exist_ok=True)
+    INDEX_PATH.parent.mkdir(exist_ok=True)
 
-                # Delete physical file
-                if Path(file_path).exists():
-                    Path(file_path).unlink()
+    MODULE_LABELS = {
+        "L1": "Governance & Regulatory",
+        "L2": "Privacy & Security",
+        "L3": "Fairness & Ethics",
+        "L4": "Explainability & Transparency",
+        "L5": "Operations & Monitoring",
+    }
 
-        elif operation['type'] == 'remove':
-            # Restore the files that were removed
-            for module_id, file_path in operation['data']['files']:
-                ix = _load_index()
-                if module_id not in ix:
-                    ix[module_id] = []
-                if file_path not in ix[module_id]:
-                    ix[module_id].append(file_path)
-                    _save_index(ix)
+    def _load_index() -> dict:
+        """Thread-safe index loading with file locking."""
+        if not INDEX_PATH.exists():
+            return {}
 
-        logger.info(f"Undo operation: {operation['type']}")
-        return True
+        lock_path = INDEX_PATH.with_suffix('.lock')
 
-    except Exception as e:
-        logger.error(f"Undo failed: {e}", exc_info=True)
-        return False
+        try:
+            with FileLock(str(lock_path), timeout=10):
+                with open(INDEX_PATH, "r", encoding="utf-8") as fh:
+                    data = json.load(fh)
+                    return data if isinstance(data, dict) else {}
+        except FileNotFoundError:
+            return {}
+        except json.JSONDecodeError as e:
+            logger.error(f"Corrupted evidence index: {e}")
+            # Backup corrupted file
+            backup_path = INDEX_PATH.with_suffix(
+                f'.backup.{int(time.time())}.json')
+            INDEX_PATH.rename(backup_path)
+            logger.info(f"Backed up corrupted index to {backup_path}")
+            return {}
+        except Exception as e:
+            logger.error(f"Failed to load evidence index: {e}")
+            return {}
 
+    _index_lock = threading.Lock()
 
-def redo_evidence_operation() -> bool:
-    """Redo the last undone operation. Returns True if successful."""
-    init_evidence_history()
+    def _save_index(ix: dict):
+        """Thread-safe index saving with file locking (cross-platform)."""
+        lock_path = INDEX_PATH.with_suffix('.lock')
 
-    redo_stack = st.session_state.evidence_history['redo_stack']
-    if not redo_stack:
-        return False
+        with _index_lock:  # In-process lock
+            with FileLock(str(lock_path), timeout=10):  # Cross-process lock
+                temp_path = INDEX_PATH.with_suffix('.tmp')
+                try:
+                    with open(temp_path, "w", encoding="utf-8") as fh:
+                        json.dump(ix, fh, indent=2)
+                    temp_path.replace(INDEX_PATH)  # Atomic rename
+                except Exception as e:
+                    if temp_path.exists():
+                        temp_path.unlink()  # Clean up temp file
+                    raise
 
-    operation = redo_stack.pop()
-    st.session_state.evidence_history['undo_stack'].append(operation)
+    def _sanitize_name(name: str) -> str:
+        keep = "._-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return "".join(c if c in keep else "_" for c in name)
+    # ============================================================================
+    # UNDO/REDO FUNCTIONALITY FOR EVIDENCE OPERATIONS
+    # ============================================================================
 
-    try:
-        if operation['type'] == 'add':
-            # Re-add the files
-            for module_id, file_path in operation['data']['files']:
-                ix = _load_index()
-                if module_id not in ix:
-                    ix[module_id] = []
-                if file_path not in ix[module_id]:
-                    ix[module_id].append(file_path)
-                    _save_index(ix)
+    def init_evidence_history():
+        """Initialize undo/redo stacks for evidence operations."""
+        if 'evidence_history' not in st.session_state:
+            st.session_state.evidence_history = {
+                'undo_stack': [],
+                'redo_stack': [],
+                'max_history': 20
+            }
 
-        elif operation['type'] == 'remove':
-            # Re-remove the files
-            for module_id, file_path in operation['data']['files']:
-                ix = _load_index()
-                if module_id in ix and file_path in ix[module_id]:
-                    ix[module_id].remove(file_path)
-                    _save_index(ix)
+    def record_evidence_operation(operation_type: str, data: dict):
+        """
+        Record an evidence operation for undo/redo.
 
-        logger.info(f"Redo operation: {operation['type']}")
-        return True
+        Args:
+            operation_type: Type of operation (add, remove, update)
+            data: Operation data (file paths, module IDs, etc.)
+        """
+        init_evidence_history()
 
-    except Exception as e:
-        logger.error(f"Redo failed: {e}", exc_info=True)
-        return False
+        operation = {
+            'type': operation_type,
+            'data': data,
+            'timestamp': datetime.now().isoformat()
+        }
 
+        # Add to undo stack
+        st.session_state.evidence_history['undo_stack'].append(operation)
 
-def process_single_file(
-    file_obj,
-    modules: list[str],
-    base_dir: Path
-) -> tuple[bool, str, str | list[tuple[str, str]]]:
-    """Process a single uploaded file (for batch processing)."""
-    try:
-        data = file_obj.read()
+        # Clear redo stack (new operation invalidates redo)
+        st.session_state.evidence_history['redo_stack'] = []
 
-        # Security checks
+        # Limit history size
+        max_history = st.session_state.evidence_history['max_history']
+        if len(st.session_state.evidence_history['undo_stack']) > max_history:
+            st.session_state.evidence_history['undo_stack'].pop(0)
+
+    def undo_evidence_operation() -> bool:
+        """Undo the last evidence operation. Returns True if successful."""
+        init_evidence_history()
+
+        undo_stack = st.session_state.evidence_history['undo_stack']
+        if not undo_stack:
+            return False
+
+        operation = undo_stack.pop()
+        st.session_state.evidence_history['redo_stack'].append(operation)
+
+        try:
+            if operation['type'] == 'add':
+                # Remove the files that were added
+                for module_id, file_path in operation['data']['files']:
+                    ix = _load_index()
+                    if module_id in ix and file_path in ix[module_id]:
+                        ix[module_id].remove(file_path)
+                        _save_index(ix)
+
+                    # Delete physical file
+                    if Path(file_path).exists():
+                        Path(file_path).unlink()
+
+            elif operation['type'] == 'remove':
+                # Restore the files that were removed
+                for module_id, file_path in operation['data']['files']:
+                    ix = _load_index()
+                    if module_id not in ix:
+                        ix[module_id] = []
+                    if file_path not in ix[module_id]:
+                        ix[module_id].append(file_path)
+                        _save_index(ix)
+
+            logger.info(f"Undo operation: {operation['type']}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Undo failed: {e}", exc_info=True)
+            return False
+
+    def redo_evidence_operation() -> bool:
+        """Redo the last undone operation. Returns True if successful."""
+        init_evidence_history()
+
+        redo_stack = st.session_state.evidence_history['redo_stack']
+        if not redo_stack:
+            return False
+
+        operation = redo_stack.pop()
+        st.session_state.evidence_history['undo_stack'].append(operation)
+
+        try:
+            if operation['type'] == 'add':
+                # Re-add the files
+                for module_id, file_path in operation['data']['files']:
+                    ix = _load_index()
+                    if module_id not in ix:
+                        ix[module_id] = []
+                    if file_path not in ix[module_id]:
+                        ix[module_id].append(file_path)
+                        _save_index(ix)
+
+            elif operation['type'] == 'remove':
+                # Re-remove the files
+                for module_id, file_path in operation['data']['files']:
+                    ix = _load_index()
+                    if module_id in ix and file_path in ix[module_id]:
+                        ix[module_id].remove(file_path)
+                        _save_index(ix)
+
+            logger.info(f"Redo operation: {operation['type']}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Redo failed: {e}", exc_info=True)
+            return False
+
+    def process_single_file(
+        file_obj,
+        modules: list[str],
+        base_dir: Path
+    ) -> tuple[bool, str, str | list[tuple[str, str]]]:
+        """Process a single uploaded file (for batch processing)."""
+        try:
+            data = file_obj.read()
+
+            # Security checks
+            MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+            if len(data) > MAX_FILE_SIZE:
+                return (False, file_obj.name, f"File too large ({len(data) / 1024 / 1024:.1f}MB)")
+
+            if len(data) == 0:
+                return (False, file_obj.name, "Empty file")
+
+            # Validate filename
+            if ".." in file_obj.name or "/" in file_obj.name or " " in file_obj.name:
+                return (False, file_obj.name, "Invalid filename")
+
+            file_ext = Path(file_obj.name).suffix.lower()
+
+            # Block dangerous extensions
+            DANGEROUS_EXTENSIONS = {'.exe', '.bat', '.sh', '.ps1',
+                                    '.cmd', '.com', '.scr', '.vbs', '.js', '.jar'}
+            if file_ext in DANGEROUS_EXTENSIONS:
+                return (False, file_obj.name, f"File type not allowed: {file_ext}")
+
+            # Generate safe filename
+            stem = _sanitize_name(Path(file_obj.name).stem)
+            ext = _sanitize_name(file_ext) or ".bin"
+            h = _hash_bytes(data)
+            fname = f"{stem}-{h}{ext}"
+
+            # Save to each module
+            saved_paths = []
+            for mid in modules:
+                target_dir = base_dir / mid
+                target_dir.mkdir(parents=True, exist_ok=True)
+
+                outp = (target_dir / fname).resolve()
+                if not str(outp).startswith(str(target_dir.resolve())):
+                    return (False, file_obj.name, "Security: Path traversal blocked")
+
+                # Atomic write
+                temp_path = outp.with_suffix(outp.suffix + '.tmp')
+                try:
+                    with open(temp_path, "wb") as fh:
+                        fh.write(data)
+
+                    if temp_path.stat().st_size != len(data):
+                        temp_path.unlink()
+                        raise IOError("File write verification failed")
+
+                    temp_path.replace(outp)
+                    saved_paths.append((mid, str(outp.as_posix())))
+                except Exception as write_error:
+                    if temp_path.exists():
+                        temp_path.unlink()
+                    raise write_error
+
+            if saved_paths:
+                return (True, fname, saved_paths)
+            else:
+                return (False, file_obj.name, "Failed to save to any module")
+
+        except Exception as e:
+            return (False, file_obj.name, f"Error: {str(e)[:100]}")
+
+    def batch_process_evidence_files(files_list: list, modules: list, base_dir: Path) -> tuple[list, list]:
+        """
+        Process multiple evidence files in batch with enhanced security.
+
+        Args:
+            files_list: List of uploaded file objects
+            modules: List of module IDs to pin to
+            base_dir: Base directory for evidence storage
+
+        Returns:
+            Tuple of (successful_files, failed_files)
+        """
+        # Security constants
         MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
-        if len(data) > MAX_FILE_SIZE:
-            return (False, file_obj.name, f"File too large ({len(data) / 1024 / 1024:.1f}MB)")
-
-        if len(data) == 0:
-            return (False, file_obj.name, "Empty file")
-
-        # Validate filename
-        if ".." in file_obj.name or "/" in file_obj.name or " " in file_obj.name:
-            return (False, file_obj.name, "Invalid filename")
-
-        file_ext = Path(file_obj.name).suffix.lower()
-
-        # Block dangerous extensions
+        ALLOWED_EXTENSIONS = {'.pdf', '.csv', '.png', '.jpg',
+                              '.jpeg', '.txt', '.docx', '.xlsx', '.json', '.yaml', '.yml'}
         DANGEROUS_EXTENSIONS = {'.exe', '.bat', '.sh', '.ps1',
                                 '.cmd', '.com', '.scr', '.vbs', '.js', '.jar'}
-        if file_ext in DANGEROUS_EXTENSIONS:
-            return (False, file_obj.name, f"File type not allowed: {file_ext}")
 
-        # Generate safe filename
-        stem = _sanitize_name(Path(file_obj.name).stem)
-        ext = _sanitize_name(file_ext) or ".bin"
-        h = _hash_bytes(data)
-        fname = f"{stem}-{h}{ext}"
+        successful = []
+        failed = []
 
-        # Save to each module
-        saved_paths = []
-        for mid in modules:
-            target_dir = base_dir / mid
-            target_dir.mkdir(parents=True, exist_ok=True)
+        for uf in files_list:
+            result = process_single_file(uf, modules, base_dir)
 
-            outp = (target_dir / fname).resolve()
-            if not str(outp).startswith(str(target_dir.resolve())):
-                return (False, file_obj.name, "Security: Path traversal blocked")
+            if result[0]:  # Success
+                successful.append((result[1], result[2]))
+                logger.info(
+                    f"Saved evidence: {result[1]} to {len(modules)} module(s)")
+            else:  # Failed
+                failed.append((result[1], result[2]))
+                if result[2]:  # Has error message
+                    logger.warning(f"Failed to save {result[1]}: {result[2]}")
 
-            # Atomic write
-            temp_path = outp.with_suffix(outp.suffix + '.tmp')
-            try:
-                with open(temp_path, "wb") as fh:
-                    fh.write(data)
+        return successful, failed
+    # =============================================================================
+    # UNDO/REDO SYSTEM (Already implemented in your code, but add UI polish)
+    # =============================================================================
 
-                if temp_path.stat().st_size != len(data):
-                    temp_path.unlink()
-                    raise IOError("File write verification failed")
+    # LOCATION: Add after line ~1450 (after evidence upload section)
 
-                temp_path.replace(outp)
-                saved_paths.append((mid, str(outp.as_posix())))
-            except Exception as write_error:
-                if temp_path.exists():
-                    temp_path.unlink()
-                raise write_error
+    # Enhanced undo/redo UI with visual feedback
+    if 'evidence_history' in st.session_state:
+        history = st.session_state.evidence_history
+        undo_count = len(history['undo_stack'])
+        redo_count = len(history['redo_stack'])
 
-        if saved_paths:
-            return (True, fname, saved_paths)
-        else:
-            return (False, file_obj.name, "Failed to save to any module")
+        if undo_count > 0 or redo_count > 0:
+            st.markdown("""
+            <div style='
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 12px 16px;
+                border-radius: 10px;
+                margin: 16px 0;
+                color: white;
+            '>
+                <h4 style='margin: 0 0 8px 0; color: white;'>🕐 History</h4>
+            """, unsafe_allow_html=True)
 
-    except Exception as e:
-        return (False, file_obj.name, f"Error: {str(e)[:100]}")
+            undo_col, redo_col, info_col = st.columns([1, 1, 2])
 
+            with undo_col:
+                undo_disabled = undo_count == 0 or _LOCK
+                if st.button(
+                    f"? Undo ({undo_count})",
+                    disabled=undo_disabled,
+                    width="stretch",
+                    key="evidence_undo_btn_ui",
+                    help="Undo last evidence operation"
+                ):
+                    if undo_evidence_operation():
+                        st.success("✅ Undone!")
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.error("❌ Undo failed")
+            with redo_col:
+                redo_disabled = redo_count == 0 or _LOCK
+                if st.button(
+                    f"↷ Redo ({redo_count})",
+                    disabled=redo_disabled,
+                    width="stretch",
+                    key="evidence_redo_btn_ui",
+                    help="Redo last undone operation"
+                ):
+                    if redo_evidence_operation():
+                        st.success("✅ Redone!")
+                        time.sleep(0.5)
+                        st.rerun()
+                    else:
+                        st.error("❌ Redo failed")
+            with info_col:
+                if undo_count > 0:
+                    last_op = history['undo_stack'][-1]
+                    st.caption(
+                        f"Last: {last_op['type']} at {last_op['timestamp'][:19]}")
 
-def batch_process_evidence_files(files_list: list, modules: list, base_dir: Path) -> tuple[list, list]:
-    """
-    Process multiple evidence files in batch with enhanced security.
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    Args:
-        files_list: List of uploaded file objects
-        modules: List of module IDs to pin to
-        base_dir: Base directory for evidence storage
+    def _hash_bytes(b: bytes) -> str:
+        return hashlib.sha1(b).hexdigest()[:10]
 
-    Returns:
-        Tuple of (successful_files, failed_files)
-    """
-    # Security constants
-    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
-    ALLOWED_EXTENSIONS = {'.pdf', '.csv', '.png', '.jpg',
-                          '.jpeg', '.txt', '.docx', '.xlsx', '.json', '.yaml', '.yml'}
-    DANGEROUS_EXTENSIONS = {'.exe', '.bat', '.sh', '.ps1',
-                            '.cmd', '.com', '.scr', '.vbs', '.js', '.jar'}
+    ix = _load_index()
 
-    successful = []
-    failed = []
+    # File upload and module selection with enhanced styling
+    st.markdown("<h4 style='margin: 20px 0 12px 0; color: #1F2937; font-weight: 700;'>📂 Upload Files</h4>",
+                unsafe_allow_html=True)
+    upload_col, module_col = st.columns([2, 1], gap="large")
 
-    for uf in files_list:
-        result = process_single_file(uf, modules, base_dir)
+    with upload_col:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #F3E8FF 0%, #FAF5FF 100%); border: 2px dashed #A78BFA; border-radius: 12px; padding: 20px; text-align: center;">
+            <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: #6D28D9; font-weight: 600;">🎯 Drag & Drop or Click to Upload</p>
+            <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #7C3AED;">Limit 50MB per file • PDF, CSV, PNG, TXT, DOCX</p>
+        </div>
+        """, unsafe_allow_html=True)
+        uploads = st.file_uploader(
+            "Upload evidence files",
+            type=["pdf", "csv", "png", "txt", "docx"],
+            accept_multiple_files=True,
+            disabled=_LOCK,
+            label_visibility="collapsed"
+        )
 
-        if result[0]:  # Success
-            successful.append((result[1], result[2]))
-            logger.info(
-                f"Saved evidence: {result[1]} to {len(modules)} module(s)")
-        else:  # Failed
-            failed.append((result[1], result[2]))
-            if result[2]:  # Has error message
-                logger.warning(f"Failed to save {result[1]}: {result[2]}")
+    with module_col:
+        st.markdown("<h5 style='margin: 0 0 12px 0; color: #1F2937; font-weight: 700;'>📌 Pin to Modules</h5>",
+                    unsafe_allow_html=True)
+        modules_to_pin = st.multiselect(
+            "Pin uploaded files to module(s)",
+            options=list(MODULE_LABELS.keys()),
+            default=["L1"],
+            format_func=lambda m: f"{m} • {MODULE_LABELS[m]}",
+            help="Each selected module receives a reference to every uploaded file.",
+            disabled=_LOCK,
+            label_visibility="collapsed"
+        )
 
-    return successful, failed
-# =============================================================================
-# UNDO/REDO SYSTEM (Already implemented in your code, but add UI polish)
-# =============================================================================
+    # Action buttons with enhanced styling
+    st.markdown("<h4 style='margin: 20px 0 12px 0; color: #1F2937; font-weight: 700;'>💾 Actions</h4>",
+                unsafe_allow_html=True)
+    act_col1, act_col2, act_col3 = st.columns([1, 1, 1], gap="small")
 
-# LOCATION: Add after line ~1450 (after evidence upload section)
+    with act_col1:
+        if st.button("💾 Save & Pin Files", disabled=_LOCK, width="stretch", type="primary"):
+            if not uploads:
+                st.warning("❌ No files uploaded.")
+            elif not modules_to_pin:
+                st.warning("❌ Pick at least one module to pin.")
+            else:
+                with progress_tracker("Saving evidence files", total=len(uploads)) as tracker:
+                    successful, failed = batch_process_evidence_files(
+                        uploads, modules_to_pin, EVID_DIR)
 
+                    # Update index for successful saves
+                    for fname, paths in successful:
+                        for mid, path in paths:
+                            ix.setdefault(mid, [])
+                            if path not in ix[mid]:
+                                ix[mid].append(path)
 
-# Enhanced undo/redo UI with visual feedback
-if 'evidence_history' in st.session_state:
-    history = st.session_state.evidence_history
-    undo_count = len(history['undo_stack'])
-    redo_count = len(history['redo_stack'])
+                    # Save updated index
+                    if successful:
+                        _save_index(ix)
+
+                        # Record operation for undo/redo
+                        all_saved_paths = []
+                        for fname, paths in successful:
+                            all_saved_paths.extend(paths)
+
+                        record_evidence_operation('add', {
+                            'files': all_saved_paths,
+                            'timestamp': datetime.now().isoformat()
+                        })
+
+                        st.success(
+                            f"✅ Saved {len(successful)} file(s): {', '.join(f[0] for f in successful)}")
+                    # Show failures if any
+                    if failed:
+                        with st.expander(f"⚠️ {len(failed)} file(s) failed", expanded=True):
+                            for fname, error in failed:
+                                st.error(f"❌ {fname}: {error}")
+
+    with act_col2:
+        if st.button("📂 Open Folder", width="stretch"):
+            st.info(f"📁 `{EVID_DIR.resolve()}`")
+
+    with act_col3:
+        st.info(f"📋 {len(uploads)} file(s) ready" if uploads else "📭 No files")
+
+    # Undo/Redo controls
+    init_evidence_history()
+    undo_count = len(st.session_state.evidence_history['undo_stack'])
+    redo_count = len(st.session_state.evidence_history['redo_stack'])
 
     if undo_count > 0 or redo_count > 0:
-        st.markdown("""
-        <div style='
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin: 16px 0;
-            color: white;
-        '>
-            <h4 style='margin: 0 0 8px 0; color: white;'>🕐 History</h4>
-        """, unsafe_allow_html=True)
-
-        undo_col, redo_col, info_col = st.columns([1, 1, 2])
+        st.markdown("**History**")
+        undo_col, redo_col = st.columns(2)
 
         with undo_col:
             undo_disabled = undo_count == 0 or _LOCK
@@ -8069,831 +8206,563 @@ if 'evidence_history' in st.session_state:
                 f"? Undo ({undo_count})",
                 disabled=undo_disabled,
                 width="stretch",
-                key="evidence_undo_btn_ui",
+                key="evidence_undo_btn",
                 help="Undo last evidence operation"
             ):
                 if undo_evidence_operation():
                     st.success("✅ Undone!")
-                    time.sleep(0.5)
                     st.rerun()
                 else:
                     st.error("❌ Undo failed")
+
         with redo_col:
             redo_disabled = redo_count == 0 or _LOCK
             if st.button(
-                f"↷ Redo ({redo_count})",
+                f"? Redo ({redo_count})",
                 disabled=redo_disabled,
                 width="stretch",
-                key="evidence_redo_btn_ui",
+                key="evidence_redo_btn",
                 help="Redo last undone operation"
             ):
                 if redo_evidence_operation():
                     st.success("✅ Redone!")
-                    time.sleep(0.5)
                     st.rerun()
                 else:
                     st.error("❌ Redo failed")
-        with info_col:
-            if undo_count > 0:
-                last_op = history['undo_stack'][-1]
-                st.caption(
-                    f"Last: {last_op['type']} at {last_op['timestamp'][:19]}")
 
-        st.markdown("</div>", unsafe_allow_html=True)
+    with st.expander("📚 Current Evidence Index (per module)", expanded=False):
+        if ix:
+            # Display as organized cards per module
+            for module_id, files in sorted(ix.items()):
+                st.markdown(
+                    f"<h5 style='margin-top: 12px; margin-bottom: 8px; color: #1F2937; font-weight: 700;'>{module_id} • {MODULE_LABELS.get(module_id, 'Unknown')}</h5>", unsafe_allow_html=True)
+                if files:
+                    for file_path in files:
+                        file_name = Path(file_path).name
+                        st.markdown(
+                            f"<div style='padding: 8px 12px; background: #F3F4F6; border-radius: 8px; margin-bottom: 6px; font-size: 0.9rem;'>📄 {file_name}</div>", unsafe_allow_html=True)
+                else:
+                    st.caption(f"No evidence files for {module_id}")
+        else:
+            st.caption("📭 No evidence files pinned yet")
 
+    close_card()
 
-def _hash_bytes(b: bytes) -> str:
-    return hashlib.sha1(b).hexdigest()[:10]
-
-
-ix = _load_index()
-
-# File upload and module selection with enhanced styling
-st.markdown("<h4 style='margin: 20px 0 12px 0; color: #1F2937; font-weight: 700;'>📂 Upload Files</h4>",
-            unsafe_allow_html=True)
-upload_col, module_col = st.columns([2, 1], gap="large")
-
-with upload_col:
+    # =========================
+    # 🔄 Sync to YAML + Export (Enhanced)
+    # =========================
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #F3E8FF 0%, #FAF5FF 100%); border: 2px dashed #A78BFA; border-radius: 12px; padding: 20px; text-align: center;">
-        <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: #6D28D9; font-weight: 600;">🎯 Drag & Drop or Click to Upload</p>
-        <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #7C3AED;">Limit 50MB per file • PDF, CSV, PNG, TXT, DOCX</p>
+    <div style="margin-top: 40px; margin-bottom: 30px;">
+        <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">🔄 Sync to Config & Export</h2>
+        <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Merge evidence pins into your project YAML and export reports in multiple formats</p>
     </div>
     """, unsafe_allow_html=True)
-    uploads = st.file_uploader(
-        "Upload evidence files",
-        type=["pdf", "csv", "png", "txt", "docx"],
-        accept_multiple_files=True,
-        disabled=_LOCK,
-        label_visibility="collapsed"
-    )
 
-with module_col:
-    st.markdown("<h5 style='margin: 0 0 12px 0; color: #1F2937; font-weight: 700;'>📌 Pin to Modules</h5>",
-                unsafe_allow_html=True)
-    modules_to_pin = st.multiselect(
-        "Pin uploaded files to module(s)",
-        options=list(MODULE_LABELS.keys()),
-        default=["L1"],
-        format_func=lambda m: f"{m} • {MODULE_LABELS[m]}",
-        help="Each selected module receives a reference to every uploaded file.",
-        disabled=_LOCK,
-        label_visibility="collapsed"
-    )
-
-# Action buttons with enhanced styling
-st.markdown("<h4 style='margin: 20px 0 12px 0; color: #1F2937; font-weight: 700;'>💾 Actions</h4>",
-            unsafe_allow_html=True)
-act_col1, act_col2, act_col3 = st.columns([1, 1, 1], gap="small")
-
-with act_col1:
-    if st.button("💾 Save & Pin Files", disabled=_LOCK, width="stretch", type="primary"):
-        if not uploads:
-            st.warning("❌ No files uploaded.")
-        elif not modules_to_pin:
-            st.warning("❌ Pick at least one module to pin.")
-        else:
-            with progress_tracker("Saving evidence files", total=len(uploads)) as tracker:
-                successful, failed = batch_process_evidence_files(
-                    uploads, modules_to_pin, EVID_DIR)
-
-                # Update index for successful saves
-                for fname, paths in successful:
-                    for mid, path in paths:
-                        ix.setdefault(mid, [])
-                        if path not in ix[mid]:
-                            ix[mid].append(path)
-
-                # Save updated index
-                if successful:
-                    _save_index(ix)
-
-                    # Record operation for undo/redo
-                    all_saved_paths = []
-                    for fname, paths in successful:
-                        all_saved_paths.extend(paths)
-
-                    record_evidence_operation('add', {
-                        'files': all_saved_paths,
-                        'timestamp': datetime.now().isoformat()
-                    })
-
-                    st.success(
-                        f"✅ Saved {len(successful)} file(s): {', '.join(f[0] for f in successful)}")
-                # Show failures if any
-                if failed:
-                    with st.expander(f"⚠️ {len(failed)} file(s) failed", expanded=True):
-                        for fname, error in failed:
-                            st.error(f"❌ {fname}: {error}")
-
-with act_col2:
-    if st.button("📂 Open Folder", width="stretch"):
-        st.info(f"📁 `{EVID_DIR.resolve()}`")
-
-with act_col3:
-    st.info(f"📋 {len(uploads)} file(s) ready" if uploads else "📭 No files")
-
-# Undo/Redo controls
-init_evidence_history()
-undo_count = len(st.session_state.evidence_history['undo_stack'])
-redo_count = len(st.session_state.evidence_history['redo_stack'])
-
-if undo_count > 0 or redo_count > 0:
-    st.markdown("**History**")
-    undo_col, redo_col = st.columns(2)
-
-    with undo_col:
-        undo_disabled = undo_count == 0 or _LOCK
-        if st.button(
-            f"? Undo ({undo_count})",
-            disabled=undo_disabled,
-            width="stretch",
-            key="evidence_undo_btn",
-            help="Undo last evidence operation"
-        ):
-            if undo_evidence_operation():
-                st.success("✅ Undone!")
-                st.rerun()
-            else:
-                st.error("❌ Undo failed")
-
-    with redo_col:
-        redo_disabled = redo_count == 0 or _LOCK
-        if st.button(
-            f"? Redo ({redo_count})",
-            disabled=redo_disabled,
-            width="stretch",
-            key="evidence_redo_btn",
-            help="Redo last undone operation"
-        ):
-            if redo_evidence_operation():
-                st.success("✅ Redone!")
-                st.rerun()
-            else:
-                st.error("❌ Redo failed")
-
-with st.expander("📚 Current Evidence Index (per module)", expanded=False):
-    if ix:
-        # Display as organized cards per module
-        for module_id, files in sorted(ix.items()):
-            st.markdown(
-                f"<h5 style='margin-top: 12px; margin-bottom: 8px; color: #1F2937; font-weight: 700;'>{module_id} • {MODULE_LABELS.get(module_id, 'Unknown')}</h5>", unsafe_allow_html=True)
-            if files:
-                for file_path in files:
-                    file_name = Path(file_path).name
-                    st.markdown(
-                        f"<div style='padding: 8px 12px; background: #F3F4F6; border-radius: 8px; margin-bottom: 6px; font-size: 0.9rem;'>📄 {file_name}</div>", unsafe_allow_html=True)
-            else:
-                st.caption(f"No evidence files for {module_id}")
-    else:
-        st.caption("📭 No evidence files pinned yet")
-
-
-close_card()
-
-# =========================
-# 🔄 Sync to YAML + Export (Enhanced)
-# =========================
-st.markdown("""
-<div style="margin-top: 40px; margin-bottom: 30px;">
-    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">🔄 Sync to Config & Export</h2>
-    <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Merge evidence pins into your project YAML and export reports in multiple formats</p>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="background: linear-gradient(135deg, #ECFDF5 0%, #E0FFDD 100%); border: 2px solid #10B981; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-        <div>
-            <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 700; color: #065F46;">🔄 Sync to YAML</p>
-            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Merges pins into `evidence: [...]` under each module. Auto-deduplicates and creates keys if missing.</p>
-        </div>
-        <div>
-            <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 700; color: #065F46;">⬇️ Export Reports</p>
-            <p style="margin: 0; font-size: 0.85rem; color: #047857;">Download compliance data in JSON, CSV, or DOCX format for stakeholders</p>
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #ECFDF5 0%, #E0FFDD 100%); border: 2px solid #10B981; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+                <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 700; color: #065F46;">🔄 Sync to YAML</p>
+                <p style="margin: 0; font-size: 0.85rem; color: #047857;">Merges pins into `evidence: [...]` under each module. Auto-deduplicates and creates keys if missing.</p>
+            </div>
+            <div>
+                <p style="margin: 0 0 8px 0; font-size: 0.9rem; font-weight: 700; color: #065F46;">⬇️ Export Reports</p>
+                <p style="margin: 0; font-size: 0.85rem; color: #047857;">Download compliance data in JSON, CSV, or DOCX format for stakeholders</p>
+            </div>
         </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-card("🔄 Sync to `configs/project.example.yaml`",
-     "")
+    card("🔄 Sync to `configs/project.example.yaml`",
+         "")
 
-
-def _sync_to_yaml(yaml_path="configs/project.example.yaml"):
-    yaml_path = Path(yaml_path)
-    if not yaml_path.exists():
-        st.error(f"Config not found: {yaml_path}")
-        return False
-    try:
-        import yaml
-    except Exception:
-        st.error("Missing PyYAML. `pip install pyyaml`")
-        return False
-
-    with open(yaml_path, "r", encoding="utf-8") as fh:
+    def _sync_to_yaml(yaml_path="configs/project.example.yaml"):
+        yaml_path = Path(yaml_path)
+        if not yaml_path.exists():
+            st.error(f"Config not found: {yaml_path}")
+            return False
         try:
-            cfg = yaml.safe_load(fh) or {}
-        except Exception as e:
-            st.error(f"YAML parse error: {e}")
+            import yaml
+        except Exception:
+            st.error("Missing PyYAML. `pip install pyyaml`")
             return False
 
-    for mid in MODULE_LABELS.keys():
-        cfg.setdefault(mid, {})
-        ev = cfg[mid].get("evidence", [])
-        if ev is None:
-            ev = []
-        if not isinstance(ev, list):
-            ev = [str(ev)]
-        for rel in ix.get(mid, []):
-            if rel not in ev:
-                ev.append(rel)
-        cfg[mid]["evidence"] = sorted(ev)
+        with open(yaml_path, "r", encoding="utf-8") as fh:
+            try:
+                cfg = yaml.safe_load(fh) or {}
+            except Exception as e:
+                st.error(f"YAML parse error: {e}")
+                return False
 
-    backup = yaml_path.with_suffix(f".backup.{int(time.time())}.yaml")
-    shutil.copyfile(yaml_path, backup)
-    with open(yaml_path, "w", encoding="utf-8") as fh:
-        yaml.safe_dump(cfg, fh, sort_keys=False)
-    st.success(f"Synced to {yaml_path}  ?  Backup: {backup.name}")
-    return True
+        for mid in MODULE_LABELS.keys():
+            cfg.setdefault(mid, {})
+            ev = cfg[mid].get("evidence", [])
+            if ev is None:
+                ev = []
+            if not isinstance(ev, list):
+                ev = [str(ev)]
+            for rel in ix.get(mid, []):
+                if rel not in ev:
+                    ev.append(rel)
+            cfg[mid]["evidence"] = sorted(ev)
 
+        backup = yaml_path.with_suffix(f".backup.{int(time.time())}.yaml")
+        shutil.copyfile(yaml_path, backup)
+        with open(yaml_path, "w", encoding="utf-8") as fh:
+            yaml.safe_dump(cfg, fh, sort_keys=False)
+        st.success(f"Synced to {yaml_path}  ?  Backup: {backup.name}")
+        return True
 
-sync_col1, sync_col2 = st.columns([1, 2])
-with sync_col1:
-    if st.button("🔄 Sync to YAML", disabled=_LOCK, width="stretch", type="primary"):
-        try:
-            if _sync_to_yaml():
-                st.success("✅ Evidence synced to project config!")
-        except Exception as e:
-            show_error_inline(e, "YAML sync failed")
-with sync_col2:
-    st.markdown(
-        "<p style='margin: 0; padding-top: 8px; font-size: 0.85rem; color: #6B7280;'>💡 After syncing, re-run L1/L2 modules so reports include the new evidence references.</p>", unsafe_allow_html=True)
+    sync_col1, sync_col2 = st.columns([1, 2])
+    with sync_col1:
+        if st.button("🔄 Sync to YAML", disabled=_LOCK, width="stretch", type="primary"):
+            try:
+                if _sync_to_yaml():
+                    st.success("✅ Evidence synced to project config!")
+            except Exception as e:
+                show_error_inline(e, "YAML sync failed")
+    with sync_col2:
+        st.markdown(
+            "<p style='margin: 0; padding-top: 8px; font-size: 0.85rem; color: #6B7280;'>💡 After syncing, re-run L1/L2 modules so reports include the new evidence references.</p>", unsafe_allow_html=True)
 
-# Inline export card
+    # Inline export card
 
+    # =============================================================================
+    # EXPORT PRESETS (Enhanced)
+    # =============================================================================
 
-# =============================================================================
-# EXPORT PRESETS (Enhanced)
-# =============================================================================
-
-st.markdown("""
-<div style="margin-top: 32px; margin-bottom: 24px;">
-    <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; font-weight: 800; color: #1F2937;">💾 Quick Export Presets</h3>
-    <p style="margin: 0; font-size: 0.95rem; color: #6B7280;">One-click exports in multiple formats for different audiences</p>
-</div>
-""", unsafe_allow_html=True)
-
-preset_col1, preset_col2, preset_col3 = st.columns(3, gap="large")
-
-with preset_col1:
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px solid #3B82F6; border-radius: 12px; padding: 24px; text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">📊</div>
-        <div style="font-weight: 700; color: #1E40AF; margin-bottom: 4px;">Executive Summary</div>
-        <div style="font-size: 0.85rem; color: #1E3A8A; margin-bottom: 16px;">High-level GQAS & floors</div>
+    <div style="margin-top: 32px; margin-bottom: 24px;">
+        <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; font-weight: 800; color: #1F2937;">💾 Quick Export Presets</h3>
+        <p style="margin: 0; font-size: 0.95rem; color: #6B7280;">One-click exports in multiple formats for different audiences</p>
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("📥 Export Executive", width="stretch", key="export_exec_preset", type="primary"):
-        export_data = {
-            "GQAS": agg.get("gqas"),
-            "Floors": {
-                "L1": latest.get("L1", {}).get("score"),
-                "L2": latest.get("L2", {}).get("score"),
-                "L3": latest.get("L3", {}).get("score"),
-                "L4": latest.get("L4", {}).get("score"),
-                "L5": latest.get("L5", {}).get("score"),
-            },
-            "Generated": datetime.now().isoformat(),
-            "Risk_Profile": risk_profile if 'risk_profile' in locals() else "High"
-        }
-        st.download_button(
-            "⬇️ Download JSON",
-            data=json.dumps(export_data, indent=2).encode("utf-8"),
-            file_name=f"executive_summary_{datetime.now().strftime('%Y%m%d')}.json",
-            mime="application/json",
-            key="dl_exec_summary",
-            width="stretch"
-        )
+    preset_col1, preset_col2, preset_col3 = st.columns(3, gap="large")
 
-with preset_col2:
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%); border: 2px solid #6B7280; border-radius: 12px; padding: 24px; text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">🔬</div>
-        <div style="font-weight: 700; color: #374151; margin-bottom: 4px;">Technical Deep Dive</div>
-        <div style="font-size: 0.85rem; color: #6B7280; margin-bottom: 16px;">Full metrics & analysis</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with preset_col1:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px solid #3B82F6; border-radius: 12px; padding: 24px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">📊</div>
+            <div style="font-weight: 700; color: #1E40AF; margin-bottom: 4px;">Executive Summary</div>
+            <div style="font-size: 0.85rem; color: #1E3A8A; margin-bottom: 16px;">High-level GQAS & floors</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.button("📥 Export Technical", width="stretch", key="export_tech_preset", type="primary"):
-        st.download_button(
-            "⬇️ Download JSON",
-            data=json.dumps(latest, indent=2).encode("utf-8"),
-            file_name=f"technical_report_{datetime.now().strftime('%Y%m%d')}.json",
-            mime="application/json",
-            key="dl_tech_report",
-            width="stretch"
-        )
+        if st.button("📥 Export Executive", width="stretch", key="export_exec_preset", type="primary"):
+            export_data = {
+                "GQAS": agg.get("gqas"),
+                "Floors": {
+                    "L1": latest.get("L1", {}).get("score"),
+                    "L2": latest.get("L2", {}).get("score"),
+                    "L3": latest.get("L3", {}).get("score"),
+                    "L4": latest.get("L4", {}).get("score"),
+                    "L5": latest.get("L5", {}).get("score"),
+                },
+                "Generated": datetime.now().isoformat(),
+                "Risk_Profile": risk_profile if 'risk_profile' in locals() else "High"
+            }
+            st.download_button(
+                "⬇️ Download JSON",
+                data=json.dumps(export_data, indent=2).encode("utf-8"),
+                file_name=f"executive_summary_{datetime.now().strftime('%Y%m%d')}.json",
+                mime="application/json",
+                key="dl_exec_summary",
+                width="stretch"
+            )
 
-with preset_col3:
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #ECFDF5 0%, #E0FFDD 100%); border: 2px solid #10B981; border-radius: 12px; padding: 24px; text-align: center;">
-        <div style="font-size: 2.5rem; margin-bottom: 8px;">📋</div>
-        <div style="font-weight: 700; color: #065F46; margin-bottom: 4px;">Compliance Only</div>
-        <div style="font-size: 0.85rem; color: #047857; margin-bottom: 16px;">L1 governance data</div>
-    </div>
-    """, unsafe_allow_html=True)
+    with preset_col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%); border: 2px solid #6B7280; border-radius: 12px; padding: 24px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">🔬</div>
+            <div style="font-weight: 700; color: #374151; margin-bottom: 4px;">Technical Deep Dive</div>
+            <div style="font-size: 0.85rem; color: #6B7280; margin-bottom: 16px;">Full metrics & analysis</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    if st.button("📥 Export Compliance", width="stretch", key="export_compliance_preset", type="primary"):
-        compliance_data = {
-            "L1_Governance": latest.get("L1", {}),
-            "Generated": datetime.now().isoformat()
-        }
-        st.download_button(
-            "⬇️ Download JSON",
-            data=json.dumps(compliance_data, indent=2).encode("utf-8"),
-            file_name=f"compliance_report_{datetime.now().strftime('%Y%m%d')}.json",
-            mime="application/json",
-            key="dl_compliance_report",
-            width="stretch"
-        )
+        if st.button("📥 Export Technical", width="stretch", key="export_tech_preset", type="primary"):
+            st.download_button(
+                "⬇️ Download JSON",
+                data=json.dumps(latest, indent=2).encode("utf-8"),
+                file_name=f"technical_report_{datetime.now().strftime('%Y%m%d')}.json",
+                mime="application/json",
+                key="dl_tech_report",
+                width="stretch"
+            )
 
-st.markdown("---")
+    with preset_col3:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #ECFDF5 0%, #E0FFDD 100%); border: 2px solid #10B981; border-radius: 12px; padding: 24px; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">📋</div>
+            <div style="font-weight: 700; color: #065F46; margin-bottom: 4px;">Compliance Only</div>
+            <div style="font-size: 0.85rem; color: #047857; margin-bottom: 16px;">L1 governance data</div>
+        </div>
+        """, unsafe_allow_html=True)
 
-# Original export buttons
-agg_json = json.dumps(agg, indent=2).encode("utf-8")
-csv_df = pd.DataFrame(score_rows)
-x1, x2 = st.columns(2)
-close_card()
+        if st.button("📥 Export Compliance", width="stretch", key="export_compliance_preset", type="primary"):
+            compliance_data = {
+                "L1_Governance": latest.get("L1", {}),
+                "Generated": datetime.now().isoformat()
+            }
+            st.download_button(
+                "⬇️ Download JSON",
+                data=json.dumps(compliance_data, indent=2).encode("utf-8"),
+                file_name=f"compliance_report_{datetime.now().strftime('%Y%m%d')}.json",
+                mime="application/json",
+                key="dl_compliance_report",
+                width="stretch"
+            )
 
-# =========================
-# 🧾 Auto-Report (Word) - Enhanced
-# =========================
-st.markdown("""
-<div style="margin-top: 40px; margin-bottom: 30px;">
-    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">🧾 Auto-Report</h2>
-    <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Generate a comprehensive Word document report with the latest IRAQAF bundle</p>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="background: linear-gradient(135deg, #FEF3C7 0%, #FEF9E7 100%); border: 2px solid #F59E0B; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-    <p style="margin: 0; font-size: 0.9rem; color: #92400E; font-weight: 600;">💾 Export comprehensive report</p>
-    <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #B45309;">Includes GQAS score, module details, metrics, and timestamps. Requires `python-docx` package.</p>
-</div>
-""", unsafe_allow_html=True)
-
-card("🧾 Generate Word Report", "")
-
-
-def build_docx(report_bundle: dict) -> bytes:
-    try:
-        from docx import Document  # type: ignore
-    except Exception:
-        st.error("`python-docx` not installed. `pip install python-docx`")
-        return b""
-    doc = Document()
-    doc.add_heading("IRAQAF QA Report", level=1)
-    doc.add_paragraph("Automatically generated from the latest IRAQAF run.")
-
-    agg_rep = report_bundle.get("AGG")
-    if agg_rep:
-        doc.add_heading("Aggregate (GQAS)", level=2)
-        doc.add_paragraph(f"GQAS: {agg_rep.get('gqas')}")
-        doc.add_paragraph(f"Floors met: {agg_rep.get('floors_met')}")
-
-    doc.add_heading("Modules", level=2)
-    for m in ["L1", "L2", "L3", "L4", "L5"]:
-        rep_m = report_bundle.get(m)
-        if not rep_m:
-            continue
-        doc.add_heading(NAMES[m], level=3)
-        doc.add_paragraph(f"Score: {rep_m['score']}  |  Band: {rep_m['band']}")
-        doc.add_paragraph("Metrics:")
-        doc.add_paragraph(json.dumps(rep_m.get("metrics", {}), indent=2))
-
-    bio = BytesIO()
-    doc.save(bio)
-    return bio.getvalue()
-
-
-dl_slot = st.empty()
-if audit_mode:
-    st.warning("🔒 Report generation disabled in Audit Mode.")
-    st.button("Generate Word Report", key="gen_docx_disabled",
-              disabled=_LOCK, width="stretch")
-else:
-    gen_col, info_col = st.columns([2, 1], gap="small")
-    with gen_col:
-        if st.button("📄 Generate Word Report", key="gen_docx", width="stretch", type="primary"):
-            with st.spinner("🔨 Building document..."):
-                payload = build_docx(latest)
-                if payload:
-                    with dl_slot:
-                        st.download_button("⬇️ Download IRAQAF_Report.docx",
-                                           data=payload,
-                                           file_name="IRAQAF_Report.docx",
-                                           mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                           key="dl_docx",
-                                           width="stretch")
-                        st.success("✅ Report ready!")
-    with info_col:
-        st.caption("💡 Requires python-docx")
-
-close_card()
-
-if not agg:
-    st.info("Run all modules to create an aggregate report.")
-
-# =========================
-#  📄 HTML/PDF Report Export
-# =========================
-card("📄 HTML/PDF Report Export")
-
-
-def _render_html_report(bundle: dict) -> str:
-    gqas = (bundle.get("AGG") or {}).get("gqas")
-    rows = []
-    for mid in ["L1", "L2", "L3", "L4", "L5"]:
-        rep = bundle.get(mid) or {}
-        rows.append(
-            f"<tr><td>{mid}</td><td>{rep.get('score', '')}</td><td>{rep.get('band', '')}</td></tr>")
-    table = "\n".join(rows)
-    return f"""<!doctype html>
-<html><head><meta charset="utf-8"><title>IRAQAF Report</title>
-<style>
-body{{font-family:Inter,Arial,sans-serif;margin:0;background:#f8fafc}}
-.wrap{{max-width:960px;margin:24px auto;padding:0 16px}}
-.card{{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 16px;margin-bottom:12px}}
-h1{{margin:0 0 8px}} h2{{margin:18px 0 8px}}
-table{{border-collapse:collapse;width:100%}}
-td,th{{border:1px solid #e5e7eb;padding:8px}} th{{background:#f6f9ff;text-align:left}}
-.small{{color:#6b7280}}
-</style></head><body>
-<div class="wrap">
-  <div class="card">
-    <h1>IRAQAF Report</h1>
-    <div class="small">Generated {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</div>
-    <h2>Aggregate</h2>
-    <p><b>GQAS:</b> {gqas}</p>
-    <h2>Modules</h2>
-    <table><tr><th>Module</th><th>Score</th><th>Band</th></tr>
-    {table}
-    </table>
-  </div>
-</div>
-</body></html>"""
-
-
-html_blob = _render_html_report(latest)
-h1, h2 = st.columns([1, 1])
-with h1:
-    st.download_button("📥 Download HTML report",
-                       data=html_blob.encode("utf-8"),
-                       file_name="IRAQAF_Report.html",
-                       mime="text/html",
-                       width="stretch",
-                       disabled=_LOCK)
-with h2:
-    if st.checkbox("Also generate PDF (requires pdfkit + wkhtmltopdf)", value=False, disabled=_LOCK):
-        try:
-            import pdfkit
-            pdf_bytes = pdfkit.from_string(html_blob, False)
-            st.download_button("⬇📥 Download PDF report", data=pdf_bytes,
-                               file_name="IRAQAF_Report.pdf", mime="application/pdf", disabled=_LOCK)
-        except Exception as e:
-            show_error_inline(e, "PDF export unavailable")
-
-close_card()
-
-# =========================
-# 📡 Maturity Radar (L1–L5)
-# =========================
-card("📡 Maturity Radar (L1–L5)",
-     "Polar plot of module scores (0–100). Hover for values.")
-
-radar_rep = {m: (latest.get(m) or {}).get("score")
-             for m in ["L1", "L2", "L3", "L4", "L5"]}
-if not any(isinstance(v, (int, float)) for v in radar_rep.values()):
-    st.info("No module scores available for radar.")
-else:
-    # Prepare a closed polygon in polar coordinates, then project to XY.
-    names = ["L1", "L2", "L3", "L4", "L5"]
-    scores = [float(radar_rep.get(m) or 0.0) for m in names]
-    names.append(names[0])
-    scores.append(scores[0])  # close
-    n = len(names)
-    rad_df = pd.DataFrame({"module": names, "score": scores})
-    rad_df["idx"] = range(n)
-    rad_df["angle"] = rad_df["idx"] * (2*math.pi/(n-1))
-    rad_df["x"] = rad_df["score"] * np.cos(rad_df["angle"])
-    rad_df["y"] = rad_df["score"] * np.sin(rad_df["angle"])
-
-    # Soft background grid/rings
-    rings = pd.DataFrame({"r": [25, 50, 75, 100]})
-    ring_df = pd.concat(
-        [pd.DataFrame({"r": [r]*361, "deg": np.arange(361)})
-         for r in rings["r"]],
-        ignore_index=True
-    )
-    ring_df["rad"] = np.deg2rad(ring_df["deg"])
-    ring_df["x"] = ring_df["r"]*np.cos(ring_df["rad"])
-    ring_df["y"] = ring_df["r"]*np.sin(ring_df["rad"])
-
-    grid = alt.Chart(ring_df).mark_line(opacity=0.15).encode(x="x:Q", y="y:Q")
-    poly = alt.Chart(rad_df).mark_area(opacity=0.15).encode(
-        x="x:Q", y="y:Q")
-    outline = alt.Chart(rad_df).mark_line(point=True).encode(
-        x="x:Q", y="y:Q", tooltip=["module", "score"])
-
-    # spokes with labels
-    spoke_base = pd.DataFrame(
-        {"module": names[:-1], "idx": range(len(names)-1)})
-    spoke_base["angle"] = spoke_base["idx"] * (2*math.pi/(len(names)-1))
-    spoke_base["x"] = 110*np.cos(spoke_base["angle"])
-    spoke_base["y"] = 110*np.sin(spoke_base["angle"])
-    label_layer = alt.Chart(spoke_base).mark_text(fontSize=12).encode(
-        x="x:Q", y="y:Q", text="module:N")
-
-    chart = (grid + poly + outline +
-             label_layer).properties(width=420, height=420)
-    st.altair_chart(chart, width="content")
-
-# ===== Framework Management (Sidebar) =====
-with st.sidebar.expander("🏛️ Framework Configuration", expanded=False):
-    frameworks = get_available_frameworks()
-
-    if not frameworks:
-        st.warning("⚠️ No frameworks found!")
-        st.caption("Create `configs/trace_map.yaml` to define frameworks")
-    else:
-        st.markdown(f"**Active Frameworks:** {len(frameworks)}")
-
-        for fw in frameworks:
-            clauses = get_framework_clauses(fw)
-            with st.expander(f"{fw} ({len(clauses)})"):
-                for clause in clauses:
-                    metrics = get_clause_metrics(fw, clause)
-                    st.markdown(f"**{clause}**")
-                    if metrics:
-                        for m in metrics:
-                            st.caption(f"  → {m}")
-                    else:
-                        st.caption("  (no metrics)")
-
-        st.markdown("---")
-
-        if st.button("🔄 Reload trace_map.yaml", key="sidebar_reload_trace"):
-            load_trace_map.clear()
-            get_available_frameworks.clear()
-            get_framework_clauses.clear()
-            get_clause_metrics.clear()
-            st.success("✅ Reloaded!")
-            st.rerun()
-
-        st.caption("💡 Edit `configs/trace_map.yaml` to modify frameworks")
-
-if st.sidebar.checkbox("🔧 Show Debug Info", value=False, key="debug_mode"):
     st.markdown("---")
 
-    # Styled container for debug info
+    # Original export buttons
+    agg_json = json.dumps(agg, indent=2).encode("utf-8")
+    csv_df = pd.DataFrame(score_rows)
+    x1, x2 = st.columns(2)
+    close_card()
+
+    # =========================
+    # 🧾 Auto-Report (Word) - Enhanced
+    # =========================
     st.markdown("""
-    <div style='
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 20px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-        color: white;
-    '>
-        <h2 style='margin: 0; color: white;'>🔧 Debug & Performance</h2>
-        <p style='margin: 5px 0 0 0; opacity: 0.9;'>System diagnostics and monitoring</p>
+    <div style="margin-top: 40px; margin-bottom: 30px;">
+        <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">🧾 Auto-Report</h2>
+        <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Generate a comprehensive Word document report with the latest IRAQAF bundle</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # Performance Metrics Card
-    with st.container():
-        st.markdown("""
-        <div style='
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        '>
-            <h3 style='margin: 0 0 12px 0; color: #1f2937;'>⚡ Performance Metrics</h3>
-        """, unsafe_allow_html=True)
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #FEF3C7 0%, #FEF9E7 100%); border: 2px solid #F59E0B; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 0.9rem; color: #92400E; font-weight: 600;">💾 Export comprehensive report</p>
+        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #B45309;">Includes GQAS score, module details, metrics, and timestamps. Requires `python-docx` package.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-        if PERFORMANCE_MONITORING:
-            monitor = get_monitor()
-            all_stats = monitor.get_all_stats()
+    card("🧾 Generate Word Report", "")
 
-            if all_stats:
-                # Show top 5 slowest operations
-                sorted_ops = sorted(
-                    all_stats.items(),
-                    key=lambda x: x[1].get("mean", 0),
-                    reverse=True
-                )[:5]
-
-                for op_name, stats in sorted_ops:
-                    mean = stats['mean']
-                    color = "#10b981" if mean < 0.5 else (
-                        "#f59e0b" if mean < 2.0 else "#ef4444")
-                    emoji = "🟢" if mean < 0.5 else (
-                        "🟡" if mean < 2.0 else "🔴")
-
-                    st.markdown(f"""
-                    <div style='
-                        display: flex;
-                        justify-content: space-between;
-                        padding: 8px;
-                        background: #f9fafb;
-                        border-radius: 6px;
-                        margin-bottom: 6px;
-                    '>
-                        <span style='color: #6b7280;'>{emoji} {op_name}</span>
-                        <span style='color: {color}; font-weight: 600;'>{mean:.3f}s</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-            else:
-                st.info("No performance data collected yet")
-        else:
-            st.warning("Performance monitoring is disabled")
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # System Info Card
-    with st.container():
-        st.markdown("""
-        <div style='
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        '>
-            <h3 style='margin: 0 0 12px 0; color: #1f2937;'>💾 System Info</h3>
-        """, unsafe_allow_html=True)
-
-        mem_usage = get_memory_usage()
-        if mem_usage:
-            rss_mb = mem_usage.get('rss_mb', 0)
-            mem_pct = mem_usage.get('percent', 0)
-
-            # Memory usage bar
-            mem_color = "#10b981" if mem_pct < 50 else (
-                "#f59e0b" if mem_pct < 80 else "#ef4444")
-            st.markdown(f"""
-            <div style='margin-bottom: 12px;'>
-                <div style='display: flex; justify-content: space-between; margin-bottom: 4px;'>
-                    <span style='color: #6b7280; font-size: 0.875rem;'>Memory Usage</span>
-                    <span style='color: {mem_color}; font-weight: 600;'>{rss_mb:.1f} MB ({mem_pct:.1f}%)</span>
-                </div>
-                <div style='
-                    width: 100%;
-                    height: 8px;
-                    background: #e5e7eb;
-                    border-radius: 4px;
-                    overflow: hidden;
-                '>
-                    <div style='
-                        width: {mem_pct}%;
-                        height: 100%;
-                        background: {mem_color};
-                        transition: width 0.3s ease;
-                    '></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-        # Reports loaded
-        st.markdown(f"""
-        <div style='
-            display: flex;
-            justify-content: space-between;
-            padding: 8px;
-            background: #f9fafb;
-            border-radius: 6px;
-            margin-bottom: 6px;
-        '>
-            <span style='color: #6b7280;'>📑 Reports loaded</span>
-            <span style='color: #1f2937; font-weight: 600;'>{len(files)}</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Modules found
-        modules_count = sum(1 for v in latest.values() if v)
-        st.markdown(f"""
-        <div style='
-            display: flex;
-            justify-content: space-between;
-            padding: 8px;
-            background: #f9fafb;
-            border-radius: 6px;
-            margin-bottom: 6px;
-        '>
-            <span style='color: #6b7280;'>📦 Modules found</span>
-            <span style='color: #1f2937; font-weight: 600;'>{modules_count}/6</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # Cache info
+    def build_docx(report_bundle: dict) -> bytes:
         try:
-            cache_info = st.cache_data.get_stats()
-            hit_rate = 0
-            if len(cache_info) > 0:
-                total_calls = sum(info.get("cache_misses", 0) + info.get("cache_hits", 0)
-                                  for info in cache_info if isinstance(info, dict))
-                total_hits = sum(info.get("cache_hits", 0)
-                                 for info in cache_info if isinstance(info, dict))
-                if total_calls > 0:
-                    hit_rate = (total_hits / total_calls) * 100
+            from docx import Document  # type: ignore
+        except Exception:
+            st.error("`python-docx` not installed. `pip install python-docx`")
+            return b""
+        doc = Document()
+        doc.add_heading("IRAQAF QA Report", level=1)
+        doc.add_paragraph(
+            "Automatically generated from the latest IRAQAF run.")
 
-            cache_color = "#10b981" if hit_rate > 50 else (
-                "#f59e0b" if hit_rate > 20 else "#ef4444")
-            st.markdown(f"""
-            <div style='
-                display: flex;
-                justify-content: space-between;
-                padding: 8px;
-                background: #f9fafb;
-                border-radius: 6px;
-            '>
-                <span style='color: #6b7280;'>💿 Cache hit rate</span>
-                <span style='color: {cache_color}; font-weight: 600;'>{hit_rate:.1f}%</span>
-            </div>
-            """, unsafe_allow_html=True)
-        except:
-            pass
+        agg_rep = report_bundle.get("AGG")
+        if agg_rep:
+            doc.add_heading("Aggregate (GQAS)", level=2)
+            doc.add_paragraph(f"GQAS: {agg_rep.get('gqas')}")
+            doc.add_paragraph(f"Floors met: {agg_rep.get('floors_met')}")
 
-        st.markdown("</div>", unsafe_allow_html=True)
+        doc.add_heading("Modules", level=2)
+        for m in ["L1", "L2", "L3", "L4", "L5"]:
+            rep_m = report_bundle.get(m)
+            if not rep_m:
+                continue
+            doc.add_heading(NAMES[m], level=3)
+            doc.add_paragraph(
+                f"Score: {rep_m['score']}  |  Band: {rep_m['band']}")
+            doc.add_paragraph("Metrics:")
+            doc.add_paragraph(json.dumps(rep_m.get("metrics", {}), indent=2))
 
-    # Actions Card
-    with st.container():
-        st.markdown("""
-        <div style='
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        '>
-            <h3 style='margin: 0 0 12px 0; color: #1f2937;'>🛠️ Actions</h3>
-        """, unsafe_allow_html=True)
+        bio = BytesIO()
+        doc.save(bio)
+        return bio.getvalue()
 
-        col1, col2 = st.columns(2)
+    dl_slot = st.empty()
+    if audit_mode:
+        st.warning("🔒 Report generation disabled in Audit Mode.")
+        st.button("Generate Word Report", key="gen_docx_disabled",
+                  disabled=_LOCK, width="stretch")
+    else:
+        gen_col, info_col = st.columns([2, 1], gap="small")
+        with gen_col:
+            if st.button("📄 Generate Word Report", key="gen_docx", width="stretch", type="primary"):
+                with st.spinner("🔨 Building document..."):
+                    payload = build_docx(latest)
+                    if payload:
+                        with dl_slot:
+                            st.download_button("⬇️ Download IRAQAF_Report.docx",
+                                               data=payload,
+                                               file_name="IRAQAF_Report.docx",
+                                               mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                               key="dl_docx",
+                                               width="stretch")
+                            st.success("✅ Report ready!")
+        with info_col:
+            st.caption("💡 Requires python-docx")
 
-        with col1:
-            if st.button("🗑️ Clear All Caches", width="stretch", key="debug_clear_cache"):
-                st.cache_data.clear()
-                st.success("✅ Caches cleared!")
+    close_card()
+
+    if not agg:
+        st.info("Run all modules to create an aggregate report.")
+
+    # =========================
+    #  📄 HTML/PDF Report Export
+    # =========================
+    card("📄 HTML/PDF Report Export")
+
+    def _render_html_report(bundle: dict) -> str:
+        gqas = (bundle.get("AGG") or {}).get("gqas")
+        rows = []
+        for mid in ["L1", "L2", "L3", "L4", "L5"]:
+            rep = bundle.get(mid) or {}
+            rows.append(
+                f"<tr><td>{mid}</td><td>{rep.get('score', '')}</td><td>{rep.get('band', '')}</td></tr>")
+        table = "\n".join(rows)
+        return f"""<!doctype html>
+    <html><head><meta charset="utf-8"><title>IRAQAF Report</title>
+    <style>
+    body{{font-family:Inter,Arial,sans-serif;margin:0;background:#f8fafc}}
+    .wrap{{max-width:960px;margin:24px auto;padding:0 16px}}
+    .card{{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:18px 16px;margin-bottom:12px}}
+    h1{{margin:0 0 8px}} h2{{margin:18px 0 8px}}
+    table{{border-collapse:collapse;width:100%}}
+    td,th{{border:1px solid #e5e7eb;padding:8px}} th{{background:#f6f9ff;text-align:left}}
+    .small{{color:#6b7280}}
+    </style></head><body>
+    <div class="wrap">
+      <div class="card">
+        <h1>IRAQAF Report</h1>
+        <div class="small">Generated {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M:%S')}</div>
+        <h2>Aggregate</h2>
+        <p><b>GQAS:</b> {gqas}</p>
+        <h2>Modules</h2>
+        <table><tr><th>Module</th><th>Score</th><th>Band</th></tr>
+        {table}
+        </table>
+      </div>
+    </div>
+    </body></html>"""
+
+    html_blob = _render_html_report(latest)
+    h1, h2 = st.columns([1, 1])
+    with h1:
+        st.download_button("📥 Download HTML report",
+                           data=html_blob.encode("utf-8"),
+                           file_name="IRAQAF_Report.html",
+                           mime="text/html",
+                           width="stretch",
+                           disabled=_LOCK)
+    with h2:
+        if st.checkbox("Also generate PDF (requires pdfkit + wkhtmltopdf)", value=False, disabled=_LOCK):
+            try:
+                import pdfkit
+                pdf_bytes = pdfkit.from_string(html_blob, False)
+                st.download_button("⬇📥 Download PDF report", data=pdf_bytes,
+                                   file_name="IRAQAF_Report.pdf", mime="application/pdf", disabled=_LOCK)
+            except Exception as e:
+                show_error_inline(e, "PDF export unavailable")
+
+    close_card()
+
+    # =========================
+    # 📡 Maturity Radar (L1–L5)
+    # =========================
+    card("📡 Maturity Radar (L1–L5)",
+         "Polar plot of module scores (0–100). Hover for values.")
+
+    radar_rep = {m: (latest.get(m) or {}).get("score")
+                 for m in ["L1", "L2", "L3", "L4", "L5"]}
+    if not any(isinstance(v, (int, float)) for v in radar_rep.values()):
+        st.info("No module scores available for radar.")
+    else:
+        # Prepare a closed polygon in polar coordinates, then project to XY.
+        names = ["L1", "L2", "L3", "L4", "L5"]
+        scores = [float(radar_rep.get(m) or 0.0) for m in names]
+        names.append(names[0])
+        scores.append(scores[0])  # close
+        n = len(names)
+        rad_df = pd.DataFrame({"module": names, "score": scores})
+        rad_df["idx"] = range(n)
+        rad_df["angle"] = rad_df["idx"] * (2*math.pi/(n-1))
+        rad_df["x"] = rad_df["score"] * np.cos(rad_df["angle"])
+        rad_df["y"] = rad_df["score"] * np.sin(rad_df["angle"])
+
+        # Soft background grid/rings
+        rings = pd.DataFrame({"r": [25, 50, 75, 100]})
+        ring_df = pd.concat(
+            [pd.DataFrame({"r": [r]*361, "deg": np.arange(361)})
+             for r in rings["r"]],
+            ignore_index=True
+        )
+        ring_df["rad"] = np.deg2rad(ring_df["deg"])
+        ring_df["x"] = ring_df["r"]*np.cos(ring_df["rad"])
+        ring_df["y"] = ring_df["r"]*np.sin(ring_df["rad"])
+
+        grid = alt.Chart(ring_df).mark_line(
+            opacity=0.15).encode(x="x:Q", y="y:Q")
+        poly = alt.Chart(rad_df).mark_area(opacity=0.15).encode(
+            x="x:Q", y="y:Q")
+        outline = alt.Chart(rad_df).mark_line(point=True).encode(
+            x="x:Q", y="y:Q", tooltip=["module", "score"])
+
+        # spokes with labels
+        spoke_base = pd.DataFrame(
+            {"module": names[:-1], "idx": range(len(names)-1)})
+        spoke_base["angle"] = spoke_base["idx"] * (2*math.pi/(len(names)-1))
+        spoke_base["x"] = 110*np.cos(spoke_base["angle"])
+        spoke_base["y"] = 110*np.sin(spoke_base["angle"])
+        label_layer = alt.Chart(spoke_base).mark_text(fontSize=12).encode(
+            x="x:Q", y="y:Q", text="module:N")
+
+        chart = (grid + poly + outline +
+                 label_layer).properties(width=420, height=420)
+        st.altair_chart(chart, width="content")
+
+    # ===== Framework Management (Sidebar) =====
+    with st.sidebar.expander("🏛️ Framework Configuration", expanded=False):
+        frameworks = get_available_frameworks()
+
+        if not frameworks:
+            st.warning("⚠️ No frameworks found!")
+            st.caption("Create `configs/trace_map.yaml` to define frameworks")
+        else:
+            st.markdown(f"**Active Frameworks:** {len(frameworks)}")
+
+            for fw in frameworks:
+                clauses = get_framework_clauses(fw)
+                with st.expander(f"{fw} ({len(clauses)})"):
+                    for clause in clauses:
+                        metrics = get_clause_metrics(fw, clause)
+                        st.markdown(f"**{clause}**")
+                        if metrics:
+                            for m in metrics:
+                                st.caption(f"  → {m}")
+                        else:
+                            st.caption("  (no metrics)")
+
+            st.markdown("---")
+
+            if st.button("🔄 Reload trace_map.yaml", key="sidebar_reload_trace"):
+                load_trace_map.clear()
+                get_available_frameworks.clear()
+                get_framework_clauses.clear()
+                get_clause_metrics.clear()
+                st.success("✅ Reloaded!")
                 st.rerun()
 
-        with col2:
-            if st.button("⤴️ Export Performance Log", width="stretch", key="debug_export_perf"):
-                if PERFORMANCE_MONITORING:
-                    monitor = get_monitor()
-                    perf_data = json.dumps(monitor.get_all_stats(), indent=2)
-                    st.download_button(
-                        "⤵️ Download performance.json",
-                        data=perf_data.encode("utf-8"),
-                        file_name=f"performance_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                        mime="application/json",
-                        key="debug_download_perf"
-                    )
-                else:
-                    st.warning("Performance monitoring not enabled")
+            st.caption("💡 Edit `configs/trace_map.yaml` to modify frameworks")
 
-        st.markdown("</div>", unsafe_allow_html=True)
+    if st.sidebar.checkbox("🔧 Show Debug Info", value=False, key="debug_mode"):
+        st.markdown("---")
 
-    # Security Card
-    with st.container():
+        # Styled container for debug info
         st.markdown("""
         <div style='
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: white;
         '>
-            <h3 style='margin: 0 0 12px 0; color: #1f2937;'>🔒 Security</h3>
+            <h2 style='margin: 0; color: white;'>🔧 Debug & Performance</h2>
+            <p style='margin: 5px 0 0 0; opacity: 0.9;'>System diagnostics and monitoring</p>
+        </div>
         """, unsafe_allow_html=True)
 
-        # Security status checks
-        security_checks = {
-            "Rate limiting": ("✅", "Active"),
-            "Input validation": ("✅", "Active"),
-            "File upload limits": ("✅", "50MB max"),
-            "Audit mode": ("✅" if get_audit_mode() else "⚪", "Enabled" if get_audit_mode() else "Disabled"),
-        }
+        # Performance Metrics Card
+        with st.container():
+            st.markdown("""
+            <div style='
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 16px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            '>
+                <h3 style='margin: 0 0 12px 0; color: #1f2937;'>⚡ Performance Metrics</h3>
+            """, unsafe_allow_html=True)
 
-        for check, (emoji, status) in security_checks.items():
-            status_color = "#10b981" if emoji == "✅" else "#9ca3af"
+            if PERFORMANCE_MONITORING:
+                monitor = get_monitor()
+                all_stats = monitor.get_all_stats()
+
+                if all_stats:
+                    # Show top 5 slowest operations
+                    sorted_ops = sorted(
+                        all_stats.items(),
+                        key=lambda x: x[1].get("mean", 0),
+                        reverse=True
+                    )[:5]
+
+                    for op_name, stats in sorted_ops:
+                        mean = stats['mean']
+                        color = "#10b981" if mean < 0.5 else (
+                            "#f59e0b" if mean < 2.0 else "#ef4444")
+                        emoji = "🟢" if mean < 0.5 else (
+                            "🟡" if mean < 2.0 else "🔴")
+
+                        st.markdown(f"""
+                        <div style='
+                            display: flex;
+                            justify-content: space-between;
+                            padding: 8px;
+                            background: #f9fafb;
+                            border-radius: 6px;
+                            margin-bottom: 6px;
+                        '>
+                            <span style='color: #6b7280;'>{emoji} {op_name}</span>
+                            <span style='color: {color}; font-weight: 600;'>{mean:.3f}s</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+                else:
+                    st.info("No performance data collected yet")
+            else:
+                st.warning("Performance monitoring is disabled")
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # System Info Card
+        with st.container():
+            st.markdown("""
+            <div style='
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 16px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            '>
+                <h3 style='margin: 0 0 12px 0; color: #1f2937;'>💾 System Info</h3>
+            """, unsafe_allow_html=True)
+
+            mem_usage = get_memory_usage()
+            if mem_usage:
+                rss_mb = mem_usage.get('rss_mb', 0)
+                mem_pct = mem_usage.get('percent', 0)
+
+                # Memory usage bar
+                mem_color = "#10b981" if mem_pct < 50 else (
+                    "#f59e0b" if mem_pct < 80 else "#ef4444")
+                st.markdown(f"""
+                <div style='margin-bottom: 12px;'>
+                    <div style='display: flex; justify-content: space-between; margin-bottom: 4px;'>
+                        <span style='color: #6b7280; font-size: 0.875rem;'>Memory Usage</span>
+                        <span style='color: {mem_color}; font-weight: 600;'>{rss_mb:.1f} MB ({mem_pct:.1f}%)</span>
+                    </div>
+                    <div style='
+                        width: 100%;
+                        height: 8px;
+                        background: #e5e7eb;
+                        border-radius: 4px;
+                        overflow: hidden;
+                    '>
+                        <div style='
+                            width: {mem_pct}%;
+                            height: 100%;
+                            background: {mem_color};
+                            transition: width 0.3s ease;
+                        '></div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Reports loaded
             st.markdown(f"""
             <div style='
                 display: flex;
@@ -8903,564 +8772,744 @@ if st.sidebar.checkbox("🔧 Show Debug Info", value=False, key="debug_mode"):
                 border-radius: 6px;
                 margin-bottom: 6px;
             '>
-                <span style='color: #6b7280;'>{check}</span>
-                <span style='color: {status_color}; font-weight: 600;'>{emoji} {status}</span>
+                <span style='color: #6b7280;'>📑 Reports loaded</span>
+                <span style='color: #1f2937; font-weight: 600;'>{len(files)}</span>
             </div>
             """, unsafe_allow_html=True)
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # ===== ADD VALIDATION FUNCTION HERE =====
-    # Trace Map Validation Card
-    with st.container():
-        st.markdown("""
-        <div style='
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        '>
-            <h3 style='margin: 0 0 12px 0; color: #1f2937;'>🔍 Trace Map Validation</h3>
-        """, unsafe_allow_html=True)
-
-        def validate_trace_map_structure():
-            """Validate trace_map.yaml structure and metric paths"""
-            trace_map = load_trace_map()
-
-            if not trace_map:
-                st.error("❌ trace_map.yaml not found or empty")
-                return False
-
-            issues = []
-            warnings = []
-            valid_modules = ["L1", "L2", "L3", "L4", "L5", "AGG"]
-
-            for framework, clauses in trace_map.items():
-                if not isinstance(clauses, dict):
-                    issues.append(f"❌ {framework}: clauses must be a dict")
-                    continue
-
-                for clause, metrics in clauses.items():
-                    if not isinstance(metrics, list):
-                        issues.append(
-                            f"❌ {framework}.{clause}: metrics must be a list")
-                        continue
-
-                    for metric in metrics:
-                        # Validate metric path format
-                        if isinstance(metric, str):
-                            parts = metric.split(".")
-                            if parts[0] not in valid_modules:
-                                warnings.append(
-                                    f"⚠️ {framework}.{clause}: '{metric}' - invalid module '{parts[0]}'")
-
-                            # Check if metric path exists in latest reports
-                            module_report = latest.get(parts[0])
-                            if module_report:
-                                # Try to navigate the path
-                                current = module_report
-                                valid_path = True
-                                for part in parts[1:]:
-                                    if isinstance(current, dict) and part in current:
-                                        current = current[part]
-                                    else:
-                                        valid_path = False
-                                        break
-
-                                if not valid_path:
-                                    warnings.append(
-                                        f"⚠️ {framework}.{clause}: '{metric}' - path not found in report")
-
-            # Display results
-            total_frameworks = len(trace_map)
-            total_clauses = sum(len(c) for c in trace_map.values())
-            total_metrics = sum(len(m) for c in trace_map.values()
-                                for m in c.values())
-
-            if issues:
-                st.error(f"❌ Found {len(issues)} critical issue(s):")
-                for issue in issues[:5]:
-                    st.caption(issue)
-                if len(issues) > 5:
-                    st.caption(f"... and {len(issues) - 5} more")
-                return False
-
-            if warnings:
-                st.warning(f"⚠️ Found {len(warnings)} warning(s):")
-                for warning in warnings[:5]:
-                    st.caption(warning)
-                if len(warnings) > 5:
-                    with st.expander(f"Show all {len(warnings)} warnings"):
-                        for warning in warnings:
-                            st.caption(warning)
-
-            # Success metrics
+            # Modules found
+            modules_count = sum(1 for v in latest.values() if v)
             st.markdown(f"""
             <div style='
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-                margin-top: 12px;
+                display: flex;
+                justify-content: space-between;
+                padding: 8px;
+                background: #f9fafb;
+                border-radius: 6px;
+                margin-bottom: 6px;
             '>
-                <div style='background: #f0fdf4; padding: 12px; border-radius: 6px; text-align: center;'>
-                    <div style='font-size: 1.5rem; font-weight: 700; color: #16a34a;'>{total_frameworks}</div>
-                    <div style='font-size: 0.875rem; color: #166534;'>Frameworks</div>
-                </div>
-                <div style='background: #f0f9ff; padding: 12px; border-radius: 6px; text-align: center;'>
-                    <div style='font-size: 1.5rem; font-weight: 700; color: #0284c7;'>{total_clauses}</div>
-                    <div style='font-size: 0.875rem; color: #075985;'>Clauses</div>
-                </div>
-                <div style='background: #fef3c7; padding: 12px; border-radius: 6px; text-align: center;'>
-                    <div style='font-size: 1.5rem; font-weight: 700; color: #d97706;'>{total_metrics}</div>
-                    <div style='font-size: 0.875rem; color: #92400e;'>Metrics</div>
-                </div>
+                <span style='color: #6b7280;'>📦 Modules found</span>
+                <span style='color: #1f2937; font-weight: 600;'>{modules_count}/6</span>
             </div>
             """, unsafe_allow_html=True)
 
-            if not warnings:
-                st.success("✅ trace_map.yaml is valid with no warnings!")
+            # Cache info
+            try:
+                cache_info = st.cache_data.get_stats()
+                hit_rate = 0
+                if len(cache_info) > 0:
+                    total_calls = sum(info.get("cache_misses", 0) + info.get("cache_hits", 0)
+                                      for info in cache_info if isinstance(info, dict))
+                    total_hits = sum(info.get("cache_hits", 0)
+                                     for info in cache_info if isinstance(info, dict))
+                    if total_calls > 0:
+                        hit_rate = (total_hits / total_calls) * 100
 
-            return True
+                cache_color = "#10b981" if hit_rate > 50 else (
+                    "#f59e0b" if hit_rate > 20 else "#ef4444")
+                st.markdown(f"""
+                <div style='
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 8px;
+                    background: #f9fafb;
+                    border-radius: 6px;
+                '>
+                    <span style='color: #6b7280;'>💿 Cache hit rate</span>
+                    <span style='color: {cache_color}; font-weight: 600;'>{hit_rate:.1f}%</span>
+                </div>
+                """, unsafe_allow_html=True)
+            except:
+                pass
 
-        # Run validation
-        validate_trace_map_structure()
+            st.markdown("</div>", unsafe_allow_html=True)
 
-        st.markdown("</div>", unsafe_allow_html=True)
-    # ===== END VALIDATION FUNCTION =====
+        # Actions Card
+        with st.container():
+            st.markdown("""
+            <div style='
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 16px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            '>
+                <h3 style='margin: 0 0 12px 0; color: #1f2937;'>🛠️ Actions</h3>
+            """, unsafe_allow_html=True)
 
-    # =============================================================================
-    #  🎯 SYSTEM INTEGRATION DASHBOARD SECTIONS
-    # =============================================================================
-    
-    if SYSTEM_INTEGRATION_AVAILABLE and st.session_state.get("system_integration_enabled"):
-        coordinator = st.session_state.get("system_coordinator")
-        monitor = st.session_state.get("realtime_monitor")
-        
-        if coordinator and monitor:
-            # Create tabs for system integration features
-            sys_tab1, sys_tab2, sys_tab3, sys_tab4, sys_tab5 = st.tabs([
-                "📊 System Status", 
-                "⚡ Real-Time Events",
-                "💾 Database Insights",
-                "🔍 Regulatory Tracking",
-                "📈 Compliance Trends"
-            ])
-            
-            # ===== TAB 1: SYSTEM STATUS =====
-            with sys_tab1:
-                st.markdown("### 📊 System Status Dashboard")
-                
-                try:
-                    status = coordinator.get_system_status()
-                    
-                    # Top metrics row
-                    col1, col2, col3, col4 = st.columns(4)
-                    
-                    with col1:
-                        st.metric(
-                            "📋 Total Changes",
-                            status.get("total_regulatory_changes", 0),
-                            delta="tracked",
-                            label_visibility="collapsed"
+            col1, col2 = st.columns(2)
+
+            with col1:
+                if st.button("🗑️ Clear All Caches", width="stretch", key="debug_clear_cache"):
+                    st.cache_data.clear()
+                    st.success("✅ Caches cleared!")
+                    st.rerun()
+
+            with col2:
+                if st.button("⤴️ Export Performance Log", width="stretch", key="debug_export_perf"):
+                    if PERFORMANCE_MONITORING:
+                        monitor = get_monitor()
+                        perf_data = json.dumps(
+                            monitor.get_all_stats(), indent=2)
+                        st.download_button(
+                            "⤵️ Download performance.json",
+                            data=perf_data.encode("utf-8"),
+                            file_name=f"performance_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                            mime="application/json",
+                            key="debug_download_perf"
                         )
-                    
-                    with col2:
-                        open_alerts = status.get("open_alerts", 0)
-                        alert_color = "🔴" if open_alerts > 5 else "🟡" if open_alerts > 0 else "🟢"
-                        st.metric(
-                            "⚠️ Open Alerts",
-                            open_alerts,
-                            delta=alert_color,
-                            label_visibility="collapsed"
-                        )
-                    
-                    with col3:
-                        avg_compliance = status.get("average_compliance_score", 0)
-                        st.metric(
-                            "✅ Avg Compliance",
-                            f"{avg_compliance:.1f}%",
-                            delta="current",
-                            label_visibility="collapsed"
-                        )
-                    
-                    with col4:
-                        pending_actions = status.get("pending_remediation_count", 0)
-                        st.metric(
-                            "🔧 Pending Actions",
-                            pending_actions,
-                            delta="to-do",
-                            label_visibility="collapsed"
-                        )
-                    
-                    st.markdown("---")
-                    
-                    # Database status
-                    st.markdown("**💾 Database Status**")
-                    db_col1, db_col2 = st.columns([2, 1])
-                    
-                    with db_col1:
-                        db_path = status.get("database_path", "Not available")
-                        st.caption(f"📁 Database: `{db_path}`")
-                        
-                        db_size = status.get("database_size_mb", 0)
-                        st.progress(min(db_size / 100, 1.0), text=f"Size: {db_size:.1f} MB / 100 MB")
-                    
-                    with db_col2:
-                        if st.button("🔄 Refresh Status", width="stretch", key="refresh_status"):
-                            st.rerun()
-                    
-                    st.markdown("---")
-                    
-                    # Monitor status
-                    st.markdown("**⚡ Real-Time Monitor**")
-                    monitor_col1, monitor_col2, monitor_col3 = st.columns(3)
-                    
-                    with monitor_col1:
-                        is_active = monitor.get_statistics().get("is_monitoring", False)
-                        status_text = "🟢 Active" if is_active else "🔴 Inactive"
-                        st.caption(f"Status: {status_text}")
-                    
-                    with monitor_col2:
-                        recent_events = len(monitor.get_recent_events(100))
-                        st.caption(f"Recent Events: {recent_events}")
-                    
-                    with monitor_col3:
-                        callbacks = monitor.get_statistics().get("callback_count", 0)
-                        st.caption(f"Active Callbacks: {callbacks}")
-                    
-                    # Event statistics
-                    st.markdown("**📊 Event Distribution**")
-                    event_stats = monitor.get_statistics().get("event_counts", {})
-                    
-                    if event_stats:
-                        events_df = pd.DataFrame([
-                            {"Event Type": k, "Count": v} 
-                            for k, v in sorted(event_stats.items(), key=lambda x: x[1], reverse=True)
-                        ])
-                        
-                        col_left, col_right = st.columns([1, 2])
-                        
-                        with col_left:
-                            st.dataframe(events_df, width="stretch", hide_index=True)
-                        
-                        with col_right:
-                            fig = alt.Chart(events_df).mark_bar().encode(
-                                x=alt.X("Count:Q", title="Count"),
-                                y=alt.Y("Event Type:N", sort="-x", title="Event Type"),
-                                color=alt.Color("Count:Q", scale=alt.Scale(scheme="blues"))
-                            ).properties(height=250).interactive()
-                            st.altair_chart(fig, width="stretch")
-                    
-                except Exception as e:
-                    st.error(f"❌ Error loading system status: {e}")
-                    logger.error(f"System status error: {e}", exc_info=True)
-            
-            # ===== TAB 2: REAL-TIME EVENTS =====
-            with sys_tab2:
-                st.markdown("### ⚡ Real-Time Events & Alerts")
-                
-                try:
-                    # Debug: Check monitor type
-                    monitor_type = type(monitor).__name__
-                    has_get_events = hasattr(monitor, 'get_recent_events')
-                    
-                    if not has_get_events:
-                        st.error(f"❌ Monitor does not support get_recent_events. Type: {monitor_type}")
                     else:
-                        # Event filters
-                        col1, col2, col3 = st.columns([2, 1, 1])
-                        
-                        with col1:
-                            event_filter = st.selectbox(
-                                "Filter by event type",
-                                options=["All Events"] + [str(e.value) if hasattr(e, 'value') else str(e) for e in EventType if EventType],
-                                key="event_type_filter"
-                            )
-                        
-                        with col2:
-                            max_events = st.number_input("Show last", min_value=5, max_value=100, value=20, key="max_events")
-                        
-                        with col3:
-                            if st.button("🔄 Refresh", width="stretch", key="refresh_events"):
-                                st.rerun()
-                        
-                        # Get recent events
-                        recent_events = monitor.get_recent_events(max_events)
-                        
-                        if recent_events:
-                            # Display events as timeline
-                            st.markdown("**📅 Event Timeline**")
-                            
-                            for event in reversed(recent_events):
-                                event_dict = event.to_dict() if hasattr(event, 'to_dict') else event
-                                
-                                # Color code by event type
-                                event_type = event_dict.get('event_type', 'UNKNOWN')
-                                color_map = {
-                                    'REGULATORY_CHANGE': '🔵',
-                                    'ALERT_TRIGGERED': '🔴',
-                                    'ALERT_RESOLVED': '🟢',
-                                    'REMEDIATION_PROGRESS': '🟡',
-                                    'COMPLIANCE_SCORE_UPDATE': '📊',
-                                    'THRESHOLD_BREACH': '⚠️',
-                                    'DEADLINE_WARNING': '⏰',
-                                    'SYSTEM_HEALTH_UPDATE': '💚',
-                                }
-                                
-                                emoji = color_map.get(event_type, '📌')
-                                timestamp = event_dict.get('timestamp', 'Unknown')
-                                
-                                with st.container(border=True):
-                                    col_emoji, col_content = st.columns([0.1, 1])
-                                    
-                                    with col_emoji:
-                                        st.write(emoji)
-                                    
-                                    with col_content:
-                                        st.markdown(f"**{event_type}** • `{timestamp}`")
-                                        
-                                        data = event_dict.get('data', {})
-                                        if isinstance(data, dict):
-                                            for key, val in list(data.items())[:3]:
-                                                st.caption(f"• {key}: {str(val)[:100]}")
+                        st.warning("Performance monitoring not enabled")
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # Security Card
+        with st.container():
+            st.markdown("""
+            <div style='
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 16px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            '>
+                <h3 style='margin: 0 0 12px 0; color: #1f2937;'>🔒 Security</h3>
+            """, unsafe_allow_html=True)
+
+            # Security status checks
+            security_checks = {
+                "Rate limiting": ("✅", "Active"),
+                "Input validation": ("✅", "Active"),
+                "File upload limits": ("✅", "50MB max"),
+                "Audit mode": ("✅" if get_audit_mode() else "⚪", "Enabled" if get_audit_mode() else "Disabled"),
+            }
+
+            for check, (emoji, status) in security_checks.items():
+                status_color = "#10b981" if emoji == "✅" else "#9ca3af"
+                st.markdown(f"""
+                <div style='
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 8px;
+                    background: #f9fafb;
+                    border-radius: 6px;
+                    margin-bottom: 6px;
+                '>
+                    <span style='color: #6b7280;'>{check}</span>
+                    <span style='color: {status_color}; font-weight: 600;'>{emoji} {status}</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # ===== ADD VALIDATION FUNCTION HERE =====
+        # Trace Map Validation Card
+        with st.container():
+            st.markdown("""
+            <div style='
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 16px;
+                margin-bottom: 16px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            '>
+                <h3 style='margin: 0 0 12px 0; color: #1f2937;'>🔍 Trace Map Validation</h3>
+            """, unsafe_allow_html=True)
+
+            def validate_trace_map_structure():
+                """Validate trace_map.yaml structure and metric paths"""
+                trace_map = load_trace_map()
+
+                if not trace_map:
+                    st.error("❌ trace_map.yaml not found or empty")
+                    return False
+
+                issues = []
+                warnings = []
+                valid_modules = ["L1", "L2", "L3", "L4", "L5", "AGG"]
+
+                for framework, clauses in trace_map.items():
+                    if not isinstance(clauses, dict):
+                        issues.append(f"❌ {framework}: clauses must be a dict")
+                        continue
+
+                    for clause, metrics in clauses.items():
+                        if not isinstance(metrics, list):
+                            issues.append(
+                                f"❌ {framework}.{clause}: metrics must be a list")
+                            continue
+
+                        for metric in metrics:
+                            # Validate metric path format
+                            if isinstance(metric, str):
+                                parts = metric.split(".")
+                                if parts[0] not in valid_modules:
+                                    warnings.append(
+                                        f"⚠️ {framework}.{clause}: '{metric}' - invalid module '{parts[0]}'")
+
+                                # Check if metric path exists in latest reports
+                                module_report = latest.get(parts[0])
+                                if module_report:
+                                    # Try to navigate the path
+                                    current = module_report
+                                    valid_path = True
+                                    for part in parts[1:]:
+                                        if isinstance(current, dict) and part in current:
+                                            current = current[part]
                                         else:
-                                            st.caption(str(data)[:200])
-                        else:
-                            st.info("No recent events recorded yet.")
-                    
-                except Exception as e:
-                    st.error(f"❌ Error loading events: {e}")
-                    logger.error(f"Events error: {e}", exc_info=True)
-            
-            # ===== TAB 3: DATABASE INSIGHTS =====
-            with sys_tab3:
-                st.markdown("### 💾 Database Insights")
-                
-                try:
-                    # Get compliance report with database data
-                    report = coordinator.get_compliance_report()
-                    
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.markdown("**📋 Compliance Scores by Framework**")
-                        
-                        scores_data = report.get("recent_scores", [])
-                        if scores_data:
-                            scores_df = pd.DataFrame([
-                                {
-                                    "Framework": s.get("framework", "Unknown"),
-                                    "System": s.get("system_name", "Unknown"),
-                                    "Score": f"{s.get('score', 0):.1f}%",
-                                    "Status": s.get("status", "Unknown")
-                                }
-                                for s in scores_data[:10]
-                            ])
-                            
-                            st.dataframe(scores_df, width="stretch", hide_index=True)
-                        else:
-                            st.info("No compliance scores recorded yet.")
-                    
-                    with col2:
-                        st.markdown("**🚨 Critical Issues**")
-                        
-                        alerts_data = report.get("critical_alerts", [])
-                        if alerts_data:
-                            for alert in alerts_data[:5]:
-                                with st.container(border=True):
-                                    st.markdown(f"🔴 **{alert.get('alert_type', 'Alert')}**")
-                                    st.caption(alert.get('message', 'No details'))
-                                    st.caption(f"Risk: {alert.get('risk_level', 'unknown')}")
-                        else:
-                            st.success("✅ No critical issues!")
-                    
-                    st.markdown("---")
-                    
-                    # Remediation tracking
-                    st.markdown("**🔧 Remediation Progress**")
-                    
-                    remediation_data = report.get("remediation_overview", {})
-                    
-                    rem_col1, rem_col2, rem_col3, rem_col4 = st.columns(4)
-                    
-                    with rem_col1:
-                        st.metric("Total", remediation_data.get("total", 0))
-                    
-                    with rem_col2:
-                        st.metric("Pending", remediation_data.get("pending", 0))
-                    
-                    with rem_col3:
-                        st.metric("In Progress", remediation_data.get("in_progress", 0))
-                    
-                    with rem_col4:
-                        st.metric("Completed", remediation_data.get("completed", 0))
-                    
-                    # Remediation chart
-                    rem_status_counts = {
-                        "Pending": remediation_data.get("pending", 0),
-                        "In Progress": remediation_data.get("in_progress", 0),
-                        "Completed": remediation_data.get("completed", 0),
-                        "Blocked": remediation_data.get("blocked", 0),
-                    }
-                    
-                    rem_df = pd.DataFrame([
-                        {"Status": k, "Count": v}
-                        for k, v in rem_status_counts.items() if v > 0
-                    ])
-                    
-                    if not rem_df.empty:
-                        fig = alt.Chart(rem_df).mark_pie(innerRadius=50).encode(
-                            theta=alt.Theta("Count:Q"),
-                            color=alt.Color("Status:N", scale=alt.Scale(scheme="set2"))
-                        ).properties(height=300)
-                        st.altair_chart(fig, width="stretch")
-                    
-                except Exception as e:
-                    st.error(f"❌ Error loading database insights: {e}")
-                    logger.error(f"Database insights error: {e}", exc_info=True)
-            
-            # ===== TAB 4: REGULATORY TRACKING =====
-            with sys_tab4:
-                st.markdown("### 🔍 Regulatory Tracking")
-                
-                try:
-                    # Get recent changes (with fallback)
+                                            valid_path = False
+                                            break
+
+                                    if not valid_path:
+                                        warnings.append(
+                                            f"⚠️ {framework}.{clause}: '{metric}' - path not found in report")
+
+                # Display results
+                total_frameworks = len(trace_map)
+                total_clauses = sum(len(c) for c in trace_map.values())
+                total_metrics = sum(len(m) for c in trace_map.values()
+                                    for m in c.values())
+
+                if issues:
+                    st.error(f"❌ Found {len(issues)} critical issue(s):")
+                    for issue in issues[:5]:
+                        st.caption(issue)
+                    if len(issues) > 5:
+                        st.caption(f"... and {len(issues) - 5} more")
+                    return False
+
+                if warnings:
+                    st.warning(f"⚠️ Found {len(warnings)} warning(s):")
+                    for warning in warnings[:5]:
+                        st.caption(warning)
+                    if len(warnings) > 5:
+                        with st.expander(f"Show all {len(warnings)} warnings"):
+                            for warning in warnings:
+                                st.caption(warning)
+
+                # Success metrics
+                st.markdown(f"""
+                <div style='
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 8px;
+                    margin-top: 12px;
+                '>
+                    <div style='background: #f0fdf4; padding: 12px; border-radius: 6px; text-align: center;'>
+                        <div style='font-size: 1.5rem; font-weight: 700; color: #16a34a;'>{total_frameworks}</div>
+                        <div style='font-size: 0.875rem; color: #166534;'>Frameworks</div>
+                    </div>
+                    <div style='background: #f0f9ff; padding: 12px; border-radius: 6px; text-align: center;'>
+                        <div style='font-size: 1.5rem; font-weight: 700; color: #0284c7;'>{total_clauses}</div>
+                        <div style='font-size: 0.875rem; color: #075985;'>Clauses</div>
+                    </div>
+                    <div style='background: #fef3c7; padding: 12px; border-radius: 6px; text-align: center;'>
+                        <div style='font-size: 1.5rem; font-weight: 700; color: #d97706;'>{total_metrics}</div>
+                        <div style='font-size: 0.875rem; color: #92400e;'>Metrics</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+                if not warnings:
+                    st.success("✅ trace_map.yaml is valid with no warnings!")
+
+                return True
+
+            # Run validation
+            validate_trace_map_structure()
+
+            st.markdown("</div>", unsafe_allow_html=True)
+        # ===== END VALIDATION FUNCTION =====
+
+        # =============================================================================
+        #  🎯 SYSTEM INTEGRATION DASHBOARD SECTIONS
+        # =============================================================================
+
+        if SYSTEM_INTEGRATION_AVAILABLE and st.session_state.get("system_integration_enabled"):
+            coordinator = st.session_state.get("system_coordinator")
+            monitor = st.session_state.get("realtime_monitor")
+
+            if coordinator and monitor:
+                # Create tabs for system integration features
+                sys_tab1, sys_tab2, sys_tab3, sys_tab4, sys_tab5 = st.tabs([
+                    "📊 System Status",
+                    "⚡ Real-Time Events",
+                    "💾 Database Insights",
+                    "🔍 Regulatory Tracking",
+                    "📈 Compliance Trends"
+                ])
+
+                # ===== TAB 1: SYSTEM STATUS =====
+                with sys_tab1:
+                    st.markdown("### 📊 System Status Dashboard")
+
                     try:
-                        changes = coordinator.get_recent_changes(days=30)
-                    except TypeError:
-                        # If days parameter not supported, try without it
-                        changes = coordinator.get_recent_changes()
-                    except:
-                        changes = []
-                    
-                    if changes:
-                        st.markdown(f"**📜 Recent Regulatory Changes ({len(changes)})**")
-                        
-                        for change in changes[:10]:
-                            with st.container(border=True):
-                                col_icon, col_content = st.columns([0.1, 1])
-                                
-                                with col_icon:
-                                    is_critical = change.get("is_critical", False)
-                                    st.write("🔴" if is_critical else "🔵")
-                                
-                                with col_content:
-                                    st.markdown(f"**{change.get('name', 'Change')}** • `{change.get('regulation_id', 'N/A')}`")
-                                    st.caption(f"Type: {change.get('change_type', 'Update')}")
-                                    st.caption(f"Impact: {change.get('impact_level', 'unknown')}")
-                                    
-                                    if change.get('description'):
-                                        st.caption(f"📝 {change.get('description', '')[:200]}")
-                                    
-                                    deadline = change.get('implementation_deadline', 'Not specified')
-                                    st.caption(f"⏰ Deadline: {deadline}")
-                    else:
-                        st.info("No recent regulatory changes.")
-                    
-                    st.markdown("---")
-                    
-                    # Log new regulatory change
-                    st.markdown("**📝 Log New Regulatory Change**")
-                    
-                    with st.form("new_regulatory_change", border=False):
-                        col1, col2 = st.columns(2)
-                        
+                        status = coordinator.get_system_status()
+
+                        # Top metrics row
+                        col1, col2, col3, col4 = st.columns(4)
+
                         with col1:
-                            reg_id = st.text_input("Regulation ID", placeholder="e.g., GDPR-2024-01")
-                            reg_name = st.text_input("Change Name", placeholder="e.g., Data Protection Update")
-                        
+                            st.metric(
+                                "📋 Total Changes",
+                                status.get("total_regulatory_changes", 0),
+                                delta="tracked",
+                                label_visibility="collapsed"
+                            )
+
                         with col2:
-                            change_type = st.selectbox("Change Type", ["Amendment", "New Regulation", "Clarification", "Enforcement"])
-                            impact_level = st.selectbox("Impact Level", ["Critical", "High", "Medium", "Low"])
-                        
-                        description = st.text_area("Description", placeholder="Describe the regulatory change...")
-                        deadline = st.date_input("Implementation Deadline")
-                        
-                        if st.form_submit_button("✅ Log Change", width="stretch"):
-                            try:
-                                coordinator.track_regulatory_change(
-                                    regulation_id=reg_id,
-                                    name=reg_name,
-                                    change_type=change_type,
-                                    description=description,
-                                    impact_level=impact_level,
-                                    affected_systems=["System1"],
-                                    implementation_deadline=str(deadline),
-                                    is_critical=(impact_level == "Critical")
-                                )
-                                st.success("✅ Regulatory change logged successfully!")
+                            open_alerts = status.get("open_alerts", 0)
+                            alert_color = "🔴" if open_alerts > 5 else "🟡" if open_alerts > 0 else "🟢"
+                            st.metric(
+                                "⚠️ Open Alerts",
+                                open_alerts,
+                                delta=alert_color,
+                                label_visibility="collapsed"
+                            )
+
+                        with col3:
+                            avg_compliance = status.get(
+                                "average_compliance_score", 0)
+                            st.metric(
+                                "✅ Avg Compliance",
+                                f"{avg_compliance:.1f}%",
+                                delta="current",
+                                label_visibility="collapsed"
+                            )
+
+                        with col4:
+                            pending_actions = status.get(
+                                "pending_remediation_count", 0)
+                            st.metric(
+                                "🔧 Pending Actions",
+                                pending_actions,
+                                delta="to-do",
+                                label_visibility="collapsed"
+                            )
+
+                        st.markdown("---")
+
+                        # Database status
+                        st.markdown("**💾 Database Status**")
+                        db_col1, db_col2 = st.columns([2, 1])
+
+                        with db_col1:
+                            db_path = status.get(
+                                "database_path", "Not available")
+                            st.caption(f"📁 Database: `{db_path}`")
+
+                            db_size = status.get("database_size_mb", 0)
+                            st.progress(min(db_size / 100, 1.0),
+                                        text=f"Size: {db_size:.1f} MB / 100 MB")
+
+                        with db_col2:
+                            if st.button("🔄 Refresh Status", width="stretch", key="refresh_status"):
                                 st.rerun()
-                            except Exception as e:
-                                st.error(f"Failed to log change: {e}")
-                    
-                except Exception as e:
-                    st.error(f"❌ Error loading regulatory tracking: {e}")
-                    logger.error(f"Regulatory tracking error: {e}", exc_info=True)
-            
-            # ===== TAB 5: COMPLIANCE TRENDS =====
-            with sys_tab5:
-                st.markdown("### 📈 Compliance Trends")
-                
-                try:
-                    # Get compliance scores over time (try all frameworks)
-                    scores = []
+
+                        st.markdown("---")
+
+                        # Monitor status
+                        st.markdown("**⚡ Real-Time Monitor**")
+                        monitor_col1, monitor_col2, monitor_col3 = st.columns(
+                            3)
+
+                        with monitor_col1:
+                            is_active = monitor.get_statistics().get("is_monitoring", False)
+                            status_text = "🟢 Active" if is_active else "🔴 Inactive"
+                            st.caption(f"Status: {status_text}")
+
+                        with monitor_col2:
+                            recent_events = len(monitor.get_recent_events(100))
+                            st.caption(f"Recent Events: {recent_events}")
+
+                        with monitor_col3:
+                            callbacks = monitor.get_statistics().get("callback_count", 0)
+                            st.caption(f"Active Callbacks: {callbacks}")
+
+                        # Event statistics
+                        st.markdown("**📊 Event Distribution**")
+                        event_stats = monitor.get_statistics().get("event_counts", {})
+
+                        if event_stats:
+                            events_df = pd.DataFrame([
+                                {"Event Type": k, "Count": v}
+                                for k, v in sorted(event_stats.items(), key=lambda x: x[1], reverse=True)
+                            ])
+
+                            col_left, col_right = st.columns([1, 2])
+
+                            with col_left:
+                                st.dataframe(
+                                    events_df, width="stretch", hide_index=True)
+
+                            with col_right:
+                                fig = alt.Chart(events_df).mark_bar().encode(
+                                    x=alt.X("Count:Q", title="Count"),
+                                    y=alt.Y("Event Type:N", sort="-x",
+                                            title="Event Type"),
+                                    color=alt.Color(
+                                        "Count:Q", scale=alt.Scale(scheme="blues"))
+                                ).properties(height=250).interactive()
+                                st.altair_chart(fig, width="stretch")
+
+                    except Exception as e:
+                        st.error(f"❌ Error loading system status: {e}")
+                        logger.error(
+                            f"System status error: {e}", exc_info=True)
+
+                # ===== TAB 2: REAL-TIME EVENTS =====
+                with sys_tab2:
+                    st.markdown("### ⚡ Real-Time Events & Alerts")
+
                     try:
-                        for framework in ["ISO27001", "SOC2", "HIPAA", "GDPR", "CCPA"]:
-                            try:
-                                fscores = coordinator.get_compliance_scores(framework=framework)
-                                if fscores:
-                                    scores.extend(fscores)
-                            except:
-                                pass
-                    except:
-                        scores = []
-                    
-                    if scores:
-                        scores_df = pd.DataFrame(scores)
-                        
-                        if "recorded_at" in scores_df.columns:
-                            scores_df["recorded_at"] = pd.to_datetime(scores_df["recorded_at"])
-                            scores_df = scores_df.sort_values("recorded_at")
-                        
-                        # Trend chart
-                        st.markdown("**📊 Compliance Score Trends**")
-                        
-                        if "framework" in scores_df.columns and "score" in scores_df.columns:
-                            fig = alt.Chart(scores_df).mark_line(point=True).encode(
-                                x=alt.X("recorded_at:T", title="Date") if "recorded_at" in scores_df.columns else alt.value(None),
-                                y=alt.Y("score:Q", title="Compliance Score (%)"),
-                                color=alt.Color("framework:N", title="Framework"),
-                                tooltip=["framework:N", "score:Q", "status:N"]
-                            ).properties(height=300).interactive()
-                            
+                        # Debug: Check monitor type
+                        monitor_type = type(monitor).__name__
+                        has_get_events = hasattr(monitor, 'get_recent_events')
+
+                        if not has_get_events:
+                            st.error(
+                                f"❌ Monitor does not support get_recent_events. Type: {monitor_type}")
+                        else:
+                            # Event filters
+                            col1, col2, col3 = st.columns([2, 1, 1])
+
+                            with col1:
+                                event_filter = st.selectbox(
+                                    "Filter by event type",
+                                    options=["All Events"] + [str(e.value) if hasattr(
+                                        e, 'value') else str(e) for e in EventType if EventType],
+                                    key="event_type_filter"
+                                )
+
+                            with col2:
+                                max_events = st.number_input(
+                                    "Show last", min_value=5, max_value=100, value=20, key="max_events")
+
+                            with col3:
+                                if st.button("🔄 Refresh", width="stretch", key="refresh_events"):
+                                    st.rerun()
+
+                            # Get recent events
+                            recent_events = monitor.get_recent_events(
+                                max_events)
+
+                            if recent_events:
+                                # Display events as timeline
+                                st.markdown("**📅 Event Timeline**")
+
+                                for event in reversed(recent_events):
+                                    event_dict = event.to_dict() if hasattr(event, 'to_dict') else event
+
+                                    # Color code by event type
+                                    event_type = event_dict.get(
+                                        'event_type', 'UNKNOWN')
+                                    color_map = {
+                                        'REGULATORY_CHANGE': '🔵',
+                                        'ALERT_TRIGGERED': '🔴',
+                                        'ALERT_RESOLVED': '🟢',
+                                        'REMEDIATION_PROGRESS': '🟡',
+                                        'COMPLIANCE_SCORE_UPDATE': '📊',
+                                        'THRESHOLD_BREACH': '⚠️',
+                                        'DEADLINE_WARNING': '⏰',
+                                        'SYSTEM_HEALTH_UPDATE': '💚',
+                                    }
+
+                                    emoji = color_map.get(event_type, '📌')
+                                    timestamp = event_dict.get(
+                                        'timestamp', 'Unknown')
+
+                                    with st.container(border=True):
+                                        col_emoji, col_content = st.columns(
+                                            [0.1, 1])
+
+                                        with col_emoji:
+                                            st.write(emoji)
+
+                                        with col_content:
+                                            st.markdown(
+                                                f"**{event_type}** • `{timestamp}`")
+
+                                            data = event_dict.get('data', {})
+                                            if isinstance(data, dict):
+                                                for key, val in list(data.items())[:3]:
+                                                    st.caption(
+                                                        f"• {key}: {str(val)[:100]}")
+                                            else:
+                                                st.caption(str(data)[:200])
+                            else:
+                                st.info("No recent events recorded yet.")
+
+                    except Exception as e:
+                        st.error(f"❌ Error loading events: {e}")
+                        logger.error(f"Events error: {e}", exc_info=True)
+
+                # ===== TAB 3: DATABASE INSIGHTS =====
+                with sys_tab3:
+                    st.markdown("### 💾 Database Insights")
+
+                    try:
+                        # Get compliance report with database data
+                        report = coordinator.get_compliance_report()
+
+                        col1, col2 = st.columns(2)
+
+                        with col1:
+                            st.markdown("**📋 Compliance Scores by Framework**")
+
+                            scores_data = report.get("recent_scores", [])
+                            if scores_data:
+                                scores_df = pd.DataFrame([
+                                    {
+                                        "Framework": s.get("framework", "Unknown"),
+                                        "System": s.get("system_name", "Unknown"),
+                                        "Score": f"{s.get('score', 0):.1f}%",
+                                        "Status": s.get("status", "Unknown")
+                                    }
+                                    for s in scores_data[:10]
+                                ])
+
+                                st.dataframe(
+                                    scores_df, width="stretch", hide_index=True)
+                            else:
+                                st.info("No compliance scores recorded yet.")
+
+                        with col2:
+                            st.markdown("**🚨 Critical Issues**")
+
+                            alerts_data = report.get("critical_alerts", [])
+                            if alerts_data:
+                                for alert in alerts_data[:5]:
+                                    with st.container(border=True):
+                                        st.markdown(
+                                            f"🔴 **{alert.get('alert_type', 'Alert')}**")
+                                        st.caption(
+                                            alert.get('message', 'No details'))
+                                        st.caption(
+                                            f"Risk: {alert.get('risk_level', 'unknown')}")
+                            else:
+                                st.success("✅ No critical issues!")
+
+                        st.markdown("---")
+
+                        # Remediation tracking
+                        st.markdown("**🔧 Remediation Progress**")
+
+                        remediation_data = report.get(
+                            "remediation_overview", {})
+
+                        rem_col1, rem_col2, rem_col3, rem_col4 = st.columns(4)
+
+                        with rem_col1:
+                            st.metric(
+                                "Total", remediation_data.get("total", 0))
+
+                        with rem_col2:
+                            st.metric(
+                                "Pending", remediation_data.get("pending", 0))
+
+                        with rem_col3:
+                            st.metric("In Progress", remediation_data.get(
+                                "in_progress", 0))
+
+                        with rem_col4:
+                            st.metric(
+                                "Completed", remediation_data.get("completed", 0))
+
+                        # Remediation chart
+                        rem_status_counts = {
+                            "Pending": remediation_data.get("pending", 0),
+                            "In Progress": remediation_data.get("in_progress", 0),
+                            "Completed": remediation_data.get("completed", 0),
+                            "Blocked": remediation_data.get("blocked", 0),
+                        }
+
+                        rem_df = pd.DataFrame([
+                            {"Status": k, "Count": v}
+                            for k, v in rem_status_counts.items() if v > 0
+                        ])
+
+                        if not rem_df.empty:
+                            fig = alt.Chart(rem_df).mark_pie(innerRadius=50).encode(
+                                theta=alt.Theta("Count:Q"),
+                                color=alt.Color(
+                                    "Status:N", scale=alt.Scale(scheme="set2"))
+                            ).properties(height=300)
                             st.altair_chart(fig, width="stretch")
-                        
-                        # Stats by framework
-                        st.markdown("**🏆 Framework Rankings**")
-                        
-                        framework_stats = scores_df.groupby("framework").agg({
-                            "score": ["mean", "max", "min", "count"]
-                        }).round(1)
-                        
-                        framework_stats.columns = ["Avg Score", "Max", "Min", "Records"]
-                        st.dataframe(framework_stats, width="stretch")
-                    else:
-                        st.info("No compliance scores recorded yet. Start logging scores to see trends.")
-                    
-                except Exception as e:
-                    st.error(f"❌ Error loading compliance trends: {e}")
-                    logger.error(f"Compliance trends error: {e}", exc_info=True)
-    
-    # Last refresh timestamp (existing code continues...)
-    st.markdown(f"""
-    <div style='
-        text-align: center;
-        color: #9ca3af;
-        font-size: 0.875rem;
-        padding: 12px;
-    '>
-        🔃 Last refresh: {st.session_state.get('last_refresh', 'Never')}
-    </div>
-    """, unsafe_allow_html=True)
+
+                    except Exception as e:
+                        st.error(f"❌ Error loading database insights: {e}")
+                        logger.error(
+                            f"Database insights error: {e}", exc_info=True)
+
+                # ===== TAB 4: REGULATORY TRACKING =====
+                with sys_tab4:
+                    st.markdown("### 🔍 Regulatory Tracking")
+
+                    try:
+                        # Get recent changes (with fallback)
+                        try:
+                            changes = coordinator.get_recent_changes(days=30)
+                        except TypeError:
+                            # If days parameter not supported, try without it
+                            changes = coordinator.get_recent_changes()
+                        except:
+                            changes = []
+
+                        if changes:
+                            st.markdown(
+                                f"**📜 Recent Regulatory Changes ({len(changes)})**")
+
+                            for change in changes[:10]:
+                                with st.container(border=True):
+                                    col_icon, col_content = st.columns(
+                                        [0.1, 1])
+
+                                    with col_icon:
+                                        is_critical = change.get(
+                                            "is_critical", False)
+                                        st.write("🔴" if is_critical else "🔵")
+
+                                    with col_content:
+                                        st.markdown(
+                                            f"**{change.get('name', 'Change')}** • `{change.get('regulation_id', 'N/A')}`")
+                                        st.caption(
+                                            f"Type: {change.get('change_type', 'Update')}")
+                                        st.caption(
+                                            f"Impact: {change.get('impact_level', 'unknown')}")
+
+                                        if change.get('description'):
+                                            st.caption(
+                                                f"📝 {change.get('description', '')[:200]}")
+
+                                        deadline = change.get(
+                                            'implementation_deadline', 'Not specified')
+                                        st.caption(f"⏰ Deadline: {deadline}")
+                        else:
+                            st.info("No recent regulatory changes.")
+
+                        st.markdown("---")
+
+                        # Log new regulatory change
+                        st.markdown("**📝 Log New Regulatory Change**")
+
+                        with st.form("new_regulatory_change", border=False):
+                            col1, col2 = st.columns(2)
+
+                            with col1:
+                                reg_id = st.text_input(
+                                    "Regulation ID", placeholder="e.g., GDPR-2024-01")
+                                reg_name = st.text_input(
+                                    "Change Name", placeholder="e.g., Data Protection Update")
+
+                            with col2:
+                                change_type = st.selectbox(
+                                    "Change Type", ["Amendment", "New Regulation", "Clarification", "Enforcement"])
+                                impact_level = st.selectbox(
+                                    "Impact Level", ["Critical", "High", "Medium", "Low"])
+
+                            description = st.text_area(
+                                "Description", placeholder="Describe the regulatory change...")
+                            deadline = st.date_input("Implementation Deadline")
+
+                            if st.form_submit_button("✅ Log Change", width="stretch"):
+                                try:
+                                    coordinator.track_regulatory_change(
+                                        regulation_id=reg_id,
+                                        name=reg_name,
+                                        change_type=change_type,
+                                        description=description,
+                                        impact_level=impact_level,
+                                        affected_systems=["System1"],
+                                        implementation_deadline=str(deadline),
+                                        is_critical=(
+                                            impact_level == "Critical")
+                                    )
+                                    st.success(
+                                        "✅ Regulatory change logged successfully!")
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error(f"Failed to log change: {e}")
+
+                    except Exception as e:
+                        st.error(f"❌ Error loading regulatory tracking: {e}")
+                        logger.error(
+                            f"Regulatory tracking error: {e}", exc_info=True)
+
+                # ===== TAB 5: COMPLIANCE TRENDS =====
+                with sys_tab5:
+                    st.markdown("### 📈 Compliance Trends")
+
+                    try:
+                        # Get compliance scores over time (try all frameworks)
+                        scores = []
+                        try:
+                            for framework in ["ISO27001", "SOC2", "HIPAA", "GDPR", "CCPA"]:
+                                try:
+                                    fscores = coordinator.get_compliance_scores(
+                                        framework=framework)
+                                    if fscores:
+                                        scores.extend(fscores)
+                                except:
+                                    pass
+                        except:
+                            scores = []
+
+                        if scores:
+                            scores_df = pd.DataFrame(scores)
+
+                            if "recorded_at" in scores_df.columns:
+                                scores_df["recorded_at"] = pd.to_datetime(
+                                    scores_df["recorded_at"])
+                                scores_df = scores_df.sort_values(
+                                    "recorded_at")
+
+                            # Trend chart
+                            st.markdown("**📊 Compliance Score Trends**")
+
+                            if "framework" in scores_df.columns and "score" in scores_df.columns:
+                                fig = alt.Chart(scores_df).mark_line(point=True).encode(
+                                    x=alt.X(
+                                        "recorded_at:T", title="Date") if "recorded_at" in scores_df.columns else alt.value(None),
+                                    y=alt.Y(
+                                        "score:Q", title="Compliance Score (%)"),
+                                    color=alt.Color(
+                                        "framework:N", title="Framework"),
+                                    tooltip=["framework:N",
+                                             "score:Q", "status:N"]
+                                ).properties(height=300).interactive()
+
+                                st.altair_chart(fig, width="stretch")
+
+                            # Stats by framework
+                            st.markdown("**🏆 Framework Rankings**")
+
+                            framework_stats = scores_df.groupby("framework").agg({
+                                "score": ["mean", "max", "min", "count"]
+                            }).round(1)
+
+                            framework_stats.columns = [
+                                "Avg Score", "Max", "Min", "Records"]
+                            st.dataframe(framework_stats, width="stretch")
+                        else:
+                            st.info(
+                                "No compliance scores recorded yet. Start logging scores to see trends.")
+
+                    except Exception as e:
+                        st.error(f"❌ Error loading compliance trends: {e}")
+                        logger.error(
+                            f"Compliance trends error: {e}", exc_info=True)
+
+        # Last refresh timestamp (existing code continues...)
+        st.markdown(f"""
+        <div style='
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+            padding: 12px;
+        '>
+            🔃 Last refresh: {st.session_state.get('last_refresh', 'Never')}
+        </div>
+        """, unsafe_allow_html=True)
