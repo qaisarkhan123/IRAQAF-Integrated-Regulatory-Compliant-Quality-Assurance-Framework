@@ -8218,19 +8218,39 @@ with evidence_tabs[0]:
 
     st.divider()
 
-    # Module selection
+    # Module selection - Improved layout with checkboxes
     st.markdown("<h4 style='margin: 16px 0 12px 0; color: #1F2937; font-weight: 700;'>📌 Assign to Modules</h4>",
                 unsafe_allow_html=True)
     st.caption("Select which compliance modules this evidence applies to")
 
-    modules_to_pin = st.multiselect(
-        "Modules",
-        options=list(MODULE_LABELS.keys()),
-        default=["L1"],
-        format_func=lambda m: f"🏛️ {m} • {MODULE_LABELS[m]}",
-        disabled=_LOCK,
-        label_visibility="collapsed"
-    )
+    # Create a more visual module selector with checkboxes
+    col1, col2 = st.columns(2)
+
+    modules_selected = []
+
+    with col1:
+        st.markdown("**Governance & Compliance**")
+        if st.checkbox("🏛️ L1 • Governance & Regulatory", value=True, key="mod_l1"):
+            modules_selected.append("L1")
+        if st.checkbox("🔐 L2 • Privacy & Security", value=False, key="mod_l2"):
+            modules_selected.append("L2")
+
+    with col2:
+        st.markdown("**Fairness & Operations**")
+        if st.checkbox("⚖️ L3 • Fairness & Ethics", value=False, key="mod_l3"):
+            modules_selected.append("L3")
+        if st.checkbox("🔍 L4 • Explainability & Transparency", value=False, key="mod_l4"):
+            modules_selected.append("L4")
+
+    st.markdown("")
+    if st.checkbox("📊 L5 • Operations & Monitoring", value=False, key="mod_l5"):
+        modules_selected.append("L5")
+
+    modules_to_pin = modules_selected
+
+    if not modules_to_pin:
+        st.warning("⚠️ Select at least one module for evidence assignment")
+        modules_to_pin = ["L1"]  # Fallback
 
     st.divider()
 
