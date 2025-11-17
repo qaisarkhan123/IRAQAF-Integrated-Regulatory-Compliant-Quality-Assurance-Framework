@@ -94,24 +94,22 @@ def render_login_page():
     col1, col2, col3 = st.columns([1, 1.5, 1])
 
     with col2:
-        # Header + Features Combined
+        # Header
         st.markdown("""
         <div class='login-container'>
             <div class='login-header'>
                 <h1>🔐 IRAQAF Dashboard</h1>
                 <p>Integrated Regulatory & Compliance Quality Assurance Framework</p>
             </div>
-            
-            <div style='margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;'>
-                <h3 style='text-align: center; color: #333; margin: 15px 0;'>✨ Key Features</h3>
-            </div>
         </div>
         """, unsafe_allow_html=True)
-        
+
+        # Features Section Header
+        st.markdown("<div style='text-align: center; margin: 20px 0 15px 0; padding-top: 15px; border-top: 1px solid #eee;'><h3 style='color: #333;'>✨ Key Features</h3></div>", unsafe_allow_html=True)
+
         # Feature cards using Streamlit columns
-        col1, col2 = st.columns(2)
-        
-        with col1:
+        feat_col1, feat_col2 = st.columns(2)
+        with feat_col1:
             st.markdown("""
             <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
                 <div style='font-size: 24px; margin-bottom: 5px;'>📊</div>
@@ -119,8 +117,7 @@ def render_login_page():
                 <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Comprehensive security scoring</p>
             </div>
             """, unsafe_allow_html=True)
-        
-        with col2:
+        with feat_col2:
             st.markdown("""
             <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
                 <div style='font-size: 24px; margin-bottom: 5px;'>🔒</div>
@@ -128,10 +125,9 @@ def render_login_page():
                 <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Admin, Analyst, Viewer roles</p>
             </div>
             """, unsafe_allow_html=True)
-        
-        col3, col4 = st.columns(2)
-        
-        with col3:
+
+        feat_col3, feat_col4 = st.columns(2)
+        with feat_col3:
             st.markdown("""
             <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
                 <div style='font-size: 24px; margin-bottom: 5px;'>📈</div>
@@ -139,8 +135,7 @@ def render_login_page():
                 <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Live security metrics</p>
             </div>
             """, unsafe_allow_html=True)
-        
-        with col4:
+        with feat_col4:
             st.markdown("""
             <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
                 <div style='font-size: 24px; margin-bottom: 5px;'>🛡️</div>
@@ -149,9 +144,8 @@ def render_login_page():
             </div>
             """, unsafe_allow_html=True)
 
-        # Login Form
-        st.markdown("<div class='login-container' style='margin-top: 20px; padding-top: 20px;'>",
-                    unsafe_allow_html=True)
+        # Login Form Container
+        st.markdown("<div style='margin-top: 25px;'>", unsafe_allow_html=True)
 
         # Login / Sign Up Tabs
         tab_login, tab_signup = st.tabs(["🔓 Login", "📝 Sign Up"])
