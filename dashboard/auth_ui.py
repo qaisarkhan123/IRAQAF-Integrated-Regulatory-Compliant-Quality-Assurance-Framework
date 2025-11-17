@@ -104,31 +104,50 @@ def render_login_page():
             
             <div style='margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;'>
                 <h3 style='text-align: center; color: #333; margin: 15px 0;'>✨ Key Features</h3>
-                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 12px;'>
-                    <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
-                        <div style='font-size: 24px; margin-bottom: 5px;'>📊</div>
-                        <strong style='font-size: 13px; color: #333;'>11-Category Assessment</strong>
-                        <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Comprehensive security scoring</p>
-                    </div>
-                    <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
-                        <div style='font-size: 24px; margin-bottom: 5px;'>🔒</div>
-                        <strong style='font-size: 13px; color: #333;'>Role-Based Access</strong>
-                        <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Admin, Analyst, Viewer roles</p>
-                    </div>
-                    <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
-                        <div style='font-size: 24px; margin-bottom: 5px;'>📈</div>
-                        <strong style='font-size: 13px; color: #333;'>Real-Time Monitoring</strong>
-                        <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Live security metrics</p>
-                    </div>
-                    <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
-                        <div style='font-size: 24px; margin-bottom: 5px;'>🛡️</div>
-                        <strong style='font-size: 13px; color: #333;'>L2 Privacy Monitor</strong>
-                        <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Advanced threat detection</p>
-                    </div>
-                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
+        
+        # Feature cards using Streamlit columns
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("""
+            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                <div style='font-size: 24px; margin-bottom: 5px;'>📊</div>
+                <strong style='font-size: 13px; color: #333;'>11-Category Assessment</strong>
+                <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Comprehensive security scoring</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col2:
+            st.markdown("""
+            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                <div style='font-size: 24px; margin-bottom: 5px;'>🔒</div>
+                <strong style='font-size: 13px; color: #333;'>Role-Based Access</strong>
+                <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Admin, Analyst, Viewer roles</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        col3, col4 = st.columns(2)
+        
+        with col3:
+            st.markdown("""
+            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                <div style='font-size: 24px; margin-bottom: 5px;'>📈</div>
+                <strong style='font-size: 13px; color: #333;'>Real-Time Monitoring</strong>
+                <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Live security metrics</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            st.markdown("""
+            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                <div style='font-size: 24px; margin-bottom: 5px;'>🛡️</div>
+                <strong style='font-size: 13px; color: #333;'>L2 Privacy Monitor</strong>
+                <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Advanced threat detection</p>
+            </div>
+            """, unsafe_allow_html=True)
 
         # Login Form
         st.markdown("<div class='login-container' style='margin-top: 20px; padding-top: 20px;'>",
@@ -240,12 +259,14 @@ def render_login_page():
 
                         if success:
                             st.success(f"✅ {message} You can now login!")
-                            st.info("Account created successfully. Please login with your credentials.")
+                            st.info(
+                                "Account created successfully. Please login with your credentials.")
                         else:
                             st.error(f"❌ {message}")
 
             # Demo Credentials
-            st.markdown("<div class='divider' style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+            st.markdown(
+                "<div class='divider' style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
         with st.expander("📋 Demo Credentials & Info"):
             st.markdown("""
