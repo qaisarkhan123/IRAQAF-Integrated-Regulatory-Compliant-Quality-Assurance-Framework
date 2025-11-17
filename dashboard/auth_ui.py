@@ -59,6 +59,34 @@ def render_login_page():
         border-radius: 3px;
         font-weight: 600;
     }
+    .features-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    .feature-card {
+        background: #f8f9ff;
+        border: 1px solid #e5e7ff;
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+        font-size: 13px;
+    }
+    .feature-icon {
+        font-size: 24px;
+        margin-bottom: 5px;
+    }
+    .security-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        display: inline-block;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 15px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -76,8 +104,51 @@ def render_login_page():
         </div>
         """, unsafe_allow_html=True)
 
+        # Key Features Section
+        st.markdown("""
+        <div class='login-container' style='margin-top: 15px; padding: 20px; background: #f8f9ff; border: 1px solid #e5e7ff;'>
+            <h3 style='text-align: center; color: #333; margin-top: 0; margin-bottom: 15px;'>✨ Key Features</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Feature cards using Streamlit columns
+        feat_col1, feat_col2 = st.columns(2)
+        with feat_col1:
+            st.markdown("""
+            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 10px;'>
+                <div style='font-size: 24px; margin-bottom: 5px;'>📊</div>
+                <strong style='font-size: 14px;'>11-Category Assessment</strong>
+                <p style='margin: 5px 0 0 0; font-size: 12px; color: #666;'>Comprehensive security scoring</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                <div style='font-size: 24px; margin-bottom: 5px;'>📈</div>
+                <strong style='font-size: 14px;'>Real-Time Monitoring</strong>
+                <p style='margin: 5px 0 0 0; font-size: 12px; color: #666;'>Live security metrics</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with feat_col2:
+            st.markdown("""
+            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 10px;'>
+                <div style='font-size: 24px; margin-bottom: 5px;'>🔒</div>
+                <strong style='font-size: 14px;'>Role-Based Access</strong>
+                <p style='margin: 5px 0 0 0; font-size: 12px; color: #666;'>Admin, Analyst, Viewer roles</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("""
+            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                <div style='font-size: 24px; margin-bottom: 5px;'>🛡️</div>
+                <strong style='font-size: 14px;'>L2 Privacy Monitor</strong>
+                <p style='margin: 5px 0 0 0; font-size: 12px; color: #666;'>Advanced threat detection</p>
+            </div>
+            """, unsafe_allow_html=True)
+
         # Login Form
-        st.markdown("<div class='login-container' style='margin-top: -20px; padding-top: 20px;'>", 
+        st.markdown("<div class='login-container' style='margin-top: 20px; padding-top: 20px;'>",
                     unsafe_allow_html=True)
 
         with st.form("login_form", clear_on_submit=False):
@@ -111,7 +182,8 @@ def render_login_page():
                 else:
                     # Authenticate
                     auth_manager = AuthenticationManager()
-                    success, user = auth_manager.authenticate(username, password)
+                    success, user = auth_manager.authenticate(
+                        username, password)
 
                     if success:
                         # Store user in session
@@ -124,20 +196,44 @@ def render_login_page():
                         time.sleep(1)
                         st.rerun()
                     else:
-                        st.error("❌ Invalid username or password. Please try again.")
+                        st.error(
+                            "❌ Invalid username or password. Please try again.")
 
             # Demo Credentials
             st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 
-            with st.expander("📋 Demo Credentials"):
+            with st.expander("📋 Demo Credentials & Info"):
                 st.markdown("""
-                **Admin Account:**
-                - Username: `admin`
-                - Password: `admin_default_123`
-
-                **Create new accounts:**
-                You can create new user accounts from the Settings page after logging in.
+                ### 🎯 Quick Start
+                
+                **Admin Account (Full Access):**
+                ```
+                Username: admin
+                Password: admin_default_123
+                ```
+                
+                **Features Available:**
+                - 📊 View 11-category security assessment
+                - 📈 Analyze 30-day trends & metrics
+                - 🛡️ Monitor real-time alerts
+                - 📋 Compliance framework tracking (GDPR, HIPAA, PCI-DSS, ISO 27001, NIST CSF)
+                - 🔐 L2 Privacy/Security Monitor
+                - 👥 Role-based access control
+                
+                **Role Permissions:**
+                - **Admin:** Full access to all features and settings
+                - **Analyst:** Full access to monitoring and reporting
+                - **Viewer:** Read-only access to reports and metrics
+                
+                **💡 Tip:** Create additional user accounts from the Settings page after logging in.
                 """)
+
+            # Security Badge
+            st.markdown("""
+            <div style='text-align: center; margin-top: 20px;'>
+                <div class='security-badge'>🔐 Enterprise-Grade Security</div>
+            </div>
+            """, unsafe_allow_html=True)
 
             st.markdown("</div>", unsafe_allow_html=True)
 
@@ -178,7 +274,8 @@ def render_user_info():
             st.sidebar.markdown(f"**Username:** {user.get('username', 'N/A')}")
             st.sidebar.markdown(f"**Email:** {user.get('email', 'N/A')}")
             st.sidebar.markdown(f"**Role:** {user.get('role', 'N/A')}")
-            st.sidebar.markdown(f"**Permissions:** {', '.join(permissions) if permissions else 'None'}")
+            st.sidebar.markdown(
+                f"**Permissions:** {', '.join(permissions) if permissions else 'None'}")
 
 
 def check_authentication():
