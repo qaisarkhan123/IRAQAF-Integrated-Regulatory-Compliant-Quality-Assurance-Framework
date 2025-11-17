@@ -67,6 +67,16 @@ except ImportError:
     L2_MONITOR_AVAILABLE = False
     show_l2_privacy_security_monitor = None
 
+# Beautiful Authentication UI
+try:
+    from auth_ui import check_authentication, render_logout_button, render_user_info
+    AUTH_UI_AVAILABLE = True
+except ImportError:
+    AUTH_UI_AVAILABLE = False
+    def check_authentication(): return True
+    def render_logout_button(): pass
+    def render_user_info(): pass
+
 # System Integration Imports - Placeholder (will be loaded after setup_paths)
 SYSTEM_INTEGRATION_AVAILABLE = False
 get_coordinator = None
@@ -794,6 +804,25 @@ def safe_json_loads(json_string: str, max_size_mb: int = 10) -> tuple[bool, Any,
 
 
 st.set_page_config(page_title="IRAQAF Dashboard", layout="wide")
+
+# ============================================================================
+# AUTHENTICATION GATE - Check authentication FIRST before showing dashboard
+# ============================================================================
+if AUTH_UI_AVAILABLE:
+    # Check if user is authenticated
+    if not check_authentication():
+        # User is not authenticated, show login page only
+        st.stop()
+
+# User is now authenticated - render dashboard
+# Add sidebar controls
+with st.sidebar:
+    st.markdown("---")
+    if AUTH_UI_AVAILABLE:
+        render_user_info()
+        st.markdown("---")
+        render_logout_button()
+    st.markdown("---")
 
 
 # ============================================================================
