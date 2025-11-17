@@ -1,97 +1,220 @@
-# L2 Privacy/Security Monitor - Quick Start
+#  Quick Reference - IRAQAF Commands
 
-Your workspace is now clean and minimal with the L2 security monitor ready to use.
+## Dashboard
 
-## Running the System
-
-### Option 1: Test the 11 Categories
-```bash
-python test_11_categories.py
-```
-Shows all 11 security categories working with scores and compliance status.
-
-### Option 2: Run the Main Dashboard
+### Start Dashboard
 ```bash
 streamlit run dashboard/app.py
 ```
-Launches the full IRAQAF dashboard (includes L2 monitor).
 
-### Option 3: Run L2 Security Monitor Only
+### Start on Different Port
 ```bash
-streamlit run dashboard/l2_privacy_security_monitor.py
+streamlit run dashboard/app.py --server.port=8502
 ```
-Launches just the L2 Privacy/Security Monitor dashboard.
 
-## Core Files
+### Debug Mode
+```bash
+streamlit run dashboard/app.py --logger.level=debug
+```
 
-**Essential Files:**
-- `dashboard/security_monitor.py` - 11-category security engine
-- `dashboard/l2_privacy_security_monitor.py` - Dashboard UI
-- `dashboard/app.py` - Full application entry point
-- `test_11_categories.py` - Verification script
-- `requirements.txt` - All dependencies
+## Modules
 
-**Configuration:**
-- `configs/` - Framework configurations
-- `configs/policies.yaml` - Security policies
-- `configs/compliance_map.yaml` - Compliance mappings
+### L1 - Governance & Regulatory
+```bash
+python -m cli.iraqaf_cli run --module L1 --config configs/governance.yaml
+```
 
-**Data:**
-- `data/auth/` - User authentication data
-- `data/security_scans/` - Security scan results
-- `iraqaf_compliance.db` - Compliance database
+### L2 - Privacy & Security
+```bash
+python -m cli.iraqaf_cli run --module L2 --config configs/security.yaml
+```
 
-## Security Categories (11 Total)
+### L3 - Fairness
+```bash
+python -m cli.iraqaf_cli run --module L3 --config configs/fairness.yaml
+```
 
-1. **Encryption** (7%) - TLS, AES-256, certificate validation
-2. **Authentication** (8%) - MFA, password policy, session management
-3. **Data Protection** (5%) - Classification, masking, backup encryption
-4. **Access Control** (5%) - RBAC, least privilege, audit logging
-5. **Vulnerability** (4%) - Critical vulnerabilities, patching SLA
-6. **Compliance** (1%) - Regulatory alignment
-7. **Incident Response** (12%) - IR plan, RTO/RPO, forensics
-8. **Monitoring & Logging** (10%) - SIEM, log retention, alerting
-9. **Network Security** (10%) - DDoS, WAF, segmentation, zero-trust
-10. **Security Testing** (10%) - Pentests, SAST/DAST, supply chain
-11. **Secrets Management** (8%) - Vault, hardcoded secrets, rotation
+### L4 - Explainability
+```bash
+python -m cli.iraqaf_cli run --module L4 --config configs/explainability.yaml
+```
 
-## Compliance Frameworks Supported
+### L5 - Operations
+```bash
+python -m cli.iraqaf_cli run --module L5 --config configs/operations.yaml
+```
 
+### Run All Modules
+```bash
+python -m cli.iraqaf_cli run-all --config configs/project.yaml
+```
+
+## Data & Reports
+
+### Generate Evidence Report
+```bash
+# Navigate to dashboard  Evidence Management  Sync & Export
+# Select format (CSV/PDF/JSON/Word) and download
+```
+
+### Access Reports Directory
+```bash
+# Reports are saved in:
+ls reports/
+
+# Filter by date:
+ls reports/L1-*.json
+```
+
+### Export Formats
+
+| Format | Usage | Command |
+|--------|-------|---------|
+| **CSV** | Tabular data | Dashboard or CLI |
+| **PDF** | Professional reports | Dashboard |
+| **JSON** | Machine-readable | CLI or Dashboard |
+| **Word** | Formatted documents | Dashboard |
+
+## Installation & Setup
+
+### Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### Verify Installation
+```bash
+python -c "import dashboard; print(' Setup complete')"
+```
+
+### Update Dependencies
+```bash
+pip install -r requirements.txt --upgrade
+```
+
+## Testing
+
+### Run Unit Tests
+```bash
+pytest tests/ -v
+```
+
+### Test Specific Module
+```bash
+pytest tests/test_l2_security.py -v
+```
+
+### Run with Coverage
+```bash
+pytest tests/ --cov=dashboard --cov-report=html
+```
+
+## Database
+
+### Reset Database
+```bash
+rm iraqaf_compliance.db
+```
+
+### Backup Database
+```bash
+cp iraqaf_compliance.db iraqaf_compliance.db.backup
+```
+
+### Check Database Status
+```bash
+# In dashboard: Evidence Management  Database Insights
+```
+
+## Configuration
+
+### Edit Configuration
+```bash
+nano configs/project.yaml
+```
+
+### Supported Frameworks
 - GDPR
 - HIPAA
 - PCI-DSS
 - ISO 27001:2022
 - NIST Cybersecurity Framework 2.0
 
-## Key Features
+### Add Custom Policy
+Edit `configs/policies.yaml` and add your policy rules.
 
-✅ Real-time security scanning  
-✅ 11 comprehensive security categories  
-✅ Weighted scoring algorithm (100% distributed)  
-✅ 12 intelligent recommendation engines  
-✅ Multi-framework compliance tracking (86/100 baseline)  
-✅ 50+ policy requirements mapped to frameworks  
-✅ Web dashboard with Streamlit  
-✅ Persistent data storage  
-✅ Role-based access control
+## Troubleshooting
 
-## Testing
+### Clear Streamlit Cache
+```bash
+streamlit cache clear
+```
 
-All 11 categories verified and working with baseline scores:
-- Encryption: 95/100
-- Authentication: 88/100
-- Data Protection: 92/100
-- Access Control: 90/100
-- Vulnerability: 100/100
-- Compliance: 87/100
-- Incident Response: 85/100
-- Monitoring & Logging: 88/100
-- Network Security: 82/100
-- Security Testing: 84/100
-- Secrets Management: 89/100
+### Stop Streamlit Process
+```powershell
+# Windows
+Get-Process streamlit | Stop-Process -Force
 
-**Overall Score: 70/100** | **Compliance: 86/100**
+# Linux/Mac
+pkill -f streamlit
+```
+
+### Check Logs
+```bash
+tail -f logs/app.log
+```
+
+### Verify Python Version
+```bash
+python --version  # Should be 3.8+
+```
+
+## Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| Port already in use | Use `--server.port=8502` |
+| Module not found | Run `pip install -r requirements.txt` |
+| Session timeout | Log back in (8-hour default) |
+| Upload fails | Check disk space and permissions |
+| Report generation slow | Reduce date range or file count |
+
+## Performance Tips
+
+-  Limit file uploads to <100MB per session
+-  Export reports in batches for large datasets
+-  Clear cache regularly with `streamlit cache clear`
+-  Close unused browser tabs to reduce memory usage
+
+## API Reference
+
+### Authentication
+```python
+from dashboard.auth_ui import verify_credentials
+auth = verify_credentials(username, password)
+```
+
+### Export Manager
+```python
+from dashboard.export_alerts_rbac import ExportManager
+manager = ExportManager()
+manager.export_to_csv(data, filename)
+```
+
+### RBAC
+```python
+from dashboard.export_alerts_rbac import RBACManager
+rbac = RBACManager()
+rbac.check_permission(user_role, action)
+```
+
+## Resources
+
+-  [README.md](./README.md) - Full documentation
+-  [00_START_HERE.md](./00_START_HERE.md) - Getting started guide
+-  [GitHub Repository](https://github.com/qaisarkhan123/IRAQAF-Integrated-Regulatory-Compliant-Quality-Assurance-Framework)
+-  Support via GitHub Issues
 
 ---
-Created: November 17, 2025  
-Status: ✅ Production Ready
+
+**Last Updated**: November 2025
