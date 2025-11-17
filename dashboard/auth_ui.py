@@ -94,139 +94,184 @@ def render_login_page():
     col1, col2, col3 = st.columns([1, 1.5, 1])
 
     with col2:
-        # Header
+        # Header + Features Combined
         st.markdown("""
         <div class='login-container'>
             <div class='login-header'>
                 <h1>🔐 IRAQAF Dashboard</h1>
                 <p>Integrated Regulatory & Compliance Quality Assurance Framework</p>
             </div>
+            
+            <div style='margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;'>
+                <h3 style='text-align: center; color: #333; margin: 15px 0;'>✨ Key Features</h3>
+                <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 12px;'>
+                    <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                        <div style='font-size: 24px; margin-bottom: 5px;'>📊</div>
+                        <strong style='font-size: 13px; color: #333;'>11-Category Assessment</strong>
+                        <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Comprehensive security scoring</p>
+                    </div>
+                    <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                        <div style='font-size: 24px; margin-bottom: 5px;'>🔒</div>
+                        <strong style='font-size: 13px; color: #333;'>Role-Based Access</strong>
+                        <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Admin, Analyst, Viewer roles</p>
+                    </div>
+                    <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                        <div style='font-size: 24px; margin-bottom: 5px;'>📈</div>
+                        <strong style='font-size: 13px; color: #333;'>Real-Time Monitoring</strong>
+                        <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Live security metrics</p>
+                    </div>
+                    <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
+                        <div style='font-size: 24px; margin-bottom: 5px;'>🛡️</div>
+                        <strong style='font-size: 13px; color: #333;'>L2 Privacy Monitor</strong>
+                        <p style='margin: 5px 0 0 0; font-size: 11px; color: #666;'>Advanced threat detection</p>
+                    </div>
+                </div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
-
-        # Key Features Section
-        st.markdown("""
-        <div class='login-container' style='margin-top: 15px; padding: 20px; background: #f8f9ff; border: 1px solid #e5e7ff;'>
-            <h3 style='text-align: center; color: #333; margin-top: 0; margin-bottom: 15px;'>✨ Key Features</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Feature cards using Streamlit columns
-        feat_col1, feat_col2 = st.columns(2)
-        with feat_col1:
-            st.markdown("""
-            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 10px;'>
-                <div style='font-size: 24px; margin-bottom: 5px;'>📊</div>
-                <strong style='font-size: 14px;'>11-Category Assessment</strong>
-                <p style='margin: 5px 0 0 0; font-size: 12px; color: #666;'>Comprehensive security scoring</p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("""
-            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
-                <div style='font-size: 24px; margin-bottom: 5px;'>📈</div>
-                <strong style='font-size: 14px;'>Real-Time Monitoring</strong>
-                <p style='margin: 5px 0 0 0; font-size: 12px; color: #666;'>Live security metrics</p>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        with feat_col2:
-            st.markdown("""
-            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 10px;'>
-                <div style='font-size: 24px; margin-bottom: 5px;'>🔒</div>
-                <strong style='font-size: 14px;'>Role-Based Access</strong>
-                <p style='margin: 5px 0 0 0; font-size: 12px; color: #666;'>Admin, Analyst, Viewer roles</p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.markdown("""
-            <div style='background: #f8f9ff; border: 1px solid #e5e7ff; border-radius: 8px; padding: 12px; text-align: center;'>
-                <div style='font-size: 24px; margin-bottom: 5px;'>🛡️</div>
-                <strong style='font-size: 14px;'>L2 Privacy Monitor</strong>
-                <p style='margin: 5px 0 0 0; font-size: 12px; color: #666;'>Advanced threat detection</p>
-            </div>
-            """, unsafe_allow_html=True)
 
         # Login Form
         st.markdown("<div class='login-container' style='margin-top: 20px; padding-top: 20px;'>",
                     unsafe_allow_html=True)
 
-        with st.form("login_form", clear_on_submit=False):
-            st.markdown("### 👤 Login")
+        # Login / Sign Up Tabs
+        tab_login, tab_signup = st.tabs(["🔓 Login", "📝 Sign Up"])
 
-            username = st.text_input(
-                "Username",
-                placeholder="Enter your username",
-                key="login_username"
-            )
+        with tab_login:
+            with st.form("login_form", clear_on_submit=False):
+                st.markdown("### Login to Dashboard")
 
-            password = st.text_input(
-                "Password",
-                type="password",
-                placeholder="Enter your password",
-                key="login_password"
-            )
-
-            col_login, col_space = st.columns([1, 1])
-
-            with col_login:
-                submit_button = st.form_submit_button(
-                    "🔓 Login",
-                    use_container_width=True,
-                    type="primary"
+                username = st.text_input(
+                    "Username",
+                    placeholder="Enter your username",
+                    key="login_username"
                 )
 
-            if submit_button:
-                if not username or not password:
-                    st.error("❌ Please enter both username and password")
-                else:
-                    # Authenticate
-                    auth_manager = AuthenticationManager()
-                    success, user = auth_manager.authenticate(
-                        username, password)
+                password = st.text_input(
+                    "Password",
+                    type="password",
+                    placeholder="Enter your password",
+                    key="login_password"
+                )
 
-                    if success:
-                        # Store user in session
-                        st.session_state['authenticated'] = True
-                        st.session_state['current_user'] = user
-                        st.session_state['username'] = username
+                col_login, col_space = st.columns([1, 1])
 
-                        # Show success and reload
-                        st.success(f"✅ Welcome, {user['username']}!")
-                        time.sleep(1)
-                        st.rerun()
+                with col_login:
+                    submit_button = st.form_submit_button(
+                        "🔓 Login",
+                        use_container_width=True,
+                        type="primary"
+                    )
+
+                if submit_button:
+                    if not username or not password:
+                        st.error("❌ Please enter both username and password")
                     else:
-                        st.error(
-                            "❌ Invalid username or password. Please try again.")
+                        # Authenticate
+                        auth_manager = AuthenticationManager()
+                        success, user = auth_manager.authenticate(
+                            username, password)
+
+                        if success:
+                            # Store user in session
+                            st.session_state['authenticated'] = True
+                            st.session_state['current_user'] = user
+                            st.session_state['username'] = username
+
+                            # Show success and reload
+                            st.success(f"✅ Welcome, {user['username']}!")
+                            time.sleep(1)
+                            st.rerun()
+                        else:
+                            st.error(
+                                "❌ Invalid username or password. Please try again.")
+
+        with tab_signup:
+            with st.form("signup_form", clear_on_submit=False):
+                st.markdown("### Create New Account")
+
+                new_username = st.text_input(
+                    "Choose Username",
+                    placeholder="Enter desired username",
+                    key="signup_username"
+                )
+
+                new_email = st.text_input(
+                    "Email Address",
+                    placeholder="Enter your email",
+                    key="signup_email"
+                )
+
+                new_password = st.text_input(
+                    "Password",
+                    type="password",
+                    placeholder="Enter a strong password",
+                    key="signup_password"
+                )
+
+                confirm_password = st.text_input(
+                    "Confirm Password",
+                    type="password",
+                    placeholder="Re-enter your password",
+                    key="signup_confirm_password"
+                )
+
+                col_signup, col_space = st.columns([1, 1])
+
+                with col_signup:
+                    signup_button = st.form_submit_button(
+                        "📝 Create Account",
+                        use_container_width=True,
+                        type="primary"
+                    )
+
+                if signup_button:
+                    if not new_username or not new_password or not new_email:
+                        st.error("❌ Please fill in all fields")
+                    elif new_password != confirm_password:
+                        st.error("❌ Passwords do not match")
+                    elif len(new_password) < 6:
+                        st.error("❌ Password must be at least 6 characters")
+                    else:
+                        # Create new user
+                        auth_manager = AuthenticationManager()
+                        success, message = auth_manager.create_user(
+                            new_username, new_password, new_email, role="Viewer")
+
+                        if success:
+                            st.success(f"✅ {message} You can now login!")
+                            st.info("Account created successfully. Please login with your credentials.")
+                        else:
+                            st.error(f"❌ {message}")
 
             # Demo Credentials
-            st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
+            st.markdown("<div class='divider' style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 
-            with st.expander("📋 Demo Credentials & Info"):
-                st.markdown("""
-                ### 🎯 Quick Start
-                
-                **Admin Account (Full Access):**
-                ```
-                Username: admin
-                Password: admin_default_123
-                ```
-                
-                **Features Available:**
-                - 📊 View 11-category security assessment
-                - 📈 Analyze 30-day trends & metrics
-                - 🛡️ Monitor real-time alerts
-                - 📋 Compliance framework tracking (GDPR, HIPAA, PCI-DSS, ISO 27001, NIST CSF)
-                - 🔐 L2 Privacy/Security Monitor
-                - 👥 Role-based access control
-                
-                **Role Permissions:**
-                - **Admin:** Full access to all features and settings
-                - **Analyst:** Full access to monitoring and reporting
-                - **Viewer:** Read-only access to reports and metrics
-                
-                **💡 Tip:** Create additional user accounts from the Settings page after logging in.
-                """)
+        with st.expander("📋 Demo Credentials & Info"):
+            st.markdown("""
+            ### 🎯 Quick Start
+            
+            **Admin Account (Full Access):**
+            ```
+            Username: admin
+            Password: admin_default_123
+            ```
+            
+            **Features Available:**
+            - 📊 View 11-category security assessment
+            - 📈 Analyze 30-day trends & metrics
+            - 🛡️ Monitor real-time alerts
+            - 📋 Compliance framework tracking (GDPR, HIPAA, PCI-DSS, ISO 27001, NIST CSF)
+            - 🔐 L2 Privacy/Security Monitor
+            - 👥 Role-based access control
+            
+            **Role Permissions:**
+            - **Admin:** Full access to all features and settings
+            - **Analyst:** Full access to monitoring and reporting
+            - **Viewer:** Read-only access to reports and metrics
+            
+            **💡 Tip:** After signing up with Viewer role, an Admin can upgrade your role to Analyst or Admin.
+            """)
 
             # Security Badge
             st.markdown("""
