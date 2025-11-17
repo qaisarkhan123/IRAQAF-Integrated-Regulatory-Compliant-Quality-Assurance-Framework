@@ -7378,286 +7378,297 @@ def _failed_clauses_summary(l1_report: dict, max_items: int = 6):
     return fails[:max_items]
 
 
-# Gather data
-agg = latest.get("AGG", {})
-gqas = agg.get("gqas")
-gqas_band = None
-if gqas is not None:
-    if gqas >= 92:
-        gqas_band = "green"
-    elif gqas >= 88:
-        gqas_band = "yellow"
-    else:
-        gqas_band = "red"
 
-# Risk profile (you already define it earlier; we read it if exists)
-# If you named it `risk`, reuse; else default to "High".
-risk_profile = globals().get("risk", "High")
+# Initialize 'latest' if not defined (module-level code guard)
+if 'latest' not in dir():
+    latest = None
 
-# Build narrative - with styled cards
-best, worst = _top_drivers(latest)
+# Gather data - only if 'latest' is available
+if latest is not None:
+    # Gather data
+    agg = latest.get("AGG", {})
+    gqas = agg.get("gqas")
+    gqas_band = None
+    if gqas is not None:
+        if gqas >= 92:
+            gqas_band = "green"
+        elif gqas >= 88:
+            gqas_band = "yellow"
+        else:
+            gqas_band = "red"
 
-# Pre-compute card values
-gqas_display = f"{gqas:.2f}" if gqas is not None else "N/A"
-best_score_display = f"{best[1]:.1f}" if best else "N/A"
-worst_score_display = f"{worst[1]:.1f}" if worst else "N/A"
+    # Risk profile (you already define it earlier; we read it if exists)
+    # If you named it `risk`, reuse; else default to "High".
+    risk_profile = globals().get("risk", "High")
 
-# Overview section with styled cards
-st.markdown("**Overview**")
-col1, col2, col3 = st.columns(3, gap="small")
+    # Build narrative - with styled cards
+    best, worst = _top_drivers(latest)
 
-# Card 1: GQAS
-with col1:
-    border_color = {"green": "#10B981", "yellow": "#F59E0B",
-                    "red": "#EF4444"}.get(gqas_band, "#9CA3AF")
-    st.markdown(f"""
-    <div style="
-        background-color: #F8F9FA;
-        border-left: 5px solid {border_color};
-        border-radius: 8px;
-        padding: 16px;
-        min-height: 140px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    ">
-        <div style="color: #6B7280; font-size: 0.85rem; font-weight: 600;">GQAS Score</div>
-        <div style="margin: 8px 0;">
-            <div style="font-size: 2rem; font-weight: 800; color: {border_color};">
-                {gqas_display}
-            </div>
-        </div>
-        <div style="color: #1F2937; font-size: 0.9rem; font-weight: 500;">
-            {_band_emoji(gqas_band)} {gqas_band.capitalize() if gqas_band else 'Unknown'}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Pre-compute card values
+    gqas_display = f"{gqas:.2f}" if gqas is not None else "N/A"
+    best_score_display = f"{best[1]:.1f}" if best else "N/A"
+    worst_score_display = f"{worst[1]:.1f}" if worst else "N/A"
 
-# Card 2: Strongest Module
-with col2:
-    strong_color = {"green": "#10B981", "yellow": "#F59E0B",
-                    "red": "#EF4444"}.get(best[2] if best else None, "#9CA3AF")
-    best_name = best[0] if best else "N/A"
-    st.markdown(f"""
-    <div style="
-        background-color: #F8F9FA;
-        border-left: 5px solid {strong_color};
-        border-radius: 8px;
-        padding: 16px;
-        min-height: 140px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    ">
-        <div style="color: #6B7280; font-size: 0.85rem; font-weight: 600;">Strongest Module</div>
-        <div style="margin: 8px 0;">
-            <div style="font-size: 1.5rem; font-weight: 800; color: {strong_color};">
-                {best_name}
-            </div>
-            <div style="font-size: 1.1rem; font-weight: 600; color: #1F2937; margin-top: 4px;">
-                {best_score_display}
-            </div>
-        </div>
-        <div style="color: #1F2937; font-size: 0.9rem;">
-            {_band_emoji(best[2]) if best and best[2] else ''}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Overview section with styled cards
+    st.markdown("**Overview**")
+    col1, col2, col3 = st.columns(3, gap="small")
 
-# Card 3: Weakest Module
-with col3:
-    weak_color = {"green": "#10B981", "yellow": "#F59E0B",
-                  "red": "#EF4444"}.get(worst[2] if worst else None, "#9CA3AF")
-    worst_name = worst[0] if worst else "N/A"
-    st.markdown(f"""
-    <div style="
-        background-color: #F8F9FA;
-        border-left: 5px solid {weak_color};
-        border-radius: 8px;
-        padding: 16px;
-        min-height: 140px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    ">
-        <div style="color: #6B7280; font-size: 0.85rem; font-weight: 600;">Weakest Module</div>
-        <div style="margin: 8px 0;">
-            <div style="font-size: 1.5rem; font-weight: 800; color: {weak_color};">
-                {worst_name}
-            </div>
-            <div style="font-size: 1.1rem; font-weight: 600; color: #1F2937; margin-top: 4px;">
-                {worst_score_display}
-            </div>
-        </div>
-        <div style="color: #1F2937; font-size: 0.9rem;">
-            {_band_emoji(worst[2]) if worst and worst[2] else ''}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("")
-
-# Next actions (simple rules) with priority colors
-actions = []
-if gqas is not None and gqas < 92:
-    actions.append(
-        ("🔴", "Raise overall GQAS = 92 by addressing the weakest module and any failed floors."))
-if latest.get("L3") and latest["L3"]["score"] < 95:
-    actions.append(
-        ("🟡", "Reduce fairness gaps (DPG/EOD) or improve L3 score = 95 for high-risk products."))
-if latest.get("L4") and latest["L4"]["score"] < 90:
-    actions.append(
-        ("🟡", "Improve explainability: ensure deletion_drop = 0.15 and stability t = 0.85."))
-if latest.get("L5") and latest["L5"]["score"] < (85 if risk_profile == "High" else 80):
-    actions.append(
-        ("🟡", "Increase logging coverage = 0.95 and keep alert latency = 1h."))
-
-st.markdown("**Next actions**")
-if actions:
-    for emoji, action_text in actions:
-        color_map = {"🔴": "#EF4444", "🟡": "#F59E0B", "🟢": "#10B981"}
-        border_color = color_map.get(emoji, "#9CA3AF")
+    # Card 1: GQAS
+    with col1:
+        border_color = {"green": "#10B981", "yellow": "#F59E0B",
+                        "red": "#EF4444"}.get(gqas_band, "#9CA3AF")
         st.markdown(f"""
         <div style="
             background-color: #F8F9FA;
             border-left: 5px solid {border_color};
             border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 8px;
+            padding: 16px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         ">
-            <div style="color: #1F2937; font-size: 0.95rem; line-height: 1.5;">
-                {emoji} {action_text}
+            <div style="color: #6B7280; font-size: 0.85rem; font-weight: 600;">GQAS Score</div>
+            <div style="margin: 8px 0;">
+                <div style="font-size: 2rem; font-weight: 800; color: {border_color};">
+                    {gqas_display}
+                </div>
+            </div>
+            <div style="color: #1F2937; font-size: 0.9rem; font-weight: 500;">
+                {_band_emoji(gqas_band)} {gqas_band.capitalize() if gqas_band else 'Unknown'}
             </div>
         </div>
         """, unsafe_allow_html=True)
-else:
-    st.markdown("<div style='color: #10B981; font-weight: 600;'>🟢 None – all thresholds currently met.</div>",
-                unsafe_allow_html=True)
 
-st.markdown("")
+    # Card 2: Strongest Module
+    with col2:
+        strong_color = {"green": "#10B981", "yellow": "#F59E0B",
+                        "red": "#EF4444"}.get(best[2] if best else None, "#9CA3AF")
+        best_name = best[0] if best else "N/A"
+        st.markdown(f"""
+        <div style="
+            background-color: #F8F9FA;
+            border-left: 5px solid {strong_color};
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        ">
+            <div style="color: #6B7280; font-size: 0.85rem; font-weight: 600;">Strongest Module</div>
+            <div style="margin: 8px 0;">
+                <div style="font-size: 1.5rem; font-weight: 800; color: {strong_color};">
+                    {best_name}
+                </div>
+                <div style="font-size: 1.1rem; font-weight: 600; color: #1F2937; margin-top: 4px;">
+                    {best_score_display}
+                </div>
+            </div>
+            <div style="color: #1F2937; font-size: 0.9rem;">
+                {_band_emoji(best[2]) if best and best[2] else ''}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-# Compose a plain-text export
-summary_text = []
-summary_text.append("IRAQAF - Executive Summary")
-summary_text.append("="*28)
-if gqas is not None:
-    summary_text.append(f"GQAS: {gqas:.2f} ({gqas_band})")
-summary_text.append(f"Risk profile: {risk_profile}")
-summary_text.append("")
-if l1 and (fails := _failed_clauses_summary(l1, max_items=12)):
-    summary_text.append("Governance gaps:")
-    for f in fails:
-        line = f"- {f['framework']} › {f['id']}: {f['desc']}"
-        if f["why"]:
-            line += f" `| Why: {f['why']}"
-        if f["hint"]:
-            line += f" `| Hint: {f['hint']}"
-        summary_text.append(line)
-summary_text.append("")
-if actions:
-    summary_text.append("Next actions:")
-    for emoji, a in actions:
-        summary_text.append(f"- {emoji} {a}")
+    # Card 3: Weakest Module
+    with col3:
+        weak_color = {"green": "#10B981", "yellow": "#F59E0B",
+                      "red": "#EF4444"}.get(worst[2] if worst else None, "#9CA3AF")
+        worst_name = worst[0] if worst else "N/A"
+        st.markdown(f"""
+        <div style="
+            background-color: #F8F9FA;
+            border-left: 5px solid {weak_color};
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        ">
+            <div style="color: #6B7280; font-size: 0.85rem; font-weight: 600;">Weakest Module</div>
+            <div style="margin: 8px 0;">
+                <div style="font-size: 1.5rem; font-weight: 800; color: {weak_color};">
+                    {worst_name}
+                </div>
+                <div style="font-size: 1.1rem; font-weight: 600; color: #1F2937; margin-top: 4px;">
+                    {worst_score_display}
+                </div>
+            </div>
+            <div style="color: #1F2937; font-size: 0.9rem;">
+                {_band_emoji(worst[2]) if worst and worst[2] else ''}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-summary_blob = "\n".join(summary_text).encode("utf-8")
+    st.markdown("")
 
-# Download buttons side-by-side
-col_txt, col_docx = st.columns(2, gap="small")
+    # Next actions (simple rules) with priority colors
+    actions = []
+    if gqas is not None and gqas < 92:
+        actions.append(
+            ("🔴", "Raise overall GQAS = 92 by addressing the weakest module and any failed floors."))
+    if latest.get("L3") and latest["L3"]["score"] < 95:
+        actions.append(
+            ("🟡", "Reduce fairness gaps (DPG/EOD) or improve L3 score = 95 for high-risk products."))
+    if latest.get("L4") and latest["L4"]["score"] < 90:
+        actions.append(
+            ("🟡", "Improve explainability: ensure deletion_drop = 0.15 and stability t = 0.85."))
+    if latest.get("L5") and latest["L5"]["score"] < (85 if risk_profile == "High" else 80):
+        actions.append(
+            ("🟡", "Increase logging coverage = 0.95 and keep alert latency = 1h."))
 
-with col_txt:
-    st.download_button("⬇️ Download Executive Summary (.txt)", data=summary_blob,
-                       file_name="IRAQAF_Executive_Summary.txt", mime="text/plain",
-                       width="stretch")
-
-# Optional: Word export using python-docx (reuses same content)
-with col_docx:
-    try:
-        from io import BytesIO
-        from docx import Document
-        doc = Document()
-        doc.add_heading("IRAQAF - Executive Summary", level=1)
-        if gqas is not None:
-            doc.add_paragraph(f"GQAS: {gqas:.2f} ({gqas_band})")
-        doc.add_paragraph(f"Risk profile: {risk_profile}")
-
-        if l1 and (fails := _failed_clauses_summary(l1, max_items=12)):
-            doc.add_heading("Governance gaps", level=2)
-            for f in fails:
-                p = doc.add_paragraph()
-                p.add_run(f"{f['framework']} › {f['id']}: ").bold = True
-                p.add_run(f"{f['desc']}")
-                if f["why"]:
-                    doc.add_paragraph(f"Why: {f['why']}")
-                if f["hint"]:
-                    doc.add_paragraph(f"Hint: {f['hint']}")
-
-        if actions:
-            doc.add_heading("Next actions", level=2)
-            for emoji, a in actions:
-                doc.add_paragraph(f"{emoji} {a}", style="List Bullet")
-
-        bio = BytesIO()
-        doc.save(bio)
-        st.download_button("⬇️ Download Executive Summary (.docx)", data=bio.getvalue(),
-                           file_name="IRAQAF_Executive_Summary.docx",
-                           mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                           width="stretch")
-    except Exception:
-        st.caption("Tip: `pip install python-docx` to enable Word export here.")
-
-st.markdown("""
-<div style="margin-top: 40px; margin-bottom: 30px;">
-    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">🤖 AI-Generated Executive Summary</h2>
-    <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Generate an intelligent, actionable summary of your compliance posture powered by LLM (optional)</p>
-</div>
-""", unsafe_allow_html=True)
-
-col_toggle, col_tip = st.columns([1, 2])
-with col_toggle:
-    use_llm = st.checkbox(
-        "Generate with LLM", value=False, disabled=_LOCK, help="Requires OPENAI_API_KEY environment variable")
-with col_tip:
-    if not use_llm:
-        st.markdown("<p style='margin: 0; font-size: 0.85rem; color: #6B7280; padding-top: 8px;'>Toggle on if you have an API key configured</p>", unsafe_allow_html=True)
-
-if use_llm and not _LOCK:
-    try:
-        import os
-        import textwrap
-        from datetime import datetime
-        from openai import OpenAI  # pip install openai
-
-        if not os.getenv("OPENAI_API_KEY"):
-            st.warning(
-                "⚠️ Set OPENAI_API_KEY environment variable to enable LLM.")
-        else:
-            client = OpenAI()
-            prompt = f"""
-You are an AI auditor. Write a crisp, actionable executive summary for stakeholders.
-Use these artifacts (JSON-like): latest={json.dumps(latest)[:50000]}
-Emphasize: GQAS, floors (pass/fail), biggest gaps, top 3 actions, risks, and time-sensitive notes.
-Date: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
-"""
-            with st.spinner("🧠 Generating intelligent summary..."):
-                resp = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0.3,
-                )
-            summary = resp.choices[0].message.content.strip()
-
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px solid #0EA5E9; border-radius: 12px; padding: 24px; margin: 20px 0;">
-                <div style="color: #0C4A6E; line-height: 1.6; font-size: 0.95rem;">
+    st.markdown("**Next actions**")
+    if actions:
+        for emoji, action_text in actions:
+            color_map = {"🔴": "#EF4444", "🟡": "#F59E0B", "🟢": "#10B981"}
+            border_color = color_map.get(emoji, "#9CA3AF")
+            st.markdown(f"""
+            <div style="
+                background-color: #F8F9FA;
+                border-left: 5px solid {border_color};
+                border-radius: 8px;
+                padding: 12px 16px;
+                margin-bottom: 8px;
+            ">
+                <div style="color: #1F2937; font-size: 0.95rem; line-height: 1.5;">
+                    {emoji} {action_text}
+                </div>
+            </div>
             """, unsafe_allow_html=True)
-            st.markdown(summary)
-            st.markdown("</div></div>", unsafe_allow_html=True)
+    else:
+        st.markdown("<div style='color: #10B981; font-weight: 600;'>🟢 None – all thresholds currently met.</div>",
+                    unsafe_allow_html=True)
 
-            st.download_button("⬇️ Download AI Summary (txt)", summary.encode("utf-8"),
-                               file_name="AI_Executive_Summary.txt", mime="text/plain", disabled=_LOCK, width="stretch")
-    except Exception as e:
-        st.error(f"❌ LLM summary unavailable: {str(e)[:200]}")
+    st.markdown("")
 
+    # Compose a plain-text export
+    summary_text = []
+    summary_text.append("IRAQAF - Executive Summary")
+    summary_text.append("="*28)
+    if gqas is not None:
+        summary_text.append(f"GQAS: {gqas:.2f} ({gqas_band})")
+    summary_text.append(f"Risk profile: {risk_profile}")
+    summary_text.append("")
+    if l1 and (fails := _failed_clauses_summary(l1, max_items=12)):
+        summary_text.append("Governance gaps:")
+        for f in fails:
+            line = f"- {f['framework']} › {f['id']}: {f['desc']}"
+            if f["why"]:
+                line += f" `| Why: {f['why']}"
+            if f["hint"]:
+                line += f" `| Hint: {f['hint']}"
+            summary_text.append(line)
+    summary_text.append("")
+    if actions:
+        summary_text.append("Next actions:")
+        for emoji, a in actions:
+            summary_text.append(f"- {emoji} {a}")
+
+    summary_blob = "\n".join(summary_text).encode("utf-8")
+
+    # Download buttons side-by-side
+    col_txt, col_docx = st.columns(2, gap="small")
+
+    with col_txt:
+        st.download_button("⬇️ Download Executive Summary (.txt)", data=summary_blob,
+                           file_name="IRAQAF_Executive_Summary.txt", mime="text/plain",
+                           width="stretch")
+
+    # Optional: Word export using python-docx (reuses same content)
+    with col_docx:
+        try:
+            from io import BytesIO
+            from docx import Document
+            doc = Document()
+            doc.add_heading("IRAQAF - Executive Summary", level=1)
+            if gqas is not None:
+                doc.add_paragraph(f"GQAS: {gqas:.2f} ({gqas_band})")
+            doc.add_paragraph(f"Risk profile: {risk_profile}")
+
+            if l1 and (fails := _failed_clauses_summary(l1, max_items=12)):
+                doc.add_heading("Governance gaps", level=2)
+                for f in fails:
+                    p = doc.add_paragraph()
+                    p.add_run(f"{f['framework']} › {f['id']}: ").bold = True
+                    p.add_run(f"{f['desc']}")
+                    if f["why"]:
+                        doc.add_paragraph(f"Why: {f['why']}")
+                    if f["hint"]:
+                        doc.add_paragraph(f"Hint: {f['hint']}")
+
+            if actions:
+                doc.add_heading("Next actions", level=2)
+                for emoji, a in actions:
+                    doc.add_paragraph(f"{emoji} {a}", style="List Bullet")
+
+            bio = BytesIO()
+            doc.save(bio)
+            st.download_button("⬇️ Download Executive Summary (.docx)", data=bio.getvalue(),
+                               file_name="IRAQAF_Executive_Summary.docx",
+                               mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                               width="stretch")
+        except Exception:
+            st.caption("Tip: `pip install python-docx` to enable Word export here.")
+
+    st.markdown("""
+    <div style="margin-top: 40px; margin-bottom: 30px;">
+        <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; color: #1F2937;">🤖 AI-Generated Executive Summary</h2>
+        <p style="margin: 8px 0 0 0; font-size: 0.95rem; color: #6B7280;">Generate an intelligent, actionable summary of your compliance posture powered by LLM (optional)</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_toggle, col_tip = st.columns([1, 2])
+    with col_toggle:
+        use_llm = st.checkbox(
+            "Generate with LLM", value=False, disabled=_LOCK, help="Requires OPENAI_API_KEY environment variable")
+    with col_tip:
+        if not use_llm:
+            st.markdown("<p style='margin: 0; font-size: 0.85rem; color: #6B7280; padding-top: 8px;'>Toggle on if you have an API key configured</p>", unsafe_allow_html=True)
+
+    if use_llm and not _LOCK:
+        try:
+            import os
+            import textwrap
+            from datetime import datetime
+            from openai import OpenAI  # pip install openai
+
+            if not os.getenv("OPENAI_API_KEY"):
+                st.warning(
+                    "⚠️ Set OPENAI_API_KEY environment variable to enable LLM.")
+            else:
+                client = OpenAI()
+                prompt = f"""
+    You are an AI auditor. Write a crisp, actionable executive summary for stakeholders.
+    Use these artifacts (JSON-like): latest={json.dumps(latest)[:50000]}
+    Emphasize: GQAS, floors (pass/fail), biggest gaps, top 3 actions, risks, and time-sensitive notes.
+    Date: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}
+    """
+                with st.spinner("🧠 Generating intelligent summary..."):
+                    resp = client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[{"role": "user", "content": prompt}],
+                        temperature=0.3,
+                    )
+                summary = resp.choices[0].message.content.strip()
+
+                st.markdown("""
+                <div style="background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%); border: 2px solid #0EA5E9; border-radius: 12px; padding: 24px; margin: 20px 0;">
+                    <div style="color: #0C4A6E; line-height: 1.6; font-size: 0.95rem;">
+                """, unsafe_allow_html=True)
+                st.markdown(summary)
+                st.markdown("</div></div>", unsafe_allow_html=True)
+
+                st.download_button("⬇️ Download AI Summary (txt)", summary.encode("utf-8"),
+                                   file_name="AI_Executive_Summary.txt", mime="text/plain", disabled=_LOCK, width="stretch")
+        except Exception as e:
+            st.error(f"❌ LLM summary unavailable: {str(e)[:200]}")
+
+
+else:
+    # If 'latest' data is not available, show placeholder
+    st.info("📊 Dashboard Ready: Upload or generate a security report to view assessment results")
 
 # =========================
 # Bottom Panels (polished)
