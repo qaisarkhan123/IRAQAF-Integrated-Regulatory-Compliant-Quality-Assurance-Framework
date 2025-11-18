@@ -472,13 +472,20 @@ def health():
     })
 
 if __name__ == '__main__':
+    import sys
+    import io
+    
+    # Fix emoji encoding on Windows
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    
     print("\n" + "="*70)
-    print("🔒 PRIVACY & SECURITY HUB - FLASK IMPLEMENTATION")
+    print("PRIVACY & SECURITY HUB - FLASK IMPLEMENTATION")
     print("="*70)
-    print("\n✓ Starting Flask app on port 8502...")
-    print("✓ Access at: http://localhost:8502")
-    print("✓ Modules available: 10 security modules + L2 metrics")
-    print("✓ API health check: http://localhost:8502/health")
+    print("\n> Starting Flask app on port 8502...")
+    print("> Access at: http://localhost:8502")
+    print("> Modules available: 10 security modules + L2 metrics")
+    print("> API health check: http://localhost:8502/health")
     print("\n" + "="*70 + "\n")
     
     # Run Flask app
