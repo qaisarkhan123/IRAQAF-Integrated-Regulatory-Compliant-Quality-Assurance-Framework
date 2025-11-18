@@ -477,35 +477,77 @@ HTML_TEMPLATE = '''
     </div>
     <script>
         function load() {
+            console.log('[L4 HUB] Starting load sequence...');
             const api = window.location.protocol + '//' + window.location.host;
+            console.log('[L4 HUB] API base:', api);
             
             // Fetch and display score
-            fetch(api + '/api/transparency-score')
-                .then(r => r.json())
-                .then(score => {
-                    document.getElementById('score').textContent = Math.round(score.transparency_score * 100) + '%';
-                    const cat = score.categories;
-                    if (cat['Explanation Generation']) document.getElementById('kpi1').textContent = Math.round(cat['Explanation Generation'].score * 100) + '%';
-                    if (cat['Explanation Reliability']) document.getElementById('kpi2').textContent = Math.round(cat['Explanation Reliability'].score * 100) + '%';
-                    if (cat['Traceability']) document.getElementById('kpi3').textContent = Math.round(cat['Traceability'].score * 100) + '%';
-                    if (cat['Documentation']) document.getElementById('kpi4').textContent = Math.round(cat['Documentation'].score * 100) + '%';
+            console.log('[L4 HUB] Fetching /api/transparency-score...');
+            fetch(api + '/api/transparency-score', { method: 'GET' })
+                .then(response => {
+                    console.log('[L4 HUB] Score response status:', response.status);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
                 })
-                .catch(e => console.error('Score error:', e));
+                .then(score => {
+                    console.log('[L4 HUB] Score data received:', score);
+                    const percentage = Math.round(score.transparency_score * 100);
+                    console.log('[L4 HUB] Setting score to:', percentage + '%');
+                    document.getElementById('score').textContent = percentage + '%';
+                    
+                    const cat = score.categories;
+                    console.log('[L4 HUB] Categories:', cat);
+                    if (cat['Explanation Generation']) {
+                        document.getElementById('kpi1').textContent = Math.round(cat['Explanation Generation'].score * 100) + '%';
+                    }
+                    if (cat['Explanation Reliability']) {
+                        document.getElementById('kpi2').textContent = Math.round(cat['Explanation Reliability'].score * 100) + '%';
+                    }
+                    if (cat['Traceability']) {
+                        document.getElementById('kpi3').textContent = Math.round(cat['Traceability'].score * 100) + '%';
+                    }
+                    if (cat['Documentation']) {
+                        document.getElementById('kpi4').textContent = Math.round(cat['Documentation'].score * 100) + '%';
+                    }
+                    console.log('[L4 HUB] Score and KPIs updated!');
+                })
+                .catch(e => {
+                    console.error('[L4 HUB] Score error:', e);
+                    document.getElementById('score').textContent = 'Error loading score';
+                });
             
             // Fetch and display modules
-            fetch(api + '/api/modules')
-                .then(r => r.json())
+            console.log('[L4 HUB] Fetching /api/modules...');
+            fetch(api + '/api/modules', { method: 'GET' })
+                .then(response => {
+                    console.log('[L4 HUB] Modules response status:', response.status);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.json();
+                })
                 .then(modules => {
-                    document.getElementById('modules').innerHTML = Object.entries(modules)
+                    console.log('[L4 HUB] Modules data received:', modules);
+                    const html = Object.entries(modules)
                         .map(([name, mod]) => `<div class="card"><div class="card-title">${name} - ${Math.round(mod.score * 100)}%</div><p style="color: var(--muted); font-size: 0.9rem;">${mod.description}</p></div>`)
                         .join('');
+                    console.log('[L4 HUB] Generated HTML for', Object.keys(modules).length, 'modules');
+                    document.getElementById('modules').innerHTML = html;
+                    console.log('[L4 HUB] Modules grid updated!');
                 })
-                .catch(e => console.error('Modules error:', e));
+                .catch(e => {
+                    console.error('[L4 HUB] Modules error:', e);
+                    document.getElementById('modules').innerHTML = '<p style="color: red;">Error loading modules</p>';
+                });
         }
         
+        console.log('[L4 HUB] Script loaded, document state:', document.readyState);
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', load);
+            console.log('[L4 HUB] Adding DOMContentLoaded listener...');
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('[L4 HUB] DOMContentLoaded fired!');
+                load();
+            });
         } else {
+            console.log('[L4 HUB] DOM already loaded, calling load() immediately...');
             load();
         }
     </script>
