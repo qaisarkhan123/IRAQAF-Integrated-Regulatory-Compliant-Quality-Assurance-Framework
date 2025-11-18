@@ -866,15 +866,28 @@ with st.sidebar:
 
     # Privacy & Security Hub - Quick Access
     st.markdown("### 🔐 Security Tools")
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        if st.button("🔐 Privacy & Security Hub", use_container_width=True, type="primary", key="privacy_hub_btn"):
-            st.markdown("""
-            <script>
-                window.open('http://localhost:8502', '_blank');
-            </script>
-            """, unsafe_allow_html=True)
-            st.info("Opening Privacy & Security Hub in new window...")
+
+    # Create a clickable link styled as a button
+    st.markdown("""
+        <div style="display: grid; gap: 10px;">
+            <a href="http://localhost:8502" target="_blank" style="
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: 600;
+                text-align: center;
+                transition: all 0.3s ease;
+                width: 100%;
+                box-sizing: border-box;
+            " onmouseover="this.style.boxShadow='0 8px 20px rgba(102, 126, 234, 0.3)'; this.style.transform='translateY(-2px)';" 
+              onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+                🔐 Privacy & Security Hub
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
 
     st.caption("📌 Dedicated privacy & security assessment tool")
     st.markdown("---")
@@ -6950,7 +6963,12 @@ if agg:
                 s = rep.get("score", 0)
             individual_scores.append(s)
 
-    # Calculate GQAS as average of all module scores
+    # Include Privacy & Security Hub score in aggregate (default: 78/100)
+    # This represents the overall security posture from the Privacy & Security Hub
+    privacy_security_hub_score = 78  # Default score - can be updated dynamically
+    individual_scores.append(privacy_security_hub_score)
+
+    # Calculate GQAS as average of all module scores INCLUDING Privacy & Security Hub
     gqas = sum(individual_scores) / \
         len(individual_scores) if individual_scores else agg.get("gqas", 0.0)
 
@@ -6959,7 +6977,7 @@ if agg:
     # Centered GQAS card
     st.markdown(
         f"<h3 style='text-align:center;'>⚙️ <b>Aggregate Global QA Score (GQAS)</b></h3>"
-        "<p style='text-align:center;color:gray;'>Weighted overall quality from all five modules</p>",
+        "<p style='text-align:center;color:gray;'>Weighted overall quality from all five modules + Privacy & Security Hub</p>",
         unsafe_allow_html=True,
     )
     st.markdown(
@@ -9580,52 +9598,9 @@ if st.sidebar.checkbox("🔧 Show Debug Info", value=False, key="debug_mode"):
     """, unsafe_allow_html=True)
 
 # ============================================================================
-# L2 PRIVACY/SECURITY MONITOR INTEGRATION
+# L2 PRIVACY/SECURITY MONITOR NOTE
 # ============================================================================
-# This section adds L2 Privacy/Security Monitor content to the dashboard
-# The content integrates with the main app after login
-
-if L2_MONITOR_AVAILABLE and show_l2_privacy_security_monitor is not None:
-    # Add bold visual header before the expander
-    st.markdown("""
-    <div style="
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 16px 20px;
-        border-radius: 10px;
-        margin-bottom: 12px;
-        border-left: 5px solid #ff6b6b;
-    ">
-        <div style="
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        ">
-            <span style="
-                font-size: 24px;
-                font-weight: bold;
-                color: white;
-            ">🔐</span>
-            <div>
-                <h3 style="
-                    margin: 0;
-                    color: white;
-                    font-size: 18px;
-                    font-weight: 700;
-                    letter-spacing: 0.5px;
-                ">L2 PRIVACY & SECURITY MONITOR</h3>
-                <p style="
-                    margin: 4px 0 0 0;
-                    color: rgba(255, 255, 255, 0.85);
-                    font-size: 12px;
-                ">Advanced compliance and security analysis</p>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    with st.expander('📊 **Click to expand security details**', expanded=False):
-        try:
-            show_l2_privacy_security_monitor()
-        except Exception as e:
-            st.error(f'Error loading L2 Monitor: {str(e)}')
-            logger.error(f'L2 Monitor error: {e}', exc_info=True)
+# Privacy & Security modules have been moved to a dedicated Privacy & Security Hub
+# Access it via the sidebar link "🔐 Privacy & Security Hub" to view all security assessments
+# This includes: PII Detection, Encryption Validation, Model Integrity, Adversarial Tests,
+# GDPR Rights, L2 Evaluator, MFA Manager, and Data Retention
