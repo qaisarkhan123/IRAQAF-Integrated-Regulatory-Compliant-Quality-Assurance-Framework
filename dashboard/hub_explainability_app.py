@@ -416,22 +416,28 @@ HTML_TEMPLATE = '''
     </div>
     <script>
         async function load() {
-            const score = await fetch('/api/transparency-score').then(r => r.json());
-            const modules = await fetch('/api/modules').then(r => r.json());
-            
-            document.getElementById('score').textContent = (score.transparency_score * 100).toFixed(0) + '%';
-            document.getElementById('kpi1').textContent = (score.categories['Explanation Generation'].score * 100).toFixed(0) + '%';
-            document.getElementById('kpi2').textContent = (score.categories['Explanation Reliability'].score * 100).toFixed(0) + '%';
-            document.getElementById('kpi3').textContent = (score.categories['Traceability'].score * 100).toFixed(0) + '%';
-            document.getElementById('kpi4').textContent = (score.categories['Documentation'].score * 100).toFixed(0) + '%';
-            
-            const grid = document.getElementById('modules');
-            grid.innerHTML = Object.entries(modules).map(([name, mod]) => 
-                <div class="card">
-                    <div class="card-title">+name+ - +(mod.score*100).toFixed(0)+%</div>
-                    <p style="color: var(--muted); font-size: 0.9rem;">+mod.description+</p>
-                </div>
-            ).join('');
+            try {
+                const score = await fetch('/api/transparency-score').then(r => r.json());
+                const modules = await fetch('/api/modules').then(r => r.json());
+                
+                document.getElementById('score').textContent = (score.transparency_score * 100).toFixed(0) + '%';
+                document.getElementById('kpi1').textContent = (score.categories['Explanation Generation'].score * 100).toFixed(0) + '%';
+                document.getElementById('kpi2').textContent = (score.categories['Explanation Reliability'].score * 100).toFixed(0) + '%';
+                document.getElementById('kpi3').textContent = (score.categories['Traceability'].score * 100).toFixed(0) + '%';
+                document.getElementById('kpi4').textContent = (score.categories['Documentation'].score * 100).toFixed(0) + '%';
+                
+                const grid = document.getElementById('modules');
+                grid.innerHTML = Object.entries(modules).map(([name, mod]) => {
+                    const scorePercent = (mod.score * 100).toFixed(0);
+                    return `<div class="card">
+                        <div class="card-title">${name} - ${scorePercent}%</div>
+                        <p style="color: var(--muted); font-size: 0.9rem;">${mod.description}</p>
+                    </div>`;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('score').textContent = 'Error loading data';
+            }
         }
         load();
     </script>
