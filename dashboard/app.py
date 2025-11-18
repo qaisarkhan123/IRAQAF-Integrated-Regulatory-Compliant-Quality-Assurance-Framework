@@ -90,6 +90,29 @@ except ImportError:
     def render_logout_button(): pass
     def render_user_info(): pass
 
+# UX Enhancements (Dark Mode, Loading Animations, Keyboard Shortcuts, Session Info)
+try:
+    from ux_enhancements import (
+        initialize_ux_enhancements, render_theme_toggle, render_session_info,
+        render_keyboard_shortcuts, render_action_buttons, render_info_cards,
+        increment_action_count, show_loading_spinner, render_progress_bar,
+        render_quick_stats, render_toast_notification
+    )
+    UX_ENHANCEMENTS_AVAILABLE = True
+except ImportError:
+    UX_ENHANCEMENTS_AVAILABLE = False
+    def initialize_ux_enhancements(): return True
+    def render_theme_toggle(): pass
+    def render_session_info(): pass
+    def render_keyboard_shortcuts(): pass
+    def increment_action_count(): pass
+    def render_action_buttons(x): return {}
+    def render_info_cards(x): pass
+    def show_loading_spinner(x=""): pass
+    def render_progress_bar(x, y, z=""): pass
+    def render_quick_stats(x): pass
+    def render_toast_notification(x, y="info"): pass
+
 # System Integration Imports - Placeholder (will be loaded after setup_paths)
 SYSTEM_INTEGRATION_AVAILABLE = False
 get_coordinator = None
@@ -818,6 +841,10 @@ def safe_json_loads(json_string: str, max_size_mb: int = 10) -> tuple[bool, Any,
 
 st.set_page_config(page_title="IRAQAF Dashboard", layout="wide")
 
+# Initialize UX Enhancements (Dark Mode, Loading, Keyboard Shortcuts, Session Info)
+if UX_ENHANCEMENTS_AVAILABLE:
+    initialize_ux_enhancements()
+
 # ============================================================================
 # AUTHENTICATION GATE - Check authentication FIRST before showing dashboard
 # ============================================================================
@@ -836,6 +863,10 @@ with st.sidebar:
         st.markdown("---")
         render_logout_button()
     st.markdown("---")
+    
+    # UX Enhancements - Session Info
+    if UX_ENHANCEMENTS_AVAILABLE:
+        render_session_info()
 
 
 # ============================================================================
@@ -1373,6 +1404,11 @@ with st.sidebar.expander("🎨 Theme", expanded=False):
         disabled=_LOCK,
         key="theme_mode_selector"
     )
+    
+    # UX Enhancements - Dark mode toggle
+    if UX_ENHANCEMENTS_AVAILABLE:
+        st.divider()
+        render_theme_toggle()
 
     # Apply base theme
     _inject_theme_css(mode)
