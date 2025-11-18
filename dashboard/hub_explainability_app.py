@@ -422,20 +422,37 @@ HTML_TEMPLATE = '''
         async function load() {
             try {
                 console.log('Starting data load...');
+                console.log('Current URL:', window.location.href);
+                
+                // Build API base URL dynamically
+                const apiBase = window.location.protocol + '//' + window.location.host;
+                console.log('API base URL:', apiBase);
                 
                 // Fetch transparency score
-                console.log('Fetching /api/transparency-score...');
-                const scoreResp = await fetch('/api/transparency-score');
-                if (!scoreResp.ok) throw new Error(`HTTP ${scoreResp.status}: ${scoreResp.statusText}`);
+                const scoreUrl = apiBase + '/api/transparency-score';
+                console.log('Fetching:', scoreUrl);
+                const scoreResp = await fetch(scoreUrl);
+                console.log('Response status:', scoreResp.status);
+                
+                if (!scoreResp.ok) {
+                    throw new Error(`HTTP ${scoreResp.status}: ${scoreResp.statusText}`);
+                }
+                
                 const score = await scoreResp.json();
                 console.log('Score data received:', score);
                 
                 // Fetch modules
-                console.log('Fetching /api/modules...');
-                const modsResp = await fetch('/api/modules');
-                if (!modsResp.ok) throw new Error(`HTTP ${modsResp.status}: ${modsResp.statusText}`);
+                const modsUrl = apiBase + '/api/modules';
+                console.log('Fetching:', modsUrl);
+                const modsResp = await fetch(modsUrl);
+                console.log('Modules response status:', modsResp.status);
+                
+                if (!modsResp.ok) {
+                    throw new Error(`HTTP ${modsResp.status}: ${modsResp.statusText}`);
+                }
+                
                 const modules = await modsResp.json();
-                console.log('Modules data received:', modules);
+                console.log('Modules data received, count:', Object.keys(modules).length);
                 
                 // Update score
                 const scoreVal = Math.round(score.transparency_score * 100);
@@ -443,13 +460,23 @@ HTML_TEMPLATE = '''
                 console.log('Updated score to:', scoreVal + '%');
                 
                 // Update KPIs
-                document.getElementById('kpi1').textContent = Math.round(score.categories['Explanation Generation'].score * 100) + '%';
-                document.getElementById('kpi2').textContent = Math.round(score.categories['Explanation Reliability'].score * 100) + '%';
-                document.getElementById('kpi3').textContent = Math.round(score.categories['Traceability'].score * 100) + '%';
-                document.getElementById('kpi4').textContent = Math.round(score.categories['Documentation'].score * 100) + '%';
+                try {
+                    document.getElementById('kpi1').textContent = Math.round(score.categories['Explanation Generation'].score * 100) + '%';
+                    document.getElementById('kpi2').textContent = Math.round(score.categories['Explanation Reliability'].score * 100) + '%';
+                    document.getElementById('kpi3').textContent = Math.round(score.categories['Traceability'].score * 100) + '%';
+                    document.getElementById('kpi4').textContent = Math.round(score.categories['Documentation'].score * 100) + '%';
+                    console.log('KPIs updated');
+                } catch (kpiError) {
+                    console.warn('Could not update KPIs:', kpiError.message);
+                }
                 
                 // Update modules grid
                 const grid = document.getElementById('modules');
+                if (!grid) {
+                    console.error('Could not find modules grid element');
+                    return;
+                }
+                
                 const cards = Object.entries(modules).map(([name, mod]) => {
                     const scorePercent = Math.round(mod.score * 100);
                     return `<div class="card">
@@ -457,21 +484,35 @@ HTML_TEMPLATE = '''
                         <p style="color: var(--muted); font-size: 0.9rem;">${mod.description}</p>
                     </div>`;
                 }).join('');
+                
                 grid.innerHTML = cards;
                 console.log('Rendered', Object.keys(modules).length, 'modules');
-                console.log('Data load complete!');
+                console.log('✅ Data load complete!');
+                
             } catch (error) {
-                console.error('Error loading dashboard:', error);
+                console.error('❌ Error loading dashboard:', error);
+                console.error('Error details:', error.message);
                 console.error('Stack:', error.stack);
-                document.getElementById('score').textContent = 'Error: ' + error.message;
-                document.getElementById('modules').innerHTML = '<p style="color: red; padding: 20px;">Error loading data. Check browser console for details.</p>';
+                
+                try {
+                    document.getElementById('score').textContent = '❌ Error';
+                    document.getElementById('modules').innerHTML = '<div style="color: #ff6b6b; padding: 20px; background: rgba(255,107,107,0.1); border-radius: 8px;"><strong>Error loading data:</strong><br>' + error.message + '<br><br>Check the browser console (F12) for more details.</div>';
+                } catch (e) {
+                    console.error('Could not update error display:', e);
+                }
             }
         }
         
-        // Run on page load
+        // Wait for DOM to be ready
+        console.log('Page load event listeners registered');
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', load);
+            console.log('Document is loading, waiting for DOMContentLoaded');
+            document.addEventListener('DOMContentLoaded', function() {
+                console.log('DOMContentLoaded fired, calling load()');
+                load();
+            });
         } else {
+            console.log('Document already loaded, calling load() immediately');
             load();
         }
     </script>
