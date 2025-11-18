@@ -864,6 +864,21 @@ with st.sidebar:
         render_logout_button()
     st.markdown("---")
 
+    # Privacy & Security Hub - Quick Access
+    st.markdown("### 🔐 Security Tools")
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        if st.button("🔐 Privacy & Security Hub", use_container_width=True, type="primary", key="privacy_hub_btn"):
+            st.markdown("""
+            <script>
+                window.open('http://localhost:8502', '_blank');
+            </script>
+            """, unsafe_allow_html=True)
+            st.info("Opening Privacy & Security Hub in new window...")
+
+    st.caption("📌 Dedicated privacy & security assessment tool")
+    st.markdown("---")
+
     # UX Enhancements - Session Info
     if UX_ENHANCEMENTS_AVAILABLE:
         render_session_info()
@@ -9607,7 +9622,7 @@ if L2_MONITOR_AVAILABLE and show_l2_privacy_security_monitor is not None:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
+
     with st.expander('📊 **Click to expand security details**', expanded=False):
         try:
             show_l2_privacy_security_monitor()
