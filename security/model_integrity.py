@@ -167,7 +167,8 @@ class ModelIntegrityValidator:
                 "model": model_path
             }
 
-        current_checksum = ModelIntegrityValidator.generate_model_checksum(model_path)
+        current_checksum = ModelIntegrityValidator.generate_model_checksum(
+            model_path)
 
         if stored_checksum.checksum_sha256 == current_checksum.checksum_sha256:
             return True, {
@@ -192,7 +193,7 @@ class ModelIntegrityValidator:
 
     @staticmethod
     def create_model_with_integrity(model_path: str, author: str = "system",
-                                   description: str = "") -> Tuple[bool, str]:
+                                    description: str = "") -> Tuple[bool, str]:
         """
         Create model with integrity protection.
 
@@ -205,8 +206,10 @@ class ModelIntegrityValidator:
             Tuple of (success, message)
         """
         try:
-            checksum = ModelIntegrityValidator.generate_model_checksum(model_path)
-            checksum_file = ModelIntegrityValidator.save_checksum(model_path, checksum)
+            checksum = ModelIntegrityValidator.generate_model_checksum(
+                model_path)
+            checksum_file = ModelIntegrityValidator.save_checksum(
+                model_path, checksum)
 
             # Create metadata file
             metadata = {
@@ -259,8 +262,8 @@ class ModelVersioning:
             logger.error(f"Error saving registry: {e}")
 
     def register_model_version(self, model_name: str, model_path: str,
-                              author: str, description: str,
-                              parent_version: Optional[str] = None) -> str:
+                               author: str, description: str,
+                               parent_version: Optional[str] = None) -> str:
         """
         Register a new model version.
 
@@ -322,7 +325,8 @@ class ModelVersioning:
             return False, {"error": "Version not found"}
 
         model_path = version["model_path"]
-        is_valid, details = ModelIntegrityValidator.verify_model_integrity(model_path)
+        is_valid, details = ModelIntegrityValidator.verify_model_integrity(
+            model_path)
 
         return is_valid, {
             **details,
@@ -399,7 +403,7 @@ class TamperDetection:
             logger.error(f"Error saving tamper log: {e}")
 
     def log_tamper_attempt(self, model_path: str, expected_checksum: str,
-                          actual_checksum: str, severity: str = "critical"):
+                           actual_checksum: str, severity: str = "critical"):
         """
         Log a detected tampering attempt.
 

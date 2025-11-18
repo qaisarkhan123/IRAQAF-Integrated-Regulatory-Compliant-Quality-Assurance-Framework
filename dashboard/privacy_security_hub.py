@@ -470,7 +470,7 @@ elif modules_section == "🔒 Encryption Validator":
             <div class="metric-value">45 days</div>
             <div style="font-size: 0.9em; opacity: 0.9;">⚠ Check Soon</div>
         </div>
-        """, unsafe_have_html=True)
+        """, unsafe_allow_html=True)
 
 # ============================================================================
 # MODULE 4: MODEL INTEGRITY

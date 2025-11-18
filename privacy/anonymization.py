@@ -62,7 +62,8 @@ class PIIDetector:
     }
 
     # Common name patterns (simplified)
-    NAME_KEYWORDS = ['name', 'first_name', 'last_name', 'full_name', 'author', 'user']
+    NAME_KEYWORDS = ['name', 'first_name',
+                     'last_name', 'full_name', 'author', 'user']
     ADDRESS_KEYWORDS = ['address', 'street', 'city', 'state', 'zip', 'postal']
 
     @classmethod
@@ -149,11 +150,14 @@ class PIIDetector:
             return 0.0
 
         # Risk based on number and types of PII found
-        high_risk_types = {PII_TYPE.SSN, PII_TYPE.CREDIT_CARD, PII_TYPE.PASSPORT}
-        high_risk_count = sum(1 for m in matches if m.pii_type in high_risk_types)
+        high_risk_types = {PII_TYPE.SSN,
+                           PII_TYPE.CREDIT_CARD, PII_TYPE.PASSPORT}
+        high_risk_count = sum(
+            1 for m in matches if m.pii_type in high_risk_types)
         other_count = len(matches) - high_risk_count
 
-        risk = (high_risk_count * 0.3 + other_count * 0.1) / max(len(data) / 100, 1)
+        risk = (high_risk_count * 0.3 + other_count * 0.1) / \
+            max(len(data) / 100, 1)
         return min(risk, 1.0)
 
 
@@ -166,7 +170,8 @@ class Anonymizer:
         if '@' not in email:
             return email
         local, domain = email.split('@', 1)
-        masked_local = local[0] + '*' * (len(local) - 2) + local[-1] if len(local) > 2 else local[0] + '*'
+        masked_local = local[0] + '*' * (len(local) - 2) + \
+            local[-1] if len(local) > 2 else local[0] + '*'
         return f"{masked_local}@{domain}"
 
     @staticmethod
@@ -286,7 +291,8 @@ class Anonymizer:
             # Find and replace in original text
             idx = anonymized.find(match.value)
             if idx != -1:
-                anonymized = anonymized[:idx] + replacement + anonymized[idx + len(match.value):]
+                anonymized = anonymized[:idx] + replacement + \
+                    anonymized[idx + len(match.value):]
 
         return anonymized
 
@@ -307,10 +313,12 @@ class Anonymizer:
 
         for col, matches in pii_columns.items():
             if matches:
-                method = column_methods.get(col, "mask") if column_methods else "mask"
+                method = column_methods.get(
+                    col, "mask") if column_methods else "mask"
 
                 # Apply anonymization to column values
-                df_anon[col] = df[col].apply(lambda x: cls.anonymize_text(str(x), method=method))
+                df_anon[col] = df[col].apply(
+                    lambda x: cls.anonymize_text(str(x), method=method))
 
         return df_anon
 
@@ -365,10 +373,12 @@ class KAnonymity:
             df_result = pd.concat(valid_groups, ignore_index=True)
         else:
             # If no groups meet k, suppress identifiers
-            logger.warning(f"Cannot achieve k={k} anonymity. Suppressing quasi-identifiers.")
+            logger.warning(
+                f"Cannot achieve k={k} anonymity. Suppressing quasi-identifiers.")
             for col in quasi_identifiers:
                 df_result[col] = df_result[col].apply(
-                    lambda x: Anonymizer.suppress_pii(str(x)) if pd.notna(x) else x
+                    lambda x: Anonymizer.suppress_pii(
+                        str(x)) if pd.notna(x) else x
                 )
 
         return df_result
@@ -383,7 +393,7 @@ class KAnonymity:
     def get_anonymity_report(df: pd.DataFrame, quasi_identifiers: List[str]) -> Dict[str, Any]:
         """Generate detailed k-anonymity report"""
         k = KAnonymity.calculate_k_anonymity(df, quasi_identifiers)
-        
+
         grouped = df.groupby(quasi_identifiers, dropna=False).size()
         group_distribution = grouped.describe().to_dict()
 
@@ -439,7 +449,7 @@ class DifferentialPrivacy:
 
     @staticmethod
     def apply_differential_privacy(df: pd.DataFrame, numeric_columns: List[str],
-                                  epsilon: float = 1.0, method: str = "laplace") -> pd.DataFrame:
+                                   epsilon: float = 1.0, method: str = "laplace") -> pd.DataFrame:
         """
         Apply differential privacy to numeric columns.
 
@@ -459,9 +469,11 @@ class DifferentialPrivacy:
                 data = df_private[col].values.astype(float)
 
                 if method == "laplace":
-                    noisy_data = DifferentialPrivacy.add_laplace_noise(data, epsilon)
+                    noisy_data = DifferentialPrivacy.add_laplace_noise(
+                        data, epsilon)
                 else:
-                    noisy_data = DifferentialPrivacy.add_gaussian_noise(data, epsilon)
+                    noisy_data = DifferentialPrivacy.add_gaussian_noise(
+                        data, epsilon)
 
                 df_private[col] = noisy_data
 
@@ -510,7 +522,8 @@ class PrivacyAudit:
             pii_found = PIIDetector.detect_pii_in_dataframe(df)
             report["privacy_checks"]["pii_detected"] = bool(pii_found)
             report["privacy_checks"]["pii_columns"] = list(pii_found.keys())
-            report["privacy_checks"]["pii_count"] = sum(len(v) for v in pii_found.values())
+            report["privacy_checks"]["pii_count"] = sum(
+                len(v) for v in pii_found.values())
 
         # Check k-anonymity
         if quasi_identifiers:

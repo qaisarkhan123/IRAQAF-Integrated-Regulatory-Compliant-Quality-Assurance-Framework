@@ -104,7 +104,8 @@ class EncryptionValidator:
                     for algo_key in ['algorithm', 'cipher', 'method', 'type']:
                         if algo_key in section:
                             algo_val = str(section[algo_key]).lower()
-                            algorithm = EncryptionValidator._parse_algorithm(algo_val)
+                            algorithm = EncryptionValidator._parse_algorithm(
+                                algo_val)
 
                     # Look for key length
                     for length_key in ['key_length', 'key_size', 'bits']:
@@ -123,7 +124,8 @@ class EncryptionValidator:
                     for tls_key in ['tls_version', 'min_tls_version', 'ssl_version']:
                         if tls_key in section:
                             tls_val = str(section[tls_key]).lower()
-                            tls_version = EncryptionValidator._parse_tls_version(tls_val)
+                            tls_version = EncryptionValidator._parse_tls_version(
+                                tls_val)
 
                     # Look for key rotation
                     for rotation_key in ['key_rotation_days', 'rotation_period']:
@@ -135,19 +137,23 @@ class EncryptionValidator:
 
         # Validate and score
         if algorithm == EncryptionAlgorithm.UNKNOWN:
-            issues.append("Encryption algorithm not specified in configuration")
+            issues.append(
+                "Encryption algorithm not specified in configuration")
 
         if key_length < 256:
             issues.append(f"Key length {key_length} is below required 256-bit")
 
         if tls_version in [TLSVersion.UNKNOWN, TLSVersion.TLS_1_0, TLSVersion.TLS_1_1]:
-            issues.append(f"TLS version {tls_version.value} is outdated or not found")
+            issues.append(
+                f"TLS version {tls_version.value} is outdated or not found")
 
         if key_rotation > EncryptionValidator.RECOMMENDED_KEY_ROTATION_DAYS:
-            issues.append(f"Key rotation period {key_rotation} days exceeds recommendation ({EncryptionValidator.RECOMMENDED_KEY_ROTATION_DAYS} days)")
+            issues.append(
+                f"Key rotation period {key_rotation} days exceeds recommendation ({EncryptionValidator.RECOMMENDED_KEY_ROTATION_DAYS} days)")
 
         # Calculate score
-        score = EncryptionValidator._calculate_score(algorithm, key_length, tls_version, issues)
+        score = EncryptionValidator._calculate_score(
+            algorithm, key_length, tls_version, issues)
 
         return EncryptionConfig(
             algorithm=algorithm,
@@ -263,27 +269,32 @@ class EncryptionValidator:
 
         # Check algorithm
         if enc_config.algorithm != EncryptionAlgorithm.AES_256:
-            messages.append(f"⚠️ Algorithm: {enc_config.algorithm.value} (required: AES-256)")
+            messages.append(
+                f"⚠️ Algorithm: {enc_config.algorithm.value} (required: AES-256)")
         else:
             messages.append(f"✓ Algorithm: {enc_config.algorithm.value}")
 
         # Check key length
         if enc_config.key_length < 256:
-            messages.append(f"⚠️ Key length: {enc_config.key_length}-bit (required: 256-bit)")
+            messages.append(
+                f"⚠️ Key length: {enc_config.key_length}-bit (required: 256-bit)")
         else:
             messages.append(f"✓ Key length: {enc_config.key_length}-bit")
 
         # Check TLS version
         if enc_config.tls_version not in [TLSVersion.TLS_1_3, TLSVersion.TLS_1_2]:
-            messages.append(f"⚠️ TLS version: {enc_config.tls_version.value} (required: 1.2+)")
+            messages.append(
+                f"⚠️ TLS version: {enc_config.tls_version.value} (required: 1.2+)")
         else:
             messages.append(f"✓ TLS version: {enc_config.tls_version.value}")
 
         # Check key rotation
         if enc_config.key_rotation_days > EncryptionValidator.RECOMMENDED_KEY_ROTATION_DAYS:
-            messages.append(f"⚠️ Key rotation: {enc_config.key_rotation_days} days (recommended: {EncryptionValidator.RECOMMENDED_KEY_ROTATION_DAYS} days)")
+            messages.append(
+                f"⚠️ Key rotation: {enc_config.key_rotation_days} days (recommended: {EncryptionValidator.RECOMMENDED_KEY_ROTATION_DAYS} days)")
         else:
-            messages.append(f"✓ Key rotation: {enc_config.key_rotation_days} days")
+            messages.append(
+                f"✓ Key rotation: {enc_config.key_rotation_days} days")
 
         # Add any additional issues
         messages.extend(enc_config.issues)
@@ -334,7 +345,8 @@ class EncryptionValidator:
     @staticmethod
     def generate_encryption_report(config: Dict[str, Any]) -> str:
         """Generate human-readable encryption audit report"""
-        is_compliant, enc_config, messages = EncryptionValidator.validate_encryption_config(config)
+        is_compliant, enc_config, messages = EncryptionValidator.validate_encryption_config(
+            config)
 
         report = f"""
 Encryption Configuration Audit Report
