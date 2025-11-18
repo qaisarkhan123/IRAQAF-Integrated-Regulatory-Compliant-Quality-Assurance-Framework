@@ -10,12 +10,16 @@ import json
 import logging
 from flask import Flask, render_template_string, jsonify, request
 from datetime import datetime
+from flask_cors import CORS
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
+
+# Enable CORS for all routes
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
@@ -417,29 +421,59 @@ HTML_TEMPLATE = '''
     <script>
         async function load() {
             try {
-                const score = await fetch('/api/transparency-score').then(r => r.json());
-                const modules = await fetch('/api/modules').then(r => r.json());
+                console.log('Starting data load...');
                 
-                document.getElementById('score').textContent = (score.transparency_score * 100).toFixed(0) + '%';
-                document.getElementById('kpi1').textContent = (score.categories['Explanation Generation'].score * 100).toFixed(0) + '%';
-                document.getElementById('kpi2').textContent = (score.categories['Explanation Reliability'].score * 100).toFixed(0) + '%';
-                document.getElementById('kpi3').textContent = (score.categories['Traceability'].score * 100).toFixed(0) + '%';
-                document.getElementById('kpi4').textContent = (score.categories['Documentation'].score * 100).toFixed(0) + '%';
+                // Fetch transparency score
+                console.log('Fetching /api/transparency-score...');
+                const scoreResp = await fetch('/api/transparency-score');
+                if (!scoreResp.ok) throw new Error(`HTTP ${scoreResp.status}: ${scoreResp.statusText}`);
+                const score = await scoreResp.json();
+                console.log('Score data received:', score);
                 
+                // Fetch modules
+                console.log('Fetching /api/modules...');
+                const modsResp = await fetch('/api/modules');
+                if (!modsResp.ok) throw new Error(`HTTP ${modsResp.status}: ${modsResp.statusText}`);
+                const modules = await modsResp.json();
+                console.log('Modules data received:', modules);
+                
+                // Update score
+                const scoreVal = Math.round(score.transparency_score * 100);
+                document.getElementById('score').textContent = scoreVal + '%';
+                console.log('Updated score to:', scoreVal + '%');
+                
+                // Update KPIs
+                document.getElementById('kpi1').textContent = Math.round(score.categories['Explanation Generation'].score * 100) + '%';
+                document.getElementById('kpi2').textContent = Math.round(score.categories['Explanation Reliability'].score * 100) + '%';
+                document.getElementById('kpi3').textContent = Math.round(score.categories['Traceability'].score * 100) + '%';
+                document.getElementById('kpi4').textContent = Math.round(score.categories['Documentation'].score * 100) + '%';
+                
+                // Update modules grid
                 const grid = document.getElementById('modules');
-                grid.innerHTML = Object.entries(modules).map(([name, mod]) => {
-                    const scorePercent = (mod.score * 100).toFixed(0);
+                const cards = Object.entries(modules).map(([name, mod]) => {
+                    const scorePercent = Math.round(mod.score * 100);
                     return `<div class="card">
                         <div class="card-title">${name} - ${scorePercent}%</div>
                         <p style="color: var(--muted); font-size: 0.9rem;">${mod.description}</p>
                     </div>`;
                 }).join('');
+                grid.innerHTML = cards;
+                console.log('Rendered', Object.keys(modules).length, 'modules');
+                console.log('Data load complete!');
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                document.getElementById('score').textContent = 'Error loading data';
+                console.error('Stack:', error.stack);
+                document.getElementById('score').textContent = 'Error: ' + error.message;
+                document.getElementById('modules').innerHTML = '<p style="color: red; padding: 20px;">Error loading data. Check browser console for details.</p>';
             }
         }
-        load();
+        
+        // Run on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', load);
+        } else {
+            load();
+        }
     </script>
 </body>
 </html>
