@@ -11,6 +11,7 @@ from typing import Callable, Optional
 # 🎨 DARK MODE & THEME MANAGEMENT
 # ============================================================================
 
+
 def init_theme_state():
     """Initialize theme state in session"""
     if "dark_mode" not in st.session_state:
@@ -66,16 +67,22 @@ def get_theme_css(dark_mode: bool) -> str:
 
 
 def render_theme_toggle():
-    """Render theme toggle button"""
-    col1, col2 = st.columns([1, 3])
+    """Render theme toggle button with improved styling"""
+    # Create compact horizontal layout
+    col1, col2, col3 = st.columns([0.8, 1.2, 1])
+    
     with col1:
-        if st.button("🌓 Toggle Dark Mode", use_container_width=True):
+        theme_icon = "🌙" if st.session_state.dark_mode else "☀️"
+        if st.button(f"{theme_icon}", help="Toggle dark mode", use_container_width=True, key="theme_toggle_btn"):
             st.session_state.dark_mode = not st.session_state.dark_mode
             st.rerun()
     
     with col2:
-        theme_text = "🌙 Dark Mode" if st.session_state.dark_mode else "☀️ Light Mode"
-        st.markdown(f"**Current: {theme_text}**")
+        theme_text = "Dark Mode" if st.session_state.dark_mode else "Light Mode"
+        st.markdown(f"<div style='padding: 0.5rem; text-align: center;'><small><b>{theme_text}</b></small></div>", unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("")  # Spacer
 
 
 # ============================================================================
@@ -98,14 +105,15 @@ def animate_metric_change(old_value: float, new_value: float, label: str = "Valu
     """Animate metric change with visual indicator"""
     delta = new_value - old_value
     delta_color = "green" if delta > 0 else "red" if delta < 0 else "gray"
-    
+
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric(label, f"{new_value:.2f}")
     with col2:
         st.metric("Change", f"{delta:+.2f}")
     with col3:
-        st.metric("% Change", f"{(delta/old_value)*100:+.1f}%" if old_value != 0 else "N/A")
+        st.metric(
+            "% Change", f"{(delta/old_value)*100:+.1f}%" if old_value != 0 else "N/A")
 
 
 # ============================================================================
@@ -128,14 +136,14 @@ def get_keyboard_shortcuts() -> dict:
 def render_keyboard_shortcuts():
     """Render keyboard shortcuts help panel"""
     shortcuts = get_keyboard_shortcuts()
-    
+
     st.markdown("### ⌨️ Keyboard Shortcuts")
-    
+
     cols = st.columns(2)
     for idx, (shortcut, action) in enumerate(shortcuts.items()):
         with cols[idx % 2]:
             st.markdown(f"**{shortcut}** → {action}")
-    
+
     st.markdown("---")
     st.info("💡 Tip: Press `?` to show this help panel anytime")
 
@@ -158,11 +166,11 @@ def get_session_duration() -> str:
     """Get formatted session duration"""
     if "session_start" not in st.session_state:
         return "Unknown"
-    
+
     duration = datetime.now() - st.session_state.session_start
     hours = duration.seconds // 3600
     minutes = (duration.seconds % 3600) // 60
-    
+
     if hours > 0:
         return f"{hours}h {minutes}m"
     else:
@@ -170,37 +178,37 @@ def get_session_duration() -> str:
 
 
 def render_session_info():
-    """Render session information widget"""
-    st.markdown("### 📊 Session Information")
+    """Render compact session information widget"""
+    st.markdown("<h5 style='margin: 0.5rem 0;'>📊 Session Info</h5>", unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
+    # Compact 3-column layout with minimal spacing
+    col1, col2, col3 = st.columns(3, gap="small")
     
     with col1:
         st.metric(
-            "Session Duration",
+            "Duration",
             get_session_duration(),
             help="Time since dashboard opened"
         )
     
     with col2:
         st.metric(
-            "Actions Performed",
+            "Actions",
             st.session_state.get("actions_count", 0),
-            help="Number of actions in this session"
+            help="Actions performed"
         )
     
     with col3:
         last_activity = st.session_state.get("last_activity", datetime.now())
         time_since_activity = datetime.now() - last_activity
+        time_str = f"{int(time_since_activity.total_seconds())}s" if time_since_activity.total_seconds() < 60 else "Active"
         st.metric(
             "Last Activity",
-            f"{int(time_since_activity.total_seconds())}s ago",
-            help="Time since last user action"
+            time_str,
+            help="Time since last action"
         )
     
     st.divider()
-
-
 def increment_action_count():
     """Increment action counter"""
     if "actions_count" not in st.session_state:
@@ -216,7 +224,7 @@ def increment_action_count():
 def render_quick_stats(stats: dict):
     """Render quick statistics dashboard"""
     st.markdown("### 📈 Quick Stats")
-    
+
     cols = st.columns(len(stats))
     for idx, (label, (value, delta, icon)) in enumerate(stats.items()):
         with cols[idx]:
@@ -227,27 +235,27 @@ def render_action_buttons(actions: dict[str, Callable]):
     """Render action buttons in a organized layout"""
     cols = st.columns(len(actions))
     results = {}
-    
+
     for idx, (label, callback) in enumerate(actions.items()):
         with cols[idx]:
             if st.button(label, use_container_width=True):
                 results[label] = callback()
                 st.success(f"✅ {label} completed!")
                 increment_action_count()
-    
+
     return results
 
 
 def render_info_cards(cards: dict[str, dict]):
     """Render information cards with icons and descriptions"""
     cols = st.columns(min(3, len(cards)))
-    
+
     for idx, (title, card_data) in enumerate(cards.items()):
         with cols[idx % len(cols)]:
             icon = card_data.get("icon", "📌")
             description = card_data.get("description", "")
             color = card_data.get("color", "info")
-            
+
             if color == "success":
                 st.success(f"{icon} **{title}**\n{description}")
             elif color == "warning":
@@ -271,16 +279,26 @@ def inject_custom_css():
         transition: all 0.3s ease-in-out;
     }
     
-    /* Enhanced buttons */
+    /* Enhanced buttons - compact and pretty */
     .stButton > button {
         font-weight: 600;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        height: auto;
     }
     
     .stButton > button:hover {
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         transform: translateY(-2px);
+    }
+    
+    /* Compact button for theme toggle */
+    [key="theme_toggle_btn"] {
+        font-size: 1.2rem !important;
+        padding: 0.4rem !important;
+        height: 2.5rem !important;
     }
     
     /* Enhanced cards */
@@ -294,12 +312,21 @@ def inject_custom_css():
     .stTabs [data-baseweb="tab-list"] button {
         border-radius: 8px;
         font-weight: 500;
+        padding: 0.75rem 1.5rem;
     }
     
-    /* Enhanced metrics */
+    /* Enhanced metrics - compact version */
+    [data-testid="stMetric"] {
+        padding: 0.75rem 0.5rem;
+    }
+    
     [data-testid="stMetricValue"] {
-        font-size: 2.5rem;
+        font-size: 1.8rem;
         font-weight: 700;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        font-size: 0.85rem;
     }
     
     /* Sidebar styling */
@@ -311,6 +338,14 @@ def inject_custom_css():
     .streamlit-expanderHeader {
         border-radius: 8px;
         font-weight: 500;
+        padding: 1rem;
+    }
+    
+    /* Divider styling */
+    hr {
+        margin: 0.5rem 0;
+        border: none;
+        border-top: 1px solid #e5e5e5;
     }
     
     /* Badge styling */
@@ -350,11 +385,11 @@ def initialize_ux_enhancements():
     init_theme_state()
     init_session_state()
     inject_custom_css()
-    
+
     # Apply theme CSS
     if st.session_state.dark_mode:
         st.markdown(get_theme_css(True), unsafe_allow_html=True)
-    
+
     return True
 
 
