@@ -96,14 +96,15 @@ SECURITY_MODULES = {
 # DATA GENERATION FOR VISUALIZATIONS
 # ============================================================================
 
+
 def get_chart_data():
     """Generate data for all visualizations"""
-    
+
     # Module scores for bar chart
     module_scores = {
         name: 85 + (hash(name) % 15) for name in SECURITY_MODULES.keys()
     }
-    
+
     # Risk distribution for pie chart
     risk_distribution = {
         "Low Risk": 65,
@@ -111,7 +112,7 @@ def get_chart_data():
         "High Risk": 8,
         "Critical": 2
     }
-    
+
     # Time series data for trend
     today = datetime.now()
     trend_data = []
@@ -122,7 +123,7 @@ def get_chart_data():
             "date": date.strftime("%m/%d"),
             "score": round(score, 1)
         })
-    
+
     # Risk matrix heatmap data
     heatmap_data = {
         "Confidentiality": [8, 7, 6, 9, 8],
@@ -131,7 +132,7 @@ def get_chart_data():
         "Authentication": [9, 9, 8, 9, 9],
         "Authorization": [8, 7, 8, 8, 9]
     }
-    
+
     return {
         "module_scores": module_scores,
         "risk_distribution": risk_distribution,
@@ -142,6 +143,7 @@ def get_chart_data():
 # ============================================================================
 # MAIN HTML TEMPLATE WITH CHART.JS VISUALIZATIONS
 # ============================================================================
+
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -679,6 +681,7 @@ HTML_TEMPLATE = """
 # FLASK ROUTES
 # ============================================================================
 
+
 @app.route('/')
 def index():
     """Render main dashboard with visualizations"""
@@ -690,12 +693,14 @@ def index():
         timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     )
 
+
 @app.route('/api/module/<module_name>')
 def get_module(module_name):
     """Get specific module data"""
     if module_name in SECURITY_MODULES:
         return jsonify(SECURITY_MODULES[module_name])
     return jsonify({"error": "Module not found"}), 404
+
 
 @app.route('/api/health')
 def health():
@@ -706,6 +711,7 @@ def health():
         "modules": len(SECURITY_MODULES)
     })
 
+
 @app.route('/api/analytics')
 def analytics():
     """Get analytics data"""
@@ -715,6 +721,7 @@ def analytics():
 # MAIN EXECUTION
 # ============================================================================
 
+
 if __name__ == '__main__':
     print("\n" + "="*70)
     print("PRIVACY & SECURITY HUB - ENHANCED FLASK IMPLEMENTATION")
@@ -722,7 +729,7 @@ if __name__ == '__main__':
     print("> Starting Flask app on port 8502...")
     print("> Running on http://127.0.0.1:8502")
     print("> Press CTRL+C to stop\n")
-    
+
     app.run(
         host='127.0.0.1',
         port=8502,
