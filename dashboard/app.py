@@ -863,7 +863,7 @@ with st.sidebar:
         st.markdown("---")
         render_logout_button()
     st.markdown("---")
-    
+
     # UX Enhancements - Session Info
     if UX_ENHANCEMENTS_AVAILABLE:
         render_session_info()
@@ -1404,7 +1404,7 @@ with st.sidebar.expander("🎨 Theme", expanded=False):
         disabled=_LOCK,
         key="theme_mode_selector"
     )
-    
+
     # UX Enhancements - Dark mode toggle
     if UX_ENHANCEMENTS_AVAILABLE:
         st.divider()
@@ -9571,7 +9571,44 @@ if st.sidebar.checkbox("🔧 Show Debug Info", value=False, key="debug_mode"):
 # The content integrates with the main app after login
 
 if L2_MONITOR_AVAILABLE and show_l2_privacy_security_monitor is not None:
-    with st.expander(' L2 Privacy/Security Monitor', expanded=False):
+    # Add bold visual header before the expander
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 16px 20px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        border-left: 5px solid #ff6b6b;
+    ">
+        <div style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        ">
+            <span style="
+                font-size: 24px;
+                font-weight: bold;
+                color: white;
+            ">🔐</span>
+            <div>
+                <h3 style="
+                    margin: 0;
+                    color: white;
+                    font-size: 18px;
+                    font-weight: 700;
+                    letter-spacing: 0.5px;
+                ">L2 PRIVACY & SECURITY MONITOR</h3>
+                <p style="
+                    margin: 4px 0 0 0;
+                    color: rgba(255, 255, 255, 0.85);
+                    font-size: 12px;
+                ">Advanced compliance and security analysis</p>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.expander('📊 **Click to expand security details**', expanded=False):
         try:
             show_l2_privacy_security_monitor()
         except Exception as e:
