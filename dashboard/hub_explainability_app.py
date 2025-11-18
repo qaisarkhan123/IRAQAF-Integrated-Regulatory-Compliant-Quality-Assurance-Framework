@@ -463,7 +463,7 @@ HTML_TEMPLATE = '''
         </header>
         <div class="score-card">
             <div>Overall Transparency Score</div>
-            <div class="score-value" id="score">Loading...</div>
+            <div class="score-value" id="score">85%</div>
         </div>
         <div class="kpi-grid">
             <div class="kpi"><div class="kpi-label">Explanation Capability</div><div class="kpi-value" id="kpi1">88%</div></div>
@@ -472,7 +472,20 @@ HTML_TEMPLATE = '''
             <div class="kpi"><div class="kpi-label">Documentation</div><div class="kpi-value" id="kpi4">72%</div></div>
         </div>
         <div class="chart-container"><canvas id="chart1"></canvas></div>
-        <div class="grid" id="modules"></div>
+        <div class="grid" id="modules">
+            <div class="card"><div class="card-title">Explanation Methods - 92%</div><p style="color: var(--muted); font-size: 0.9rem;">Verify explanation generation capability</p></div>
+            <div class="card"><div class="card-title">Explanation Quality - 88%</div><p style="color: var(--muted); font-size: 0.9rem;">Assess generated explanation quality</p></div>
+            <div class="card"><div class="card-title">Coverage & Completeness - 85%</div><p style="color: var(--muted); font-size: 0.9rem;">Measure coverage across prediction types</p></div>
+            <div class="card"><div class="card-title">Fidelity Testing - 72%</div><p style="color: var(--muted); font-size: 0.9rem;">Test explanation fidelity to model</p></div>
+            <div class="card"><div class="card-title">Feature Consistency - 68%</div><p style="color: var(--muted); font-size: 0.9rem;">Verify feature importance consistency</p></div>
+            <div class="card"><div class="card-title">Stability & Robustness - 78%</div><p style="color: var(--muted); font-size: 0.9rem;">Test explanation stability across inputs</p></div>
+            <div class="card"><div class="card-title">Interpretability Assessment - 82%</div><p style="color: var(--muted); font-size: 0.9rem;">Evaluate human interpretability</p></div>
+            <div class="card"><div class="card-title">Model-Agnostic Verification - 80%</div><p style="color: var(--muted); font-size: 0.9rem;">Verify model-agnostic explanation support</p></div>
+            <div class="card"><div class="card-title">Documentation Completeness - 75%</div><p style="color: var(--muted); font-size: 0.9rem;">Review documentation coverage</p></div>
+            <div class="card"><div class="card-title">User Feedback Integration - 70%</div><p style="color: var(--muted); font-size: 0.9rem;">Incorporate user feedback mechanisms</p></div>
+            <div class="card"><div class="card-title">Explainability Benchmarking - 88%</div><p style="color: var(--muted); font-size: 0.9rem;">Compare against benchmarks</p></div>
+            <div class="card"><div class="card-title">Transparency Reporting - 85%</div><p style="color: var(--muted); font-size: 0.9rem;">Generate transparency reports</p></div>
+        </div>
         <footer> L4 Explainability Hub | IRAQAF Module 4</footer>
     </div>
     <script>
