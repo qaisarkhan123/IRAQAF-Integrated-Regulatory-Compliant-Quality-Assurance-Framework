@@ -1,177 +1,218 @@
 #  Quick Start Guide - IRAQAF
 
-## Dashboard Launch
+## What is IRAQAF?
 
-### Automated Dual Dashboard (Recommended)
-\\\ash
+IRAQAF is a **Regulatory Compliance Framework** for AI systems. It assesses compliance across **5 levels (L1-L5)** and provides real-time dashboards for monitoring and improvement.
+
+##  Three Dashboards
+
+| Dashboard | Port | Purpose | Access |
+|-----------|------|---------|--------|
+| **Main Dashboard** | 8501 | L1-L5 Overview | Login required |
+| **Security Hub** | 8502 | Security/Privacy deep-dive | Open API |
+| **L4 Explainability Hub** | 8503 | Explainability assessment | Open API |
+
+##  60-Second Setup
+
+`powershell
+# 1. Activate virtual environment
+venv\Scripts\activate
+
+# 2. Launch all dashboards
 python launch_dual_dashboards.py
-\\\
 
-### Manual Launch
+# 3. Open in browser
+# Main: http://localhost:8501
+# Security: http://localhost:8502
+# L4 Hub: http://localhost:8503
+`
 
-**Terminal 1 - Main Dashboard (Port 8501)**
-\\\ash
-streamlit run dashboard/app.py --server.port 8501
-\\\
+**Done!** All three dashboards are running.
 
-**Terminal 2 - Security Hub (Port 8502)**
-\\\ash
-python dashboard/hub_flask_app.py
-\\\
+##  Detailed Setup
 
-## Access Dashboard
+### Step 1: Clone Repository
+`ash
+git clone https://github.com/qaisarkhan123/IRAQAF.git
+cd IRAQAF
+`
 
-- **Main Dashboard**: http://localhost:8501
-- **Security Hub**: http://localhost:8502
-- **Login**: admin / admin_default_123
+### Step 2: Create Virtual Environment
+`ash
+# Windows
+python -m venv venv
+venv\Scripts\activate
 
-## Process Management
+# macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
+`
 
-### Kill All Python Processes
-\\\powershell
-Get-Process python -ErrorAction SilentlyContinue | Stop-Process -Force
-\\\
-
-### Kill Specific Port
-\\\powershell
-netstat -ano | findstr :8501
-taskkill /PID <PID> /F
-\\\
-
-## CLI Modules
-
-### L1 - Governance & Regulatory
-\\\ash
-python -m cli.iraqaf_cli run --module L1 --config configs/governance.yaml
-\\\
-
-### L2 - Privacy & Security
-\\\ash
-python -m cli.iraqaf_cli run --module L2 --config configs/security.yaml
-\\\
-
-### L3 - Fairness
-\\\ash
-python -m cli.iraqaf_cli run --module L3 --config configs/fairness.yaml
-\\\
-
-### L4 - Explainability
-\\\ash
-python -m cli.iraqaf_cli run --module L4 --config configs/explainability.yaml
-\\\
-
-### L5 - Operations
-\\\ash
-python -m cli.iraqaf_cli run --module L5 --config configs/operations.yaml
-\\\
-
-## Data & Reports
-
-### Generate Evidence Report
-1. Dashboard  Evidence Management  Sync & Export
-2. Select format (CSV/PDF/JSON/Word)
-3. Download report
-
-### Access Reports Directory
-\\\ash
-ls reports/
-ls reports/L1-*.json
-\\\
-
-## Installation & Setup
-
-### Install Dependencies
-\\\ash
+### Step 3: Install Dependencies
+`ash
 pip install -r requirements.txt
-\\\
+`
 
-### Update Dependencies
-\\\ash
-pip install -r requirements.txt --upgrade
-\\\
+### Step 4: Launch Dashboards
+`ash
+# Option A: Launch all 3 dashboards together
+python launch_dual_dashboards.py
 
-## Testing
+# Option B: Launch individual dashboards
+# Main Dashboard
+streamlit run dashboard/app.py
 
-### Run Unit Tests
-\\\ash
-pytest tests/ -v
-\\\
+# Security Hub
+python dashboard/hub_flask_app.py
 
-### Run with Coverage
-\\\ash
-pytest tests/ --cov=dashboard --cov-report=html
-\\\
+# L4 Explainability Hub
+python dashboard/hub_explainability_app.py
+`
 
-## Database
+### Step 5: Access Dashboards
 
-### Reset Database
-\\\ash
-rm iraqaf_compliance.db
-\\\
+**Main Dashboard** (Streamlit)
+- URL: http://localhost:8501
+- Login: admin / admin_default_123
+- Features: L1-L5 modules, interactive tours, configuration
 
-### Backup Database
-\\\ash
-cp iraqaf_compliance.db iraqaf_compliance.db.backup
-\\\
+**Security Hub** (Flask)
+- URL: http://localhost:8502
+- No login required
+- Features: 10 security/privacy checks, real-time scoring
 
-## Troubleshooting
+**L4 Explainability Hub** (Flask)
+- URL: http://localhost:8503
+- No login required
+- Features: 12 explainability checks, transparency scoring, test results
+
+##  L4 Explainability Hub
+
+The dedicated L4 hub provides comprehensive explainability assessment:
+
+### 4 Categories (Weighted)
+1. **Explanation Capability** (35%) - Can the system explain its decisions?
+2. **Explanation Reliability** (30%) - Are explanations accurate and stable?
+3. **Traceability & Auditability** (25%) - Can decisions be fully traced?
+4. **Documentation Transparency** (10%) - Is the system well documented?
+
+### 12 Assessment Checks
+- Explanation Methods (SHAP/LIME)
+- Explanation Quality
+- Coverage & Completeness
+- Fidelity Testing
+- Feature Consistency
+- Stability Testing
+- Prediction Logging
+- Model Versioning
+- Audit Trail
+- Documentation
+- Intended Use
+- Change Management
+
+### Test Results Included
+-  Fidelity Test (mask features, measure change)
+-  Consistency Test (Jaccard similarity for similar cases)
+-  Stability Test (correlation under noise)
+-  Audit Trail Test (traceability verification)
+
+##  API Endpoints
+
+### Main Dashboard
+`
+GET  http://localhost:8501          # Streamlit UI
+`
+
+### Security Hub
+`
+GET  http://localhost:8502/                    # Dashboard
+GET  http://localhost:8502/api/modules         # All modules
+GET  http://localhost:8502/api/module/<name>   # Specific module
+GET  http://localhost:8502/health              # Health check
+`
+
+### L4 Explainability Hub
+`
+GET  http://localhost:8503/                       # Dashboard
+GET  http://localhost:8503/api/modules            # 12 checks
+GET  http://localhost:8503/api/categories         # 4 categories
+GET  http://localhost:8503/api/transparency-score # Overall score
+GET  http://localhost:8503/api/tests              # Test results
+GET  http://localhost:8503/health                 # Health check
+`
+
+##  Troubleshooting
 
 ### Port Already in Use
-\\\powershell
-streamlit run dashboard/app.py --server.port=8503
-\\\
+`powershell
+# Find process using port 8501
+netstat -ano | findstr :8501
 
-### Security Hub Not Accessible (Port 8502)
-\\\powershell
-# Install Flask if needed
-pip install flask
+# Kill process (replace PID)
+taskkill /PID <PID> /F
+`
 
-# Launch the hub
-python dashboard/hub_flask_app.py
-\\\
+### Virtual Environment Not Activating
+`powershell
+# Try absolute path
+.\venv\Scripts\activate.ps1
 
-### Clear Streamlit Cache
-\\\ash
-streamlit cache clear
-\\\
+# Or run PowerShell as Admin
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+`
 
-## Common Issues
+### Dependencies Not Installing
+`ash
+pip install --upgrade pip
+pip install -r requirements.txt --force-reinstall
+`
 
-| Issue | Solution |
-|-------|----------|
-| Port 8501 in use | Use \--server.port=8503\ |
-| Port 8502 in use | Kill with \Get-Process python \| Stop-Process -Force\ |
-| Module not found | Run \pip install -r requirements.txt\ |
-| Session timeout | Log back in (8-hour default) |
-| Upload fails | Check disk space in \data/uploads/\ |
-| Flask hub crashes | Install Flask: \pip install flask\ |
+### Dashboards Not Responding
+`powershell
+# Kill all Python processes
+taskkill /F /IM python.exe
 
-## Performance Tips
+# Restart launcher
+python launch_dual_dashboards.py
+`
 
-- Limit file uploads to <100MB per session
-- Export reports in batches
-- Clear cache: \streamlit cache clear\
-- Close unused tabs to reduce memory
-- Run Hub on separate terminal
+##  Documentation
 
-## Security Hub API Endpoints
+- **README.md** - Full project documentation
+- **QUICK_START.md** - This guide
+- **SECURITY_HUB_ENHANCEMENTS.md** - Security hub details
 
-\\\ash
-# Get dashboard
-curl http://localhost:8502/
+##  Understanding L1-L5
 
-# Get module data
-curl http://localhost:8502/api/module/PII_Detection
+- **L1 - Transparency** - Basic system documentation
+- **L2 - Auditability** - Decision logging and tracking
+- **L3 - Robustness** - Error handling and reliability
+- **L4 - Explainability** - Decision explanation capability
+- **L5 - Contestability** - User appeal and recourse mechanisms
 
-# Health check
-curl http://localhost:8502/health
+##  Tips
 
-# Analytics data
-curl http://localhost:8502/api/analytics
-\\\
+- **First Time?** Start with the Main Dashboard (port 8501)
+- **Deep Dive?** Check Security Hub (port 8502) for security focus
+- **Explainability Focus?** Use L4 Hub (port 8503) for detailed assessment
+- **API Integration?** Use the exposed endpoints for programmatic access
+
+##  Next Steps
+
+1.  Dashboards running? Explore L1-L5 modules
+2.  Check Security Hub for compliance gaps
+3.  Review L4 Hub for explainability requirements
+4.  Export reports for stakeholders
+5.  Configure compliance thresholds
+
+##  Support
+
+- Email: support@iraqaf.example.com
+- GitHub Issues: https://github.com/qaisarkhan123/IRAQAF/issues
+- Documentation: https://iraqaf.readthedocs.io
 
 ---
 
-**Last Updated**: November 2025  
-**Status**:  Production Ready  
-**Version**: 2.1 (Flask Hub)
+**Last Updated**: November 19, 2025
+**Version**: 2.0
+**Status**:  Production Ready

@@ -1,143 +1,207 @@
 # IRAQAF - Integrated Regulatory Compliant Quality Assurance Framework
 
-A comprehensive AI quality assurance and regulatory compliance framework for evaluating AI systems across five critical domains with dedicated security assessment tools.
+**Comprehensive AI System Compliance & Governance Platform**
 
-##  Overview
+## Overview
 
-IRAQAF provides a modular approach to evaluate AI systems across:
+IRAQAF is a production-ready framework for assessing AI system compliance across 5 regulatory levels (L1-L5). It provides dual-dashboard architecture combining Streamlit main dashboard with specialized Flask hubs for in-depth module assessment.
 
-- **L1 Governance & Regulatory** - Compliance requirements and audit trails
-- **L2 Privacy & Security** - Data protection, encryption, and security controls
-- **L3 Fairness** - Bias detection and fairness metrics
-- **L4 Explainability & Transparency** - Model interpretability and transparency
-- **L5 Operations & Monitoring** - Performance tracking and operational compliance
+##  Key Features
+
+- **5-Level Compliance Framework**: L1-L5 regulatory assessment
+- **Dual-Dashboard Architecture**: Streamlit main interface + Flask specialized hubs
+- **Real-Time Metrics**: Live compliance scoring and visualization
+- **12 Assessment Modules per Level**: Comprehensive evaluation criteria
+- **Role-Based Access**: Admin/User authentication and authorization
+- **Audit Trail**: Complete decision traceability
+
+##  Dual Dashboard System
+
+### 1. **Main Dashboard** (Streamlit - Port 8501)
+   - L1-L5 compliance modules overview
+   - Interactive tours for each level
+   - User authentication
+   - Dashboard configuration
+   - Module deep-dives and testing
+
+### 2. **Security & Privacy Hub** (Flask - Port 8502)
+   - 10 security/privacy assessment checks
+   - Real-time threat analysis
+   - Compliance score visualization
+   - Module breakdown with Chart.js
+   - RESTful API endpoints
+
+### 3. **L4 Explainability Hub** (Flask - Port 8503)  NEW
+   - 12 explainability assessment checks
+   - 4-category transparency scoring (35%, 30%, 25%, 10%)
+   - Fidelity, consistency, stability testing
+   - Audit trail verification
+   - Model versioning & provenance tracking
+   - Interactive transparency dashboard
 
 ##  Quick Start
 
 ### Prerequisites
-- Python 3.8+
-- Virtual environment (recommended)
+- Python 3.10+
+- Virtual environment (venv)
+- Flask 3.1.2
+- Streamlit 1.28+
 
 ### Installation
 
-\\\ash
-# Clone and setup
-git clone https://github.com/qaisarkhan123/IRAQAF-Integrated-Regulatory-Compliant-Quality-Assurance-Framework.git
-cd IRAQAF-Integrated-Regulatory-Compliant-Quality-Assurance-Framework
+`ash
+# Clone repository
+git clone https://github.com/qaisarkhan123/IRAQAF.git
+cd IRAQAF
 
-# Create and activate virtual environment
+# Create virtual environment
 python -m venv venv
-source venv/Scripts/activate  # Windows: venv\Scripts\activate
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
-\\\
+`
 
-### Launch Dual Dashboard System
+### Launch All Dashboards
 
-**Method 1: Automated Launcher (Recommended)**
-\\\ash
+`ash
 python launch_dual_dashboards.py
-\\\
+`
 
-**Method 2: Manual Launch**
-\\\ash
-# Terminal 1 - Main Dashboard (Port 8501)
-streamlit run dashboard/app.py --server.port 8501
-
-# Terminal 2 - Security Hub (Port 8502)
-python dashboard/hub_flask_app.py
-\\\
-
-### Access Dashboard
-
-Navigate to:
-- **Main Dashboard**: http://localhost:8501
+This starts:
+- **Main Dashboard**: http://localhost:8501 (requires login)
 - **Security Hub**: http://localhost:8502
+- **L4 Explainability Hub**: http://localhost:8503
 
-**Login Credentials**:
-- **Username**: admin
-- **Password**: admin_default_123
+### Launch Individual Components
 
-##  Dual Dashboard System
+`ash
+# Main Dashboard only
+streamlit run dashboard/app.py
 
-### Main Dashboard (Streamlit, Port 8501)
+# Security Hub only
+python dashboard/hub_flask_app.py
 
-The primary dashboard includes:
-1. **Evidence Management** - Upload, index, and manage compliance evidence
-2. **Five Core Modules** (L1-L5) with metrics and assessments
-3. **GQAS Aggregate Score** - Overall compliance scoring system
-4. **Real-time Visualization** - Interactive charts and dashboards
-5. **Export Capabilities** - CSV, PDF, JSON, Word formats
-6. **Role-Based Access Control** - Admin, Analyst, Viewer roles
-7. **Secure Authentication** - SHA-256 hashing with 8-hour timeout
-
-### Privacy & Security Hub (Flask, Port 8502)
-
-A lightweight, visualization-focused security assessment tool with 10 specialized modules.
-
-**Features**:
--  Interactive visualizations with Chart.js
--  Ultra-fast startup (<2 seconds) with zero crashes
--  Beautiful responsive UI with dark gradient theme
--  RESTful API endpoints for integration
--  Real-time KPI cards and analytics dashboard
+# L4 Explainability Hub only
+python dashboard/hub_explainability_app.py
+`
 
 ##  Technology Stack
 
-| Component | Technology | Port |
-|-----------|-----------|------|
-| Main Dashboard | Streamlit 1.x | 8501 |
-| Security Hub | Flask 3.1.2 + Chart.js | 8502 |
-| Database | SQLite | N/A |
-| Authentication | SHA-256 | N/A |
+| Component | Technology | Port | Purpose |
+|-----------|-----------|------|---------|
+| Main Dashboard | Streamlit 1.28+ | 8501 | L1-L5 compliance overview |
+| Security Hub | Flask 3.1.2 + Chart.js | 8502 | Security/Privacy deep-dive |
+| L4 Hub | Flask 3.1.2 + Chart.js | 8503 | Explainability assessment |
+| Backend | Python 3.10+ | - | Core logic & APIs |
+| Database | SQLite/PostgreSQL | - | Audit logs & history |
 
-##  Security Features
+##  Authentication
 
-- **End-to-end encryption** for sensitive data
-- **Role-based access control (RBAC)** - Admin, Analyst, Viewer roles
-- **Comprehensive audit logging** - Track all user actions
-- **Secure session management** - 8-hour timeout with SHA-256 hashing
-- **Input validation and sanitization** - Prevent injection attacks
+**Default Credentials** (change in production):
+- **Username**: admin
+- **Password**: admin_default_123
 
-##  Project Structure
-
-\\\
-IRAQAF/
- dashboard/              # Main Streamlit dashboards
-    app.py             # Main dashboard (L1-L5, GQAS scoring)
-    hub_flask_app.py   # Flask-based security hub
-    auth_ui.py         # Authentication UI
-    ...
- core/                  # Core modules
- configs/               # Configuration files
- data/                  # Data storage
- reports/               # Generated reports
- tests/                 # Test suite
- launch_dual_dashboards.py # Launcher script
- requirements.txt       # Dependencies
- README.md             # This file
-\\\
-
-##  Compliance Frameworks
-
-- GDPR
-- HIPAA
-- PCI-DSS
-- ISO 27001:2022
-- NIST Cybersecurity Framework 2.0
+Security hubs are accessible without authentication (open API access).
 
 ##  Documentation
 
-- **[QUICK_START.md](./QUICK_START.md)** - Command reference guide
-- **[SECURITY_HUB_ENHANCEMENTS.md](./SECURITY_HUB_ENHANCEMENTS.md)** - Hub features
+- README.md - Project overview and setup
+- QUICK_START.md - Step-by-step getting started guide
+- SECURITY_HUB_ENHANCEMENTS.md - Security hub deep-dive
+
+##  Project Structure
+
+`
+IRAQAF/
+ dashboard/
+    app.py                      # Main Streamlit dashboard
+    hub_flask_app.py            # Security & Privacy Hub
+    hub_explainability_app.py   # L4 Explainability Hub
+    modules/                    # L1-L5 module implementations
+ launch_dual_dashboards.py       # Universal launcher script
+ requirements.txt                # Python dependencies
+ README.md                       # This file
+`
+
+##  API Endpoints
+
+### Security Hub (Port 8502)
+- GET / - Dashboard HTML
+- GET /api/modules - All security modules
+- GET /api/module/<name> - Specific module data
+- GET /api/check/<check_name> - Individual check status
+- GET /health - Health check
+
+### L4 Explainability Hub (Port 8503)
+- GET / - Dashboard HTML
+- GET /api/modules - All explainability modules (12 checks)
+- GET /api/categories - 4-category breakdown
+- GET /api/transparency-score - Overall transparency score
+- GET /api/tests - Test results (fidelity, consistency, stability, audit)
+- GET /health - Health check
+
+##  L4 Explainability Hub Details
+
+The dedicated L4 hub assesses explainability across 4 categories:
+
+### Category A: Explanation Capability (35%)
+- Explanation Method Implementation
+- Explanation Quality & Format
+- Coverage & Completeness
+
+### Category B: Explanation Reliability (30%)
+- Fidelity Testing (>0.5 threshold)
+- Feature Consistency (Jaccard >0.7)
+- Stability Testing (Spearman >0.8)
+
+### Category C: Traceability & Auditability (25%)
+- Prediction Logging & Immutability
+- Model Versioning & Provenance
+- Audit Trail Completeness
+
+### Category D: Documentation Transparency (10%)
+- System Documentation
+- Intended Use & Scope
+- Change Management & Transparency
+
+##  Testing
+
+`ash
+# Run all tests
+python -m pytest tests/
+
+# Run specific test module
+python -m pytest tests/test_app.py -v
+`
+
+##  Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch (git checkout -b feature/AmazingFeature)
+3. Commit changes (git commit -m 'Add AmazingFeature')
+4. Push to branch (git push origin feature/AmazingFeature)
+5. Open a Pull Request
+
+##  License
+
+This project is licensed under the MIT License - see LICENSE.md for details.
 
 ##  Support
 
-For issues or questions, visit the GitHub repository.
+For issues, questions, or suggestions:
+- Open an issue on GitHub
+- Email: support@iraqaf.example.com
+- Documentation: https://iraqaf.readthedocs.io
 
 ---
 
-**Last Updated**: November 2025  
-**Status**:  Production Ready  
-**Version**: 2.1 (Flask Hub)
+**Last Updated**: November 19, 2025
+**Version**: 2.0 (Dual Dashboard + L4 Hub)
+**Status**:  Production Ready
