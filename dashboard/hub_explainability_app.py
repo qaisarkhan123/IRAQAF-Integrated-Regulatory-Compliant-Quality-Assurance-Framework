@@ -289,38 +289,95 @@ TEST_RESULTS = {
 # Flask Routes
 
 
+@app.before_request
+def log_request():
+    """Log incoming requests"""
+    logger.info(f"Request: {request.method} {request.path}")
+
+
+@app.after_request
+def set_json_response_headers(response):
+    """Ensure API responses have correct content type"""
+    if request.path.startswith('/api/'):
+        response.headers['Content-Type'] = 'application/json'
+    return response
+
+
+@app.errorhandler(404)
+def handle_404(e):
+    """Handle 404 errors with JSON response"""
+    logger.error(f"404 Error: {request.path}")
+    return jsonify({"error": "Not found", "path": request.path}), 404
+
+
+@app.errorhandler(500)
+def handle_500(e):
+    """Handle 500 errors with JSON response"""
+    logger.error(f"500 Error: {str(e)}")
+    return jsonify({"error": "Internal server error", "message": str(e)}), 500
+
+
 @app.route('/')
 def index():
-    return render_template_string(HTML_TEMPLATE)
+    try:
+        return render_template_string(HTML_TEMPLATE)
+    except Exception as e:
+        logger.error(f"Error rendering template: {e}", exc_info=True)
+        return jsonify({"error": "Template error", "message": str(e)}), 500
 
 
 @app.route('/api/modules')
 def get_modules():
-    return jsonify(EXPLAINABILITY_MODULES)
+    try:
+        logger.info(f"Returning {len(EXPLAINABILITY_MODULES)} modules")
+        return jsonify(EXPLAINABILITY_MODULES)
+    except Exception as e:
+        logger.error(f"Error in /api/modules: {e}", exc_info=True)
+        return jsonify({"error": "Failed to get modules", "message": str(e)}), 500
 
 
 @app.route('/api/categories')
 def get_categories():
-    return jsonify(CATEGORY_SCORES)
+    try:
+        logger.info(f"Returning {len(CATEGORY_SCORES)} categories")
+        return jsonify(CATEGORY_SCORES)
+    except Exception as e:
+        logger.error(f"Error in /api/categories: {e}", exc_info=True)
+        return jsonify({"error": "Failed to get categories", "message": str(e)}), 500
 
 
 @app.route('/api/transparency-score')
 def get_score():
-    return jsonify({
-        "transparency_score": OVERALL_SCORE,
-        "category_breakdown": {k: v["score"] for k, v in CATEGORY_SCORES.items()},
-        "categories": CATEGORY_SCORES
-    })
+    try:
+        response_data = {
+            "transparency_score": OVERALL_SCORE,
+            "category_breakdown": {k: v["score"] for k, v in CATEGORY_SCORES.items()},
+            "categories": CATEGORY_SCORES
+        }
+        logger.info(f"Returning transparency score: {OVERALL_SCORE}")
+        return jsonify(response_data)
+    except Exception as e:
+        logger.error(f"Error in /api/transparency-score: {e}", exc_info=True)
+        return jsonify({"error": "Failed to get score", "message": str(e)}), 500
 
 
 @app.route('/api/tests')
 def get_tests():
-    return jsonify(TEST_RESULTS)
+    try:
+        logger.info(f"Returning {len(TEST_RESULTS)} test results")
+        return jsonify(TEST_RESULTS)
+    except Exception as e:
+        logger.error(f"Error in /api/tests: {e}", exc_info=True)
+        return jsonify({"error": "Failed to get tests", "message": str(e)}), 500
 
 
 @app.route('/health')
 def health():
-    return jsonify({"status": "healthy", "service": "L4 Explainability Hub"})
+    try:
+        return jsonify({"status": "healthy", "service": "L4 Explainability Hub"})
+    except Exception as e:
+        logger.error(f"Error in /health: {e}", exc_info=True)
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 
 # HTML Template (embedded)
@@ -421,8 +478,8 @@ HTML_TEMPLATE = '''
     <script>
         async function load() {
             try {
-                console.log('Starting data load...');
-                console.log('Current URL:', window.location.href);
+                console.log('✅ Starting data load...');
+                console.log('Current page URL:', window.location.href);
                 
                 // Build API base URL dynamically
                 const apiBase = window.location.protocol + '//' + window.location.host;
@@ -430,20 +487,35 @@ HTML_TEMPLATE = '''
                 
                 // Fetch transparency score
                 const scoreUrl = apiBase + '/api/transparency-score';
-                console.log('Fetching:', scoreUrl);
+                console.log('📡 Fetching:', scoreUrl);
+                
                 const scoreResp = await fetch(scoreUrl);
                 console.log('Response status:', scoreResp.status);
+                console.log('Response headers:', {
+                    'content-type': scoreResp.headers.get('content-type'),
+                    'content-length': scoreResp.headers.get('content-length')
+                });
+                
+                // Check if response is actually JSON
+                const contentType = scoreResp.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.warn('⚠️ Non-JSON response received!');
+                    console.warn('Content-Type:', contentType);
+                    const text = await scoreResp.text();
+                    console.warn('Response preview (first 200 chars):', text.substring(0, 200));
+                    throw new Error(`Expected JSON but got ${contentType}. Server may have returned an error page.`);
+                }
                 
                 if (!scoreResp.ok) {
                     throw new Error(`HTTP ${scoreResp.status}: ${scoreResp.statusText}`);
                 }
                 
                 const score = await scoreResp.json();
-                console.log('Score data received:', score);
+                console.log('✅ Score data received:', score);
                 
                 // Fetch modules
                 const modsUrl = apiBase + '/api/modules';
-                console.log('Fetching:', modsUrl);
+                console.log('📡 Fetching:', modsUrl);
                 const modsResp = await fetch(modsUrl);
                 console.log('Modules response status:', modsResp.status);
                 
@@ -452,12 +524,12 @@ HTML_TEMPLATE = '''
                 }
                 
                 const modules = await modsResp.json();
-                console.log('Modules data received, count:', Object.keys(modules).length);
+                console.log('✅ Modules data received, count:', Object.keys(modules).length);
                 
                 // Update score
                 const scoreVal = Math.round(score.transparency_score * 100);
                 document.getElementById('score').textContent = scoreVal + '%';
-                console.log('Updated score to:', scoreVal + '%');
+                console.log('✅ Updated score to:', scoreVal + '%');
                 
                 // Update KPIs
                 try {
@@ -465,15 +537,15 @@ HTML_TEMPLATE = '''
                     document.getElementById('kpi2').textContent = Math.round(score.categories['Explanation Reliability'].score * 100) + '%';
                     document.getElementById('kpi3').textContent = Math.round(score.categories['Traceability'].score * 100) + '%';
                     document.getElementById('kpi4').textContent = Math.round(score.categories['Documentation'].score * 100) + '%';
-                    console.log('KPIs updated');
+                    console.log('✅ KPIs updated');
                 } catch (kpiError) {
-                    console.warn('Could not update KPIs:', kpiError.message);
+                    console.warn('⚠️ Could not update KPIs:', kpiError.message);
                 }
                 
                 // Update modules grid
                 const grid = document.getElementById('modules');
                 if (!grid) {
-                    console.error('Could not find modules grid element');
+                    console.error('❌ Could not find modules grid element');
                     return;
                 }
                 
@@ -486,17 +558,28 @@ HTML_TEMPLATE = '''
                 }).join('');
                 
                 grid.innerHTML = cards;
-                console.log('Rendered', Object.keys(modules).length, 'modules');
-                console.log('✅ Data load complete!');
+                console.log('✅ Rendered', Object.keys(modules).length, 'modules');
+                console.log('✅✅✅ Data load complete! ✅✅✅');
                 
             } catch (error) {
-                console.error('❌ Error loading dashboard:', error);
-                console.error('Error details:', error.message);
-                console.error('Stack:', error.stack);
+                console.error('❌ Error loading dashboard:', error.message);
+                console.error('Error type:', error.name);
+                console.error('Stack trace:', error.stack);
                 
                 try {
                     document.getElementById('score').textContent = '❌ Error';
-                    document.getElementById('modules').innerHTML = '<div style="color: #ff6b6b; padding: 20px; background: rgba(255,107,107,0.1); border-radius: 8px;"><strong>Error loading data:</strong><br>' + error.message + '<br><br>Check the browser console (F12) for more details.</div>';
+                    document.getElementById('modules').innerHTML = `
+                        <div style="grid-column: 1 / -1; color: #ff6b6b; padding: 30px; background: rgba(255,107,107,0.1); border-radius: 8px; border-left: 4px solid #ff6b6b;">
+                            <strong>❌ Error loading data</strong>
+                            <p style="margin-top: 10px; font-size: 0.95rem;">${error.message}</p>
+                            <p style="margin-top: 10px; font-size: 0.85rem; color: #9aa3b2;">
+                                <strong>Debug info:</strong><br>
+                                • Open browser console (F12) to see full error<br>
+                                • Check that http://${window.location.host}/api/transparency-score is accessible<br>
+                                • Ensure the server returned JSON, not HTML error page
+                            </p>
+                        </div>
+                    `;
                 } catch (e) {
                     console.error('Could not update error display:', e);
                 }
@@ -504,11 +587,11 @@ HTML_TEMPLATE = '''
         }
         
         // Wait for DOM to be ready
-        console.log('Page load event listeners registered');
+        console.log('Page initialization: setting up event listeners');
         if (document.readyState === 'loading') {
             console.log('Document is loading, waiting for DOMContentLoaded');
             document.addEventListener('DOMContentLoaded', function() {
-                console.log('DOMContentLoaded fired, calling load()');
+                console.log('✅ DOMContentLoaded fired, calling load()');
                 load();
             });
         } else {
