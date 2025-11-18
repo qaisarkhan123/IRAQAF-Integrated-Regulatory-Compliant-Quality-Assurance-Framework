@@ -197,6 +197,7 @@ modules_section = st.sidebar.radio(
         "⚔️ Adversarial Testing",
         "⚖️ GDPR Rights Manager",
         "📈 L2 Evaluator",
+        "📊 L2 Historical Metrics",
         "🔑 MFA Manager",
         "📋 Data Retention",
         "🎯 Quick Assessment"
@@ -735,8 +736,108 @@ elif modules_section == "📈 L2 Evaluator":
 
     st.plotly_chart(fig, use_container_width=True)
 
+
 # ============================================================================
-# MODULE 8: MFA MANAGER
+# MODULE 8: L2 HISTORICAL METRICS & TRENDS
+# ============================================================================
+
+elif modules_section == "📊 L2 Historical Metrics":
+    st.markdown("## 📊 L2 Privacy & Security - Historical Metrics & Trends")
+
+    st.markdown("""
+    <div class="alert-box alert-info">
+        <strong>ℹ️ Purpose:</strong> View historical L2 metrics, trends, and security posture across frameworks and applications
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Load L2 reports
+    reports_dir = Path("reports")
+    l2_files = sorted(reports_dir.glob("L2-*.json")
+                      ) if reports_dir.exists() else []
+
+    if not l2_files:
+        st.warning("📭 No L2 Historical Metrics Found")
+        st.info(
+            "Run the CLI with L2 module to generate privacy and security assessments")
+    else:
+        # Parse L2 data
+        l2_data = []
+        for f in l2_files:
+            try:
+                with open(f, "r") as fh:
+                    data = json.load(fh)
+                if data.get("module") == "L2":
+                    metrics = data.get("metrics", {}) or {}
+                    l2_data.append({
+                        "timestamp": f.name.replace("L2-", "").replace(".json", ""),
+                        "encryption_coverage": metrics.get("encryption_coverage", 0),
+                        "dpia_complete": metrics.get("dpia_complete", 0),
+                        "access_review_age": metrics.get("access_review_age_days", 0),
+                        "incident_rate": metrics.get("incident_rate_per_1k_users", 0),
+                        "score": data.get("score", 0)
+                    })
+            except Exception as e:
+                st.debug(f"Error reading {f}: {e}")
+
+        if l2_data:
+            l2_df = pd.DataFrame(l2_data)
+
+            # Summary metrics
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Avg Encryption Coverage",
+                          f"{l2_df['encryption_coverage'].mean():.1%}")
+            with col2:
+                st.metric("Avg DPIA Completion",
+                          f"{l2_df['dpia_complete'].mean():.1%}")
+            with col3:
+                st.metric("Avg Access Review Age",
+                          f"{l2_df['access_review_age'].mean():.0f} days")
+            with col4:
+                st.metric("Avg Incident Rate",
+                          f"{l2_df['incident_rate'].mean():.2f}/1k users")
+
+            st.markdown("---")
+
+            # Historical trends
+            st.markdown("### 📈 Security Metrics Trends")
+
+            fig = go.Figure()
+
+            fig.add_trace(go.Scatter(
+                x=l2_df['timestamp'],
+                y=l2_df['encryption_coverage'],
+                mode='lines+markers',
+                name='Encryption Coverage',
+                line=dict(color='#667eea', width=3),
+                marker=dict(size=8)
+            ))
+
+            fig.add_trace(go.Scatter(
+                x=l2_df['timestamp'],
+                y=l2_df['dpia_complete'],
+                mode='lines+markers',
+                name='DPIA Completion',
+                line=dict(color='#51cf66', width=3),
+                marker=dict(size=8)
+            ))
+
+            fig.update_layout(
+                hovermode='x unified',
+                height=400,
+                template='plotly_white',
+                margin=dict(l=0, r=0, t=30, b=0),
+                yaxis_title="Score (0-1)",
+                xaxis_title="Date/Time"
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.markdown("### 📊 Detailed Historical Data")
+            st.dataframe(l2_df, use_container_width=True, hide_index=True)
+
+# ============================================================================
+# MODULE 9: MFA MANAGER
 # ============================================================================
 
 elif modules_section == "🔑 MFA Manager":
@@ -788,7 +889,7 @@ elif modules_section == "🔑 MFA Manager":
         st.success(f"✅ Test code sent via {test_method}")
 
 # ============================================================================
-# MODULE 9: DATA RETENTION
+# MODULE 10: DATA RETENTION
 # ============================================================================
 
 elif modules_section == "📋 Data Retention":
@@ -845,7 +946,7 @@ elif modules_section == "📋 Data Retention":
             f"✅ Retention policy updated: {data_type} - {retention_days} days")
 
 # ============================================================================
-# MODULE 10: QUICK ASSESSMENT
+# MODULE 11: QUICK ASSESSMENT
 # ============================================================================
 
 elif modules_section == "🎯 Quick Assessment":
