@@ -864,12 +864,28 @@ with st.sidebar:
         render_logout_button()
     st.markdown("---")
 
-    # Privacy & Security Hub - Quick Access
-    st.markdown("### 🔐 Security Tools")
+    # Quick Access Hubs
+    st.markdown("### 🎯 Advanced Tools")
 
-    # Create a clickable link styled as a button
+    # Create clickable links styled as buttons
     st.markdown("""
         <div style="display: grid; gap: 10px;">
+            <a href="http://localhost:5000" target="_blank" style="
+                display: inline-block;
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: 600;
+                text-align: center;
+                transition: all 0.3s ease;
+                width: 100%;
+                box-sizing: border-box;
+            " onmouseover="this.style.boxShadow='0 8px 20px rgba(245, 87, 108, 0.3)'; this.style.transform='translateY(-2px)';" 
+              onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+                🔍 L4 Explainability & Transparency Hub
+            </a>
             <a href="http://localhost:8502" target="_blank" style="
                 display: inline-block;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -889,7 +905,7 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-    st.caption("📌 Dedicated privacy & security assessment tool")
+    st.caption("📌 Access specialized assessment tools")
     st.markdown("---")
 
     # UX Enhancements - Session Info
