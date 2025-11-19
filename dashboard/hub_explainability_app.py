@@ -580,26 +580,28 @@ TEST_RESULTS = {
 # INTERPRETABILITY VISUALIZATION FUNCTIONS
 # ============================================================================
 
+
 def generate_shap_visualization():
     """Generate SHAP force plot-style visualization"""
-    features = ["Feature A", "Feature B", "Feature C", "Feature D", "Feature E"]
+    features = ["Feature A", "Feature B",
+                "Feature C", "Feature D", "Feature E"]
     shap_values = [0.15, -0.08, 0.22, -0.05, 0.18]
     base_value = 0.45
     prediction = base_value + sum(shap_values)
-    
+
     fig, ax = plt.subplots(figsize=(10, 4))
     ax.set_facecolor('#151922')
     fig.patch.set_facecolor('#0f1116')
-    
+
     # Create horizontal bar chart showing SHAP values
     colors = ['#43e97b' if v > 0 else '#fa709a' for v in shap_values]
     positions = np.arange(len(features))
-    
+
     ax.barh(positions, shap_values, color=colors, alpha=0.8)
     ax.set_yticks(positions)
     ax.set_yticklabels(features, color='#e6e6e6')
     ax.set_xlabel('SHAP Value (Impact on Prediction)', color='#e6e6e6')
-    ax.set_title('SHAP Force Plot - Feature Contributions to Prediction', 
+    ax.set_title('SHAP Force Plot - Feature Contributions to Prediction',
                  color='#e6e6e6', fontsize=12, fontweight='bold')
     ax.axvline(x=0, color='#2a2f3a', linestyle='-', linewidth=1)
     ax.tick_params(colors='#9aa3b2')
@@ -607,11 +609,12 @@ def generate_shap_visualization():
     ax.spines['left'].set_color('#2a2f3a')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    
+
     # Add value labels
     for i, (feat, val) in enumerate(zip(features, shap_values)):
-        ax.text(val, i, f' {val:.3f}', va='center', color='#e6e6e6', fontsize=9)
-    
+        ax.text(val, i, f' {val:.3f}', va='center',
+                color='#e6e6e6', fontsize=9)
+
     # Convert to base64
     from io import BytesIO
     buffer = BytesIO()
@@ -619,7 +622,7 @@ def generate_shap_visualization():
     buffer.seek(0)
     img_str = base64.b64encode(buffer.getvalue()).decode()
     plt.close(fig)
-    
+
     return {
         "type": "SHAP Force Plot",
         "base_value": float(base_value),
@@ -633,39 +636,41 @@ def generate_shap_visualization():
 
 def generate_lime_visualization():
     """Generate LIME-style local feature importance visualization"""
-    features = ["Loan Amount", "Credit Score", "Income Level", "Employment Years", "Debt Ratio"]
+    features = ["Loan Amount", "Credit Score",
+                "Income Level", "Employment Years", "Debt Ratio"]
     weights = [0.28, 0.25, 0.22, 0.15, 0.10]
-    
+
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.set_facecolor('#151922')
     fig.patch.set_facecolor('#0f1116')
-    
+
     colors = ['#4facfe', '#667eea', '#43e97b', '#fa709a', '#f093fb']
     positions = np.arange(len(features))
-    
+
     ax.barh(positions, weights, color=colors, alpha=0.8)
     ax.set_yticks(positions)
     ax.set_yticklabels(features, color='#e6e6e6')
     ax.set_xlabel('Prediction Impact Weight', color='#e6e6e6')
-    ax.set_title('LIME Explanation - Local Feature Importance', 
+    ax.set_title('LIME Explanation - Local Feature Importance',
                  color='#e6e6e6', fontsize=12, fontweight='bold')
     ax.tick_params(colors='#9aa3b2')
     ax.spines['bottom'].set_color('#2a2f3a')
     ax.spines['left'].set_color('#2a2f3a')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    
+
     # Add percentage labels
     for i, (feat, weight) in enumerate(zip(features, weights)):
-        ax.text(weight, i, f' {weight*100:.1f}%', va='center', color='#e6e6e6', fontsize=9)
-    
+        ax.text(weight, i, f' {weight*100:.1f}%',
+                va='center', color='#e6e6e6', fontsize=9)
+
     from io import BytesIO
     buffer = BytesIO()
     plt.savefig(buffer, format='png', bbox_inches='tight', facecolor='#0f1116')
     buffer.seek(0)
     img_str = base64.b64encode(buffer.getvalue()).decode()
     plt.close(fig)
-    
+
     return {
         "type": "LIME Explanation",
         "features": features,
@@ -678,44 +683,46 @@ def generate_lime_visualization():
 def generate_gradcam_visualization():
     """Generate GradCAM-style attention heatmap"""
     # Simulate attention weights across different aspects
-    aspects = ["Input Features", "Historical Data", "Risk Factors", "Mitigation", "Context"]
+    aspects = ["Input Features", "Historical Data",
+               "Risk Factors", "Mitigation", "Context"]
     attention_scores = [0.32, 0.18, 0.28, 0.12, 0.10]
-    
+
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 4))
     fig.patch.set_facecolor('#0f1116')
-    
+
     # Attention heatmap
     ax1.set_facecolor('#151922')
     heatmap_data = np.random.rand(5, 8) * 0.5
     for i in range(len(attention_scores)):
         heatmap_data[i, :] *= attention_scores[i]
-    
+
     im = ax1.imshow(heatmap_data, cmap='YlOrRd', aspect='auto')
     ax1.set_yticks(np.arange(len(aspects)))
     ax1.set_yticklabels(aspects, color='#e6e6e6')
     ax1.set_xlabel('Model Internal States', color='#e6e6e6')
-    ax1.set_title('GradCAM - Model Attention Map', color='#e6e6e6', fontweight='bold')
+    ax1.set_title('GradCAM - Model Attention Map',
+                  color='#e6e6e6', fontweight='bold')
     ax1.tick_params(colors='#9aa3b2')
-    
+
     # Attention distribution
     ax2.set_facecolor('#151922')
     colors_grad = ['#4facfe', '#667eea', '#43e97b', '#fa709a', '#f093fb']
     wedges, texts, autotexts = ax2.pie(attention_scores, labels=aspects, autopct='%1.1f%%',
-                                        colors=colors_grad, startangle=90)
+                                       colors=colors_grad, startangle=90)
     for text in texts:
         text.set_color('#e6e6e6')
     for autotext in autotexts:
         autotext.set_color('#0f1116')
         autotext.set_fontweight('bold')
     ax2.set_title('Attention Distribution', color='#e6e6e6', fontweight='bold')
-    
+
     from io import BytesIO
     buffer = BytesIO()
     plt.savefig(buffer, format='png', bbox_inches='tight', facecolor='#0f1116')
     buffer.seek(0)
     img_str = base64.b64encode(buffer.getvalue()).decode()
     plt.close(fig)
-    
+
     return {
         "type": "GradCAM Heatmap",
         "aspects": aspects,
@@ -730,10 +737,11 @@ def generate_decision_path_visualization():
     decision_path = [
         {"node": "Input Features", "decision": "Feature extraction", "confidence": 0.95},
         {"node": "Risk Assessment", "decision": "High risk detected", "confidence": 0.87},
-        {"node": "Mitigation Check", "decision": "Mitigations present", "confidence": 0.92},
+        {"node": "Mitigation Check",
+            "decision": "Mitigations present", "confidence": 0.92},
         {"node": "Final Classification", "decision": "APPROVED", "confidence": 0.89}
     ]
-    
+
     return {
         "type": "Decision Path",
         "path": decision_path,
@@ -834,7 +842,8 @@ def get_shap():
         shap_data = generate_shap_visualization()
         return jsonify(shap_data)
     except Exception as e:
-        logger.error(f"Error in /api/interpretability/shap: {e}", exc_info=True)
+        logger.error(
+            f"Error in /api/interpretability/shap: {e}", exc_info=True)
         return jsonify({"error": "Failed to generate SHAP", "message": str(e)}), 500
 
 
@@ -846,7 +855,8 @@ def get_lime():
         lime_data = generate_lime_visualization()
         return jsonify(lime_data)
     except Exception as e:
-        logger.error(f"Error in /api/interpretability/lime: {e}", exc_info=True)
+        logger.error(
+            f"Error in /api/interpretability/lime: {e}", exc_info=True)
         return jsonify({"error": "Failed to generate LIME", "message": str(e)}), 500
 
 
@@ -858,7 +868,8 @@ def get_gradcam():
         gradcam_data = generate_gradcam_visualization()
         return jsonify(gradcam_data)
     except Exception as e:
-        logger.error(f"Error in /api/interpretability/gradcam: {e}", exc_info=True)
+        logger.error(
+            f"Error in /api/interpretability/gradcam: {e}", exc_info=True)
         return jsonify({"error": "Failed to generate GradCAM", "message": str(e)}), 500
 
 
@@ -870,7 +881,8 @@ def get_decision_path():
         path_data = generate_decision_path_visualization()
         return jsonify(path_data)
     except Exception as e:
-        logger.error(f"Error in /api/interpretability/decision-path: {e}", exc_info=True)
+        logger.error(
+            f"Error in /api/interpretability/decision-path: {e}", exc_info=True)
         return jsonify({"error": "Failed to generate decision path", "message": str(e)}), 500
 
 
@@ -1309,9 +1321,14 @@ HTML_TEMPLATE = '''
         
         function loadDetailsTab() {
             const api = window.location.protocol + '//' + window.location.host;
+            console.log('[Details Tab] Loading...');
             fetch(api + '/api/modules')
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
                 .then(modules => {
+                    console.log('[Details Tab] Received modules:', Object.keys(modules).length);
                     let html = '';
                     Object.entries(modules).forEach(([name, mod]) => {
                         const statusBadge = getStatusBadge(mod.score);
@@ -1334,75 +1351,158 @@ HTML_TEMPLATE = '''
                         `;
                     });
                     document.getElementById('detailsGrid').innerHTML = html;
+                    console.log('[Details Tab] Loaded successfully');
+                })
+                .catch(e => {
+                    console.error('[Details Tab] Error:', e);
+                    document.getElementById('detailsGrid').innerHTML = `<div class="card"><p style="color: #fa709a;"><strong>Error loading details:</strong> ${e.message}</p></div>`;
                 });
         }
         
         function loadCalculationsTab() {
             const api = window.location.protocol + '//' + window.location.host;
+            console.log('[Calculations Tab] Loading...');
             fetch(api + '/api/modules')
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
                 .then(modules => {
+                    console.log('[Calculations Tab] Received modules');
                     let html = '';
                     Object.entries(modules).forEach(([name, mod]) => {
                         if (mod.calculation) {
                             const calc = mod.calculation;
                             const componentsHtml = calc.components.map(comp => 
                                 `<div class="metric-row">
-                                    <div class="metric-label">${comp.name}</div>
+                                    <div class="metric-label"><strong>${comp.name}</strong></div>
                                     <div class="metric-value">${Math.round(comp.value * 100)}%</div>
                                 </div>`
                             ).join('');
                             
                             html += `
-                                <div class="card">
-                                    <div class="card-title">${name}</div>
-                                    <div class="metric-row"><strong>Method:</strong> <span>${calc.formula}</span></div>
-                                    <div class="calculation-box">
-                                        ${calc.how_calculated}<br><br>
-                                        <strong>Status:</strong> ${calc.current_status}<br>
-                                        <strong>Pass Threshold:</strong> ${calc.pass_threshold}<br>
-                                        ${calc.tests_run ? `<strong>Tests Run:</strong> ${calc.tests_run}` : ''}
+                                <div class="card" style="grid-column: span 1;">
+                                    <div class="card-title" style="font-size: 1.1rem;">${name}</div>
+                                    <div style="background: rgba(102, 126, 234, 0.1); padding: 12px; border-radius: 6px; margin-bottom: 15px; border-left: 3px solid var(--primary);">
+                                        <strong style="color: var(--primary);">📐 Formula:</strong><br>
+                                        <span style="font-family: 'Courier New', monospace; color: #e6e6e6; font-size: 0.9rem;">${calc.formula}</span>
                                     </div>
-                                    <div style="margin-top: 15px;">
-                                        <strong>Components:</strong>
-                                        <div class="component-list" style="margin-top: 10px;">
+                                    
+                                    <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                                        <strong style="color: var(--text);">🧮 Calculation:</strong><br>
+                                        <span style="font-family: 'Courier New', monospace; color: #9aa3b2; font-size: 0.85rem;">${calc.how_calculated}</span>
+                                    </div>
+                                    
+                                    <div style="margin-bottom: 15px;">
+                                        <strong style="color: var(--text); display: block; margin-bottom: 8px;">📊 Component Scores:</strong>
+                                        <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px;">
                                             ${componentsHtml}
                                         </div>
                                     </div>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                                        <div style="background: rgba(67, 233, 123, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid var(--success);">
+                                            <strong>Status:</strong><br>${calc.current_status}
+                                        </div>
+                                        <div style="background: rgba(79, 172, 254, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid var(--info);">
+                                            <strong>Threshold:</strong><br>${calc.pass_threshold}
+                                        </div>
+                                    </div>
+                                    
+                                    ${calc.tests_run ? `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.9rem;"><strong>Tests Run:</strong> ${calc.tests_run}</div>` : ''}
+                                    ${calc.predictions_covered ? `<div style="font-size: 0.9rem;"><strong>Coverage:</strong> ${calc.predictions_covered}</div>` : ''}
                                 </div>
                             `;
                         }
                     });
                     document.getElementById('calculationsGrid').innerHTML = html;
+                    document.getElementById('calculationsGrid').style.gridTemplateColumns = 'repeat(auto-fit, minmax(450px, 1fr))';
+                    console.log('[Calculations Tab] Loaded successfully');
+                })
+                .catch(e => {
+                    console.error('[Calculations Tab] Error:', e);
+                    document.getElementById('calculationsGrid').innerHTML = `<div class="card"><p style="color: #fa709a;"><strong>Error loading calculations:</strong> ${e.message}</p></div>`;
                 });
         }
         
         function loadImprovementsTab() {
             const api = window.location.protocol + '//' + window.location.host;
+            console.log('[Improvements Tab] Loading...');
             fetch(api + '/api/modules')
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
                 .then(modules => {
+                    console.log('[Improvements Tab] Received modules');
                     let html = '';
+                    let hasImprovements = false;
+                    
                     Object.entries(modules).forEach(([name, mod]) => {
-                        if (mod.calculation && (mod.calculation.recommendations || mod.calculation.next_steps || mod.score < 0.80)) {
-                            const recs = mod.calculation.recommendations || mod.calculation.next_steps || [];
-                            if (recs.length > 0 || mod.score < 0.80) {
-                                html += `
-                                    <div class="card">
-                                        <div class="card-title">${name} - ${Math.round(mod.score * 100)}%</div>
-                                        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 15px;">
-                                            Current score below optimal. Here are suggested improvements:
-                                        </p>
-                                        ${recs.map(rec => `<div class="recommendation">• ${rec}</div>`).join('')}
-                                        ${mod.score < 0.80 ? `<div class="recommendation" style="border-left-color: var(--warning); margin-top: 15px;">
-                                            <strong>Priority:</strong> This module scores below 80% and should be prioritized for improvement.
-                                        </div>` : ''}
+                        const recs = (mod.calculation && (mod.calculation.recommendations || mod.calculation.next_steps)) || [];
+                        const needsImprovement = mod.score < 0.85;
+                        
+                        if (recs.length > 0 || needsImprovement) {
+                            hasImprovements = true;
+                            const priorityColor = mod.score < 0.70 ? '#fa709a' : mod.score < 0.80 ? '#f093fb' : '#43e97b';
+                            const priorityLabel = mod.score < 0.70 ? '🔴 HIGH PRIORITY' : mod.score < 0.80 ? '🟡 MEDIUM PRIORITY' : '🟢 MONITOR';
+                            
+                            html += `
+                                <div class="card">
+                                    <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
+                                        <span>${name}</span>
+                                        <span style="font-size: 0.8rem; color: ${priorityColor};">${priorityLabel}</span>
                                     </div>
-                                `;
-                            }
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; font-size: 0.9rem;">
+                                        <div>
+                                            <strong>Current Score:</strong><br>
+                                            <span style="font-size: 1.2rem; color: var(--primary);">${Math.round(mod.score * 100)}%</span>
+                                        </div>
+                                        <div>
+                                            <strong>Target Score:</strong><br>
+                                            <span style="font-size: 1.2rem; color: var(--success);">90%</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="progress-bar" style="margin-bottom: 15px;">
+                                        <div class="progress-fill" style="width: ${mod.score * 100}%"></div>
+                                    </div>
+                                    
+                                    ${recs.length > 0 ? `
+                                        <div style="margin-bottom: 15px;">
+                                            <strong style="color: var(--text); display: block; margin-bottom: 8px;">💡 Recommended Improvements:</strong>
+                                            <div>
+                                                ${recs.map((rec, idx) => `
+                                                    <div class="recommendation" style="margin-bottom: 8px;">
+                                                        <span style="color: var(--primary); font-weight: 600;">${idx + 1}.</span> ${rec}
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    ${needsImprovement ? `
+                                        <div style="background: rgba(250, 112, 154, 0.1); border-left: 3px solid #fa709a; padding: 12px; border-radius: 6px; margin-top: 10px;">
+                                            <strong style="color: #fa709a;">⚠️ Action Required:</strong><br>
+                                            <span style="font-size: 0.9rem;">This module scores below the optimal threshold of 85%. Implement recommended improvements to increase effectiveness and reliability.</span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
                         }
                     });
-                    document.getElementById('recommendationsGrid').innerHTML = html || '<div class="card"><p>All modules performing well! No urgent improvements needed.</p></div>';
+                    
+                    if (!hasImprovements) {
+                        html = '<div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;"><div style="font-size: 1.5rem; margin-bottom: 10px;">🎉</div><strong>All Modules Performing Optimally!</strong><p style="color: var(--muted); margin-top: 10px;">No urgent improvements needed. Continue monitoring for changes in performance.</p></div>';
+                    }
+                    
+                    document.getElementById('recommendationsGrid').innerHTML = html;
+                    console.log('[Improvements Tab] Loaded successfully');
+                })
+                .catch(e => {
+                    console.error('[Improvements Tab] Error:', e);
+                    document.getElementById('recommendationsGrid').innerHTML = `<div class="card"><p style="color: #fa709a;"><strong>Error loading recommendations:</strong> ${e.message}</p></div>`;
                 });
         }
         
