@@ -918,7 +918,7 @@ with st.sidebar:
               onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
                 ⚖️ L1 Regulations & Governance Hub
             </a>
-            <a href="http://localhost:8506" target="_blank" style="
+            <a href="http://localhost:8503" target="_blank" style="
                 display: inline-block;
                 background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
                 color: white;
