@@ -37,30 +37,30 @@ class MonitoringReport:
     report_date: datetime
     monitoring_period_start: datetime
     monitoring_period_end: datetime
-    
+
     # Change detection
     total_changes: int
     critical_changes: int
     high_changes: int
     medium_changes: int
     low_changes: int
-    
+
     # Impact assessment
     regulations_affected: List[str]
     systems_affected: List[str]
     overall_compliance_score: float
     score_change_percent: float
-    
+
     # Notifications
     notifications_sent: int
     notifications_delivered: int
     critical_alerts: int
-    
+
     # Remediation
     total_remediation_hours: float
     total_remediation_cost: float
     top_priority_actions: List[Dict]
-    
+
     # Status
     monitoring_status: str
     next_monitoring_run: datetime
@@ -71,7 +71,7 @@ class IntegratedMonitoringSystem:
     """
     Integrated monitoring system combining change detection,
     impact assessment, and notifications.
-    
+
     This is the core of Phase 6 and integrates all prior phases:
     - Phase 2 (Database) for regulatory content
     - Phase 4 (NLP) for semantic analysis
@@ -81,7 +81,7 @@ class IntegratedMonitoringSystem:
     def __init__(self, monitoring_interval_hours: int = 24):
         """
         Initialize integrated monitoring system.
-        
+
         Args:
             monitoring_interval_hours: Hours between monitoring runs (default 24)
         """
@@ -103,7 +103,7 @@ class IntegratedMonitoringSystem:
     ) -> MonitoringReport:
         """
         Execute complete monitoring cycle.
-        
+
         Args:
             system_id: System being monitored
             previous_state: Previous regulatory requirements by regulation
@@ -111,55 +111,55 @@ class IntegratedMonitoringSystem:
             previous_compliance_scores: Previous compliance scores
             current_compliance_scores: Current compliance scores
             recipients: Notification recipients
-            
+
         Returns:
             Complete monitoring report
         """
         logger.info("="*70)
         logger.info("STARTING PHASE 6 INTEGRATED MONITORING CYCLE")
         logger.info("="*70)
-        
+
         report_id = f"RPT-{datetime.now().timestamp()}"
         all_changes = []
         all_drifts = []
         all_notifications = []
-        
+
         # Step 1: Detect changes in all regulations
         logger.info("\n[STEP 1] Detecting regulatory changes...")
         for regulation in current_state:
             logger.info(f"  • Scanning {regulation}...")
-            
+
             prev_reqs = previous_state.get(regulation, {})
             curr_reqs = current_state[regulation]
-            
+
             detection_result = self.detector.analyze_changes(
                 regulation,
                 prev_reqs,
                 curr_reqs
             )
-            
+
             all_changes.extend(detection_result.changes)
-            
+
             logger.info(f"    Found {detection_result.total_changes} changes")
             if detection_result.critical_changes > 0:
                 logger.warning(
                     f"    ⚠️  {detection_result.critical_changes} CRITICAL changes!"
                 )
-        
+
         # Step 2: Assess compliance drift
         logger.info("\n[STEP 2] Assessing compliance drift...")
         regulations_affected = set()
         systems_affected = set()
         total_remediation_hours = 0
         total_remediation_cost = 0
-        
+
         for regulation in current_state:
             logger.info(f"  • Analyzing {regulation}...")
-            
+
             # Build compliance metrics from scores
             prev_scores = previous_compliance_scores.get(regulation, {})
             curr_scores = current_compliance_scores.get(regulation, {})
-            
+
             # Create compliance metrics (simplified for demo)
             prev_metrics = [
                 self._create_compliance_metric(
@@ -167,21 +167,21 @@ class IntegratedMonitoringSystem:
                 )
                 for req_id, score in prev_scores.items()
             ]
-            
+
             curr_metrics = [
                 self._create_compliance_metric(
                     req_id, regulation, prev_scores.get(req_id, 0), score
                 )
                 for req_id, score in curr_scores.items()
             ]
-            
+
             assessment = self.assessor.assess_compliance_drift(
                 regulation,
                 system_id,
                 prev_metrics,
                 curr_metrics
             )
-            
+
             all_drifts.extend(assessment.drifts)
             regulations_affected.add(regulation)
             systems_affected.update(
@@ -189,17 +189,18 @@ class IntegratedMonitoringSystem:
                     [d.affected_systems for d in assessment.drifts]
                     for system in systems)
             )
-            
+
             total_remediation_hours += assessment.total_remediation_hours
             total_remediation_cost += assessment.total_remediation_cost
-            
-            logger.info(f"    Compliance: {assessment.current_overall_score:.1%}")
+
+            logger.info(
+                f"    Compliance: {assessment.current_overall_score:.1%}")
             logger.info(f"    Change: {assessment.score_change:+.1%}")
             logger.info(f"    Drifts detected: {len(assessment.drifts)}")
-        
+
         # Step 3: Create and send notifications
         logger.info("\n[STEP 3] Creating notifications...")
-        
+
         for change in all_changes:
             notifications = self.notification_manager.create_change_notification(
                 change_id=change.change_id,
@@ -212,57 +213,57 @@ class IntegratedMonitoringSystem:
                 recipients=recipients
             )
             all_notifications.extend(notifications)
-        
+
         # Send notifications
         send_results = self.notification_manager.send_notifications(
             all_notifications
         )
-        
+
         logger.info(f"  Notifications created: {len(all_notifications)}")
         logger.info(f"  • Sent: {send_results['sent']}")
         logger.info(f"  • Delivered: {send_results['delivered']}")
         logger.info(f"  • Failed: {send_results['failed']}")
-        
+
         # Step 4: Generate priority actions
         logger.info("\n[STEP 4] Generating action plan...")
-        
+
         top_priority_actions = self._extract_top_actions(
             all_drifts,
             max_actions=5
         )
-        
+
         logger.info(f"  Top priority actions: {len(top_priority_actions)}")
         for i, action in enumerate(top_priority_actions, 1):
             logger.info(
                 f"    {i}. {action['requirement']} - "
                 f"${action['estimated_cost']}"
             )
-        
+
         # Step 5: Generate monitoring report
         logger.info("\n[STEP 5] Generating monitoring report...")
-        
+
         # Calculate overall compliance
         all_current_scores = []
         for regulation_scores in current_compliance_scores.values():
             all_current_scores.extend(regulation_scores.values())
-        
+
         overall_score = (
             sum(all_current_scores) / len(all_current_scores) / 100
             if all_current_scores else 0
         )
-        
+
         # Calculate score change
         all_previous_scores = []
         for regulation_scores in previous_compliance_scores.values():
             all_previous_scores.extend(regulation_scores.values())
-        
+
         prev_overall_score = (
             sum(all_previous_scores) / len(all_previous_scores) / 100
             if all_previous_scores else 0
         )
-        
+
         score_change = (overall_score - prev_overall_score) * 100
-        
+
         # Generate summary
         summary = self._generate_monitoring_summary(
             len(all_changes),
@@ -271,45 +272,51 @@ class IntegratedMonitoringSystem:
             overall_score,
             score_change
         )
-        
+
         # Create report
         report = MonitoringReport(
             report_id=report_id,
             report_date=datetime.now(),
-            monitoring_period_start=self.last_monitoring_run or datetime.now() - self.monitoring_interval,
+            monitoring_period_start=self.last_monitoring_run or datetime.now() -
+            self.monitoring_interval,
             monitoring_period_end=datetime.now(),
-            
+
             total_changes=len(all_changes),
-            critical_changes=sum(1 for c in all_changes if c.severity.value == "CRITICAL"),
-            high_changes=sum(1 for c in all_changes if c.severity.value == "HIGH"),
-            medium_changes=sum(1 for c in all_changes if c.severity.value == "MEDIUM"),
-            low_changes=sum(1 for c in all_changes if c.severity.value == "LOW"),
-            
+            critical_changes=sum(
+                1 for c in all_changes if c.severity.value == "CRITICAL"),
+            high_changes=sum(
+                1 for c in all_changes if c.severity.value == "HIGH"),
+            medium_changes=sum(
+                1 for c in all_changes if c.severity.value == "MEDIUM"),
+            low_changes=sum(
+                1 for c in all_changes if c.severity.value == "LOW"),
+
             regulations_affected=list(regulations_affected),
             systems_affected=list(systems_affected),
             overall_compliance_score=overall_score,
             score_change_percent=score_change,
-            
+
             notifications_sent=send_results['sent'],
             notifications_delivered=send_results['delivered'],
-            critical_alerts=sum(1 for n in all_notifications if n.priority == NotificationPriority.CRITICAL),
-            
+            critical_alerts=sum(
+                1 for n in all_notifications if n.priority == NotificationPriority.CRITICAL),
+
             total_remediation_hours=total_remediation_hours,
             total_remediation_cost=total_remediation_cost,
             top_priority_actions=top_priority_actions,
-            
+
             monitoring_status="COMPLETE",
             next_monitoring_run=datetime.now() + self.monitoring_interval,
             summary=summary
         )
-        
+
         self.monitoring_history.append(report)
         self.last_monitoring_run = datetime.now()
-        
+
         logger.info("\n" + "="*70)
         logger.info("MONITORING CYCLE COMPLETE")
         logger.info("="*70)
-        
+
         return report
 
     def _create_compliance_metric(
@@ -323,7 +330,7 @@ class IntegratedMonitoringSystem:
         from monitoring.impact_assessor import (
             ComplianceMetric, ComplianceStatus
         )
-        
+
         # Determine status from score
         if current_score >= 80:
             status = ComplianceStatus.COMPLIANT
@@ -331,13 +338,13 @@ class IntegratedMonitoringSystem:
             status = ComplianceStatus.PARTIALLY_COMPLIANT
         else:
             status = ComplianceStatus.NON_COMPLIANT
-        
+
         prev_status = (
             ComplianceStatus.COMPLIANT if previous_score >= 80
             else ComplianceStatus.PARTIALLY_COMPLIANT if previous_score >= 50
             else ComplianceStatus.NON_COMPLIANT
         )
-        
+
         return ComplianceMetric(
             requirement_id=requirement_id,
             regulation=regulation,
@@ -358,7 +365,7 @@ class IntegratedMonitoringSystem:
     ) -> List[Dict]:
         """Extract top priority actions from drifts"""
         actions = []
-        
+
         for drift in drifts[:max_actions]:
             action = {
                 "priority": drift.remediation_priority,
@@ -370,7 +377,7 @@ class IntegratedMonitoringSystem:
                 "systems": ", ".join(drift.affected_systems)
             }
             actions.append(action)
-        
+
         return actions
 
     def _generate_monitoring_summary(
@@ -394,14 +401,14 @@ class IntegratedMonitoringSystem:
             f"Compliance Score: {overall_score:.1%}",
             f"Score Change: {score_change:+.1%}",
         ]
-        
+
         if score_change > 5:
             summary_parts.append("✓ Compliance improving")
         elif score_change < -5:
             summary_parts.append("⚠️  Compliance declining")
         else:
             summary_parts.append("→ Compliance stable")
-        
+
         return "\n".join(summary_parts)
 
     def export_report_to_json(self, report: MonitoringReport) -> str:
@@ -412,7 +419,7 @@ class IntegratedMonitoringSystem:
         report_dict['monitoring_period_end'] = report.monitoring_period_end.isoformat()
         report_dict['next_monitoring_run'] = report.next_monitoring_run.isoformat()
         report_dict['overall_compliance_score'] = f"{report.overall_compliance_score:.1%}"
-        
+
         return json.dumps(report_dict, indent=2)
 
     def get_monitoring_history(
@@ -421,19 +428,19 @@ class IntegratedMonitoringSystem:
     ) -> List[MonitoringReport]:
         """Get monitoring history"""
         cutoff_date = datetime.now() - timedelta(days=days)
-        
+
         history = [
             r for r in self.monitoring_history
             if r.report_date >= cutoff_date
         ]
-        
+
         return sorted(history, key=lambda r: r.report_date, reverse=True)
 
 
 # Example usage and demo
 if __name__ == "__main__":
     system = IntegratedMonitoringSystem(monitoring_interval_hours=24)
-    
+
     # Sample previous state
     previous_state = {
         "GDPR": {
@@ -446,7 +453,7 @@ if __name__ == "__main__":
             "AI-2": "High-risk AI requires human oversight"
         }
     }
-    
+
     # Sample current state (with changes)
     current_state = {
         "GDPR": {
@@ -461,19 +468,19 @@ if __name__ == "__main__":
             "AI-3": "All AI training data must be documented"
         }
     }
-    
+
     # Sample compliance scores (before)
     previous_scores = {
         "GDPR": {"GDPR-1": 85, "GDPR-2": 60, "GDPR-3": 75},
         "EU AI Act": {"AI-1": 70, "AI-2": 80}
     }
-    
+
     # Sample compliance scores (after)
     current_scores = {
         "GDPR": {"GDPR-1": 90, "GDPR-2": 45, "GDPR-4": 30, "GDPR-5": 20},
         "EU AI Act": {"AI-1": 85, "AI-2": 75, "AI-3": 40}
     }
-    
+
     # Execute monitoring cycle
     report = system.execute_monitoring_cycle(
         system_id="acme-corp",
@@ -483,9 +490,11 @@ if __name__ == "__main__":
         current_compliance_scores=current_scores,
         recipients=["compliance@acme.com", "ciso@acme.com"]
     )
-    
+
     # Display report
     print("\n" + report.summary)
     print(f"\n💾 Report saved: {report.report_id}")
-    print(f"📅 Period: {report.monitoring_period_start.date()} to {report.monitoring_period_end.date()}")
-    print(f"🎯 Next run: {report.next_monitoring_run.strftime('%Y-%m-%d %H:%M')}")
+    print(
+        f"📅 Period: {report.monitoring_period_start.date()} to {report.monitoring_period_end.date()}")
+    print(
+        f"🎯 Next run: {report.next_monitoring_run.strftime('%Y-%m-%d %H:%M')}")

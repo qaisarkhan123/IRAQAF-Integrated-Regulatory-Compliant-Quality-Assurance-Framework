@@ -825,6 +825,7 @@ L3_DASHBOARD_HTML = """
     <script>
         // Load data on page load
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, starting dashboard...');
             loadDashboard();
             setInterval(updateTimestamp, 1000);
         });
@@ -836,143 +837,81 @@ L3_DASHBOARD_HTML = """
 
         async function loadDashboard() {
             try {
+                console.log('Fetching /api/status...');
                 const response = await fetch('/api/status');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log('Data received:', data);
                 
                 renderPhases(data.phases);
                 renderEndpoints(data.phases);
                 renderCoverage(data.phases);
             } catch (error) {
                 console.error('Error loading dashboard:', error);
+                document.getElementById('phases-container').innerHTML = '<div style="color: red; padding: 20px;">Error loading phases: ' + error.message + '</div>';
             }
         }
 
         function renderPhases(phases) {
+            console.log('Rendering phases:', phases.length);
             const container = document.getElementById('phases-container');
-            container.innerHTML = phases.map(phase => `
-                <div class="phase-card" onclick="togglePhaseDetail(${phase.phase})">
-                    <div class="phase-header">
-                        <div class="phase-title">
-                            <span class="phase-number">${phase.phase}</span>
-                            ${getPhaseIcon(phase.phase)} ${phase.name}
-                        </div>
-                        <div class="phase-status">${phase.status}</div>
-                    </div>
-                    <div class="phase-body">
-                        ${renderPhaseContent(phase)}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function getPhaseIcon(phase) {
-            const icons = {
-                1: '🏗️',
-                2: '🗄️',
-                3: '🕷️',
-                4: '🧠',
-                5: '⚖️',
-                6: '👁️',
-                7: '🔌',
-                8: '🧪'
-            };
-            return icons[phase] || '📦';
-        }
-
-        function renderPhaseContent(phase) {
-            let content = '';
             
-            if (phase.modules) {
-                content = Object.entries(phase.modules).map(([key, val]) => `
-                    <div class="phase-item">
-                        <div class="phase-label">${key}</div>
-                        <div class="phase-value">${val}</div>
-                    </div>
-                `).join('');
-            } else if (phase.scrapers) {
-                content = Object.entries(phase.scrapers).map(([name, info]) => `
-                    <div class="phase-item">
-                        <div class="phase-label">${name} • ${info.status}</div>
-                        <div class="phase-value">${info.last_run}</div>
-                    </div>
-                `).join('');
-            } else if (phase.metrics) {
-                content = Object.entries(phase.metrics).map(([key, val]) => `
-                    <div class="phase-item">
-                        <div class="phase-label">${key}</div>
-                        <div class="phase-value">${val}</div>
-                    </div>
-                `).join('');
-            } else if (phase.testing) {
-                const testing = phase.testing;
-                content = `
-                    <div class="phase-item">
-                        <div class="phase-label">Tests</div>
-                        <div class="phase-value">${testing.total_tests} (${testing.pass_rate} passing)</div>
-                    </div>
-                    <div class="phase-item">
-                        <div class="phase-label">Coverage</div>
-                        <div class="phase-value">${testing.coverage}</div>
-                    </div>
-                    <div class="phase-item">
-                        <div class="phase-label">Documentation</div>
-                        <div class="phase-value">${testing.documentation.total_lines}</div>
+            if (!phases || phases.length === 0) {
+                container.innerHTML = '<div style="color: orange; padding: 20px;">No phases data</div>';
+                return;
+            }
+            
+            let html = '';
+            for (let phase of phases) {
+                const icons = {1: '🏗️', 2: '🗄️', 3: '🕷️', 4: '🧠', 5: '⚖️', 6: '👁️', 7: '🔌', 8: '🧪'};
+                const icon = icons[phase.phase] || '📦';
+                
+                html += `
+                    <div class="phase-card">
+                        <div class="phase-header">
+                            <div class="phase-title">
+                                <span class="phase-number">${phase.phase}</span>
+                                ${icon} ${phase.name || 'Phase ' + phase.phase}
+                            </div>
+                            <div class="phase-status">${phase.status || 'UNKNOWN'}</div>
+                        </div>
+                        <div class="phase-body">
+                            <pre style="color: #60a5fa; font-size: 11px; overflow: auto;">${JSON.stringify(phase, null, 2)}</pre>
+                        </div>
                     </div>
                 `;
             }
             
-            return content;
+            container.innerHTML = html;
         }
 
         function renderEndpoints(phases) {
             const apiPhase = phases.find(p => p.phase === 7);
-            if (!apiPhase || !apiPhase.rest_api) return;
-            
             const container = document.getElementById('endpoints-container');
-            let html = '';
             
-            Object.entries(apiPhase.rest_api.endpoints).forEach(([group, endpoints]) => {
-                html += `<div class="endpoint-group">
-                    <div class="endpoint-group-title">${group}</div>
-                    ${endpoints.map(ep => `<div class="endpoint">${ep}</div>`).join('')}
-                </div>`;
-            });
+            if (!apiPhase) {
+                container.innerHTML = '<div style="color: orange;">No API phase data</div>';
+                return;
+            }
             
-            container.innerHTML = html;
+            container.innerHTML = '<pre style="color: #60a5fa; font-size: 11px; overflow: auto;">' + JSON.stringify(apiPhase, null, 2) + '</pre>';
         }
 
         function renderCoverage(phases) {
             const testPhase = phases.find(p => p.phase === 8);
-            if (!testPhase || !testPhase.testing) return;
-            
             const container = document.getElementById('coverage-container');
-            let html = '';
             
-            Object.entries(testPhase.testing.coverage_by_module).forEach(([module, coverage]) => {
-                const percent = parseInt(coverage);
-                html += `
-                    <div class="coverage-bar-container">
-                        <div class="coverage-label">
-                            <span>${module}</span>
-                            <span>${coverage}</span>
-                        </div>
-                        <div class="coverage-bar">
-                            <div class="coverage-fill" style="width: ${percent}%"></div>
-                        </div>
-                    </div>
-                `;
-            });
+            if (!testPhase) {
+                container.innerHTML = '<div style="color: orange;">No testing phase data</div>';
+                return;
+            }
             
-            container.innerHTML = html;
-        }
-
-        function togglePhaseDetail(phase) {
-            const cards = document.querySelectorAll('.phase-card');
-            cards.forEach(card => {
-                if (card.dataset.phase !== phase.toString()) {
-                    card.style.opacity = '0.5';
-                }
-            });
+            container.innerHTML = '<pre style="color: #60a5fa; font-size: 11px; overflow: auto;">' + JSON.stringify(testPhase, null, 2) + '</pre>';
         }
     </script>
 </body>
@@ -986,31 +925,31 @@ L3_DASHBOARD_HTML = """
 if __name__ == '__main__':
     port = 8503
     print(f"""
-╔════════════════════════════════════════════════════════════════════════════╗
-║                                                                            ║
-║              🎛️  L3 OPERATIONS CONTROL CENTER - STARTING                 ║
-║                                                                            ║
-╚════════════════════════════════════════════════════════════════════════════╝
+================================================================================
 
-🌐 Access at:  http://localhost:{port}
+          L3 OPERATIONS CONTROL CENTER - STARTING
 
-📊 Features:
-   ✅ Phase 1: Architecture Overview
-   ✅ Phase 2: Database Operations
-   ✅ Phase 3: Web Scrapers Dashboard
-   ✅ Phase 4: NLP Pipeline Status
-   ✅ Phase 5: Compliance Scoring Engine
-   ✅ Phase 6: Change Monitoring & Alerts
-   ✅ Phase 7: REST API (19+ endpoints)
-   ✅ Phase 8: Testing & Coverage (105+ tests)
+================================================================================
 
-🎯 Purpose:
+Access at:  http://localhost:{port}
+
+Features:
+   [OK] Phase 1: Architecture Overview
+   [OK] Phase 2: Database Operations
+   [OK] Phase 3: Web Scrapers Dashboard
+   [OK] Phase 4: NLP Pipeline Status
+   [OK] Phase 5: Compliance Scoring Engine
+   [OK] Phase 6: Change Monitoring & Alerts
+   [OK] Phase 7: REST API (19+ endpoints)
+   [OK] Phase 8: Testing & Coverage (105+ tests)
+
+Purpose:
    - Central operations cockpit for all 8 phases
    - Real-time status monitoring
    - System health and metrics
    - Developer/Operator view
 
-📡 API Endpoints:
+API Endpoints:
    GET /api/status           - Complete system status
    GET /api/phase/<id>       - Specific phase details
    GET /api/health           - Health check

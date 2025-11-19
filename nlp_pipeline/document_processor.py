@@ -26,7 +26,8 @@ class DocumentProcessor:
         try:
             self.nlp = spacy.load(NLP_CONFIG["model"])
         except OSError:
-            logger.warning(f"Model {NLP_CONFIG['model']} not found. Downloading...")
+            logger.warning(
+                f"Model {NLP_CONFIG['model']} not found. Downloading...")
             import subprocess
             subprocess.run([
                 "python", "-m", "spacy", "download", NLP_CONFIG["model"]
@@ -41,11 +42,11 @@ class DocumentProcessor:
     def extract_text(self, file_path: str, file_type: str) -> str:
         """
         Extract text from various document formats
-        
+
         Args:
             file_path: Path to the document
             file_type: Type of document (pdf, docx, txt, html)
-            
+
         Returns:
             Extracted text
         """
@@ -84,12 +85,12 @@ class DocumentProcessor:
     def chunk_text(self, text: str, chunk_size: int = None, overlap: int = None) -> List[str]:
         """
         Split text into overlapping chunks for processing
-        
+
         Args:
             text: Input text
             chunk_size: Size of each chunk (tokens)
             overlap: Overlap between chunks (tokens)
-            
+
         Returns:
             List of text chunks
         """
@@ -108,7 +109,8 @@ class DocumentProcessor:
             if current_length + sentence_length > chunk_size and current_chunk:
                 chunks.append(" ".join(current_chunk))
                 # Keep last few sentences for overlap
-                current_chunk = current_chunk[-2:] if len(current_chunk) > 2 else current_chunk
+                current_chunk = current_chunk[-2:] if len(
+                    current_chunk) > 2 else current_chunk
                 current_length = sum(len(self.nlp(s)) for s in current_chunk)
 
             current_chunk.append(sentence)
@@ -142,7 +144,8 @@ class DocumentProcessor:
                 requirement_phrase = " ".join([t.text for t in token.subtree])
                 entities["REQUIREMENT"].append(requirement_phrase)
 
-        logger.info(f"Extracted {sum(len(v) for v in entities.values())} entities")
+        logger.info(
+            f"Extracted {sum(len(v) for v in entities.values())} entities")
         return entities
 
     def compute_semantic_similarity(
@@ -157,7 +160,8 @@ class DocumentProcessor:
             if query:
                 documents = [query] + documents
                 tfidf_matrix = self.tfidf_vectorizer.fit_transform(documents)
-                similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:])
+                similarity = cosine_similarity(
+                    tfidf_matrix[0:1], tfidf_matrix[1:])
                 return similarity[0]
             else:
                 tfidf_matrix = self.tfidf_vectorizer.fit_transform(documents)

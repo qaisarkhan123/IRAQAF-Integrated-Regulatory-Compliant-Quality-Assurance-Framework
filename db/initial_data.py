@@ -14,6 +14,8 @@ Author: IRAQAF Phase 2
 Date: 2024
 """
 
+from config import config
+from db.operations import db_ops
 import sys
 import logging
 from pathlib import Path
@@ -23,8 +25,6 @@ from datetime import datetime
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from db.operations import db_ops
-from config import config
 
 # Configure logging
 logging.basicConfig(

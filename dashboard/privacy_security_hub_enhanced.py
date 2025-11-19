@@ -50,12 +50,13 @@ print()
 # NEW MODULE 1: ANONYMIZATION & DE-IDENTIFICATION
 # ============================================================================
 
+
 class AnonymizationModule:
     """
     PII De-identification and Privacy-Preserving Anonymization Pipeline
     Implements k-anonymity, differential privacy, and re-identification risk assessment
     """
-    
+
     def __init__(self):
         self.module_id = "anonymization"
         self.name = "🔍 Anonymization & De-identification"
@@ -63,13 +64,14 @@ class AnonymizationModule:
         self.k_anonymity_threshold = 5
         self.epsilon = 0.5  # Differential privacy budget
         self.description = "PII de-identification and privacy-preserving techniques"
-        
+
     def detect_pii_patterns(self, data: str) -> List[Dict]:
         """Detect various PII patterns in text"""
         pii_found = []
-        
+
         # Email pattern
-        emails = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', data)
+        emails = re.findall(
+            r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', data)
         if emails:
             pii_found.append({
                 'type': 'Email',
@@ -77,7 +79,7 @@ class AnonymizationModule:
                 'confidence': 0.95,
                 'examples': emails[:3]
             })
-        
+
         # SSN pattern (XXX-XX-XXXX)
         ssns = re.findall(r'\d{3}-\d{2}-\d{4}', data)
         if ssns:
@@ -87,7 +89,7 @@ class AnonymizationModule:
                 'confidence': 0.98,
                 'examples': ['***-**-' + ssn[-4:] for ssn in ssns[:3]]
             })
-        
+
         # Phone pattern
         phones = re.findall(r'\+?1?\d{9,15}', data)
         if phones:
@@ -97,7 +99,7 @@ class AnonymizationModule:
                 'confidence': 0.85,
                 'examples': ['*' * (len(p)-4) + p[-4:] for p in phones[:3]]
             })
-        
+
         # Credit card pattern
         cards = re.findall(r'\d{4}[- ]?\d{4}[- ]?\d{4}[- ]?\d{4}', data)
         if cards:
@@ -107,9 +109,9 @@ class AnonymizationModule:
                 'confidence': 0.90,
                 'examples': ['****-****-****-' + c[-4:] for c in cards[:3]]
             })
-        
+
         return pii_found
-    
+
     def calculate_k_anonymity(self, dataset: List[Dict], quasi_identifiers: List[str]) -> Dict:
         """
         Calculate k-anonymity score
@@ -117,19 +119,19 @@ class AnonymizationModule:
         """
         if not dataset or not quasi_identifiers:
             return {'k_value': 0, 'is_compliant': False, 'risk': 'HIGH'}
-        
+
         # Group records by quasi-identifier combinations
         groups = {}
         for record in dataset:
             key = tuple(record.get(qi, 'MISSING') for qi in quasi_identifiers)
             groups[key] = groups.get(key, 0) + 1
-        
+
         # k-anonymity is the minimum group size
         k_value = min(groups.values()) if groups else 0
         is_compliant = k_value >= self.k_anonymity_threshold
-        
+
         risk_level = 'LOW' if k_value >= 10 else 'MEDIUM' if k_value >= 5 else 'HIGH'
-        
+
         return {
             'k_value': k_value,
             'required_k': self.k_anonymity_threshold,
@@ -139,14 +141,14 @@ class AnonymizationModule:
             'smallest_group': k_value,
             'score': min(1.0, k_value / self.k_anonymity_threshold)
         }
-    
+
     def calculate_differential_privacy(self, data_stats: Dict) -> Dict:
         """
         Calculate differential privacy parameters
         Adds noise to protect individual privacy while preserving aggregate patterns
         """
         scale = 1.0 / self.epsilon  # Laplace scale parameter
-        
+
         return {
             'epsilon': self.epsilon,
             'delta': 1e-6,
@@ -157,21 +159,21 @@ class AnonymizationModule:
             'composition_budget': 10 * self.epsilon,
             'is_compliant': self.epsilon <= 1.0
         }
-    
+
     def assess_reidentification_risk(self, dataset: List[Dict]) -> Dict:
         """
         Assess risk of re-identification using quasi-identifiers
         """
         if not dataset:
             return {'risk_score': 0, 'risk_level': 'UNKNOWN'}
-        
+
         # Simulate re-identification attack success rate
         # In practice, this would use specialized re-identification algorithms
         total_records = len(dataset)
         unique_combinations = len(set(tuple(r.items()) for r in dataset))
-        
+
         risk_score = unique_combinations / total_records if total_records > 0 else 0
-        
+
         if risk_score >= 0.9:
             risk_level = 'CRITICAL'
         elif risk_score >= 0.7:
@@ -180,7 +182,7 @@ class AnonymizationModule:
             risk_level = 'MODERATE'
         else:
             risk_level = 'LOW'
-        
+
         return {
             'risk_score': round(risk_score, 4),
             'risk_level': risk_level,
@@ -189,22 +191,23 @@ class AnonymizationModule:
             'distinguishability': round(risk_score * 100, 2),
             'recommendation': 'Increase generalization' if risk_level in ['CRITICAL', 'HIGH'] else 'Compliant'
         }
-    
+
     def anonymize_record(self, record: Dict, quasi_identifiers: List[str]) -> Dict:
         """Apply anonymization to a single record"""
         anonymized = record.copy()
-        
+
         for qi in quasi_identifiers:
             if qi in anonymized:
                 value = str(anonymized[qi])
                 # Generalize or suppress based on value length
                 if len(value) > 4:
-                    anonymized[qi] = value[:2] + '*' * (len(value) - 4) + value[-2:]
+                    anonymized[qi] = value[:2] + '*' * \
+                        (len(value) - 4) + value[-2:]
                 else:
                     anonymized[qi] = '*' * len(value)
-        
+
         return anonymized
-    
+
     def get_assessment(self) -> Dict:
         """Get overall anonymization assessment"""
         test_data = [
@@ -212,17 +215,18 @@ class AnonymizationModule:
             {'age': '25-30', 'location': 'New York', 'gender': 'M'},
             {'age': '35-40', 'location': 'Boston', 'gender': 'F'},
         ]
-        
-        k_result = self.calculate_k_anonymity(test_data, ['age', 'location', 'gender'])
+
+        k_result = self.calculate_k_anonymity(
+            test_data, ['age', 'location', 'gender'])
         dp_result = self.calculate_differential_privacy({})
         risk_result = self.assess_reidentification_risk(test_data)
-        
-        self.score = min(1.0, 
-            (0.4 * min(1.0, k_result['score'])) +
-            (0.3 * (1.0 if dp_result['is_compliant'] else 0.5)) +
-            (0.3 * max(0, 1.0 - risk_result['risk_score']))
-        )
-        
+
+        self.score = min(1.0,
+                         (0.4 * min(1.0, k_result['score'])) +
+                         (0.3 * (1.0 if dp_result['is_compliant'] else 0.5)) +
+                         (0.3 * max(0, 1.0 - risk_result['risk_score']))
+                         )
+
         return {
             'id': self.module_id,
             'name': self.name,
@@ -249,13 +253,13 @@ class ModelSecurityModule:
     """
     Model Integrity, Adversarial Robustness, and Data Leakage Prevention
     """
-    
+
     def __init__(self):
         self.module_id = "model_security"
         self.name = "🛡️ Model Security & Adversarial Testing"
         self.score = 0
         self.description = "Model integrity verification and adversarial attack resistance"
-    
+
     def verify_model_integrity(self, model_path: str = "model.pkl") -> Dict:
         """
         Verify model integrity using checksums
@@ -263,9 +267,10 @@ class ModelSecurityModule:
         # Simulated model checksum verification
         expected_hash = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
         current_hash = hashlib.sha256(b"model_binary_data_sample").hexdigest()
-        
-        is_verified = current_hash == expected_hash or len(current_hash) > 0  # Simulated
-        
+
+        is_verified = current_hash == expected_hash or len(
+            current_hash) > 0  # Simulated
+
         return {
             'model_path': model_path,
             'expected_hash': expected_hash,
@@ -275,7 +280,7 @@ class ModelSecurityModule:
             'tampering_detected': not is_verified,
             'risk_level': 'LOW' if is_verified else 'CRITICAL'
         }
-    
+
     def test_adversarial_robustness(self) -> Dict:
         """
         Test model robustness against adversarial attacks (FGSM, PGD)
@@ -284,12 +289,12 @@ class ModelSecurityModule:
         clean_accuracy = 0.95
         fgsm_accuracy = 0.87  # Fast Gradient Sign Method (ε=0.1)
         pgd_accuracy = 0.82   # Projected Gradient Descent (ε=0.1)
-        
+
         fgsm_robustness = (fgsm_accuracy / clean_accuracy) * 100
         pgd_robustness = (pgd_accuracy / clean_accuracy) * 100
-        
+
         avg_robustness = (fgsm_robustness + pgd_robustness) / 2
-        
+
         return {
             'clean_accuracy': clean_accuracy,
             'fgsm_attack_accuracy': fgsm_accuracy,
@@ -301,7 +306,7 @@ class ModelSecurityModule:
             'robustness_level': 'STRONG' if avg_robustness >= 90 else 'MODERATE' if avg_robustness >= 80 else 'WEAK',
             'recommendation': 'Model is robust' if avg_robustness >= 90 else 'Apply adversarial training'
         }
-    
+
     def test_membership_inference(self) -> Dict:
         """
         Test resistance to membership inference attacks
@@ -310,9 +315,9 @@ class ModelSecurityModule:
         # Simulated membership inference attack
         attack_success_rate = 0.52  # Near random guessing (0.5)
         baseline_random = 0.5
-        
+
         is_resistant = attack_success_rate < 0.55
-        
+
         return {
             'attack_name': 'Membership Inference Attack',
             'attack_success_rate': attack_success_rate,
@@ -323,20 +328,21 @@ class ModelSecurityModule:
             'data_leakage_risk': 'LOW' if is_resistant else 'HIGH',
             'recommendation': 'Model resists membership inference' if is_resistant else 'Apply differential privacy'
         }
-    
+
     def get_assessment(self) -> Dict:
         """Get overall model security assessment"""
         integrity = self.verify_model_integrity()
         adversarial = self.test_adversarial_robustness()
         membership = self.test_membership_inference()
-        
+
         # Calculate composite score
         integrity_score = 1.0 if integrity['integrity_verified'] else 0.0
         adversarial_score = min(1.0, adversarial['average_robustness'] / 100)
         membership_score = 1.0 if membership['is_resistant'] else 0.5
-        
-        self.score = (0.3 * integrity_score) + (0.4 * adversarial_score) + (0.3 * membership_score)
-        
+
+        self.score = (0.3 * integrity_score) + \
+            (0.4 * adversarial_score) + (0.3 * membership_score)
+
         return {
             'id': self.module_id,
             'name': self.name,
@@ -363,7 +369,7 @@ class DataMinimizationModule:
     """
     Data Minimization and Retention Policy Enforcement
     """
-    
+
     def __init__(self):
         self.module_id = "data_minimization"
         self.name = "📋 Data Minimization & Retention"
@@ -375,7 +381,7 @@ class DataMinimizationModule:
             'audit_logs': {'retention_days': 365, 'regulation': 'SOX'},
             'backup_data': {'retention_days': 30, 'regulation': 'NIST'}
         }
-    
+
     def justify_data_fields(self) -> Dict:
         """Justify why each data field is collected"""
         field_justifications = {
@@ -415,17 +421,17 @@ class DataMinimizationModule:
                 'retention_period': 'N/A'
             }
         }
-        
+
         return field_justifications
-    
+
     def enforce_retention_policies(self) -> Dict:
         """Enforce data retention policies with automated deletion"""
         enforcement_status = {}
-        
+
         for data_type, policy in self.retention_policies.items():
             retention_days = policy['retention_days']
             deletion_date = datetime.now() - timedelta(days=retention_days)
-            
+
             enforcement_status[data_type] = {
                 'data_type': data_type,
                 'retention_period_days': retention_days,
@@ -435,30 +441,34 @@ class DataMinimizationModule:
                 'regulation': policy['regulation'],
                 'compliance_status': 'COMPLIANT'
             }
-        
+
         return enforcement_status
-    
+
     def calculate_data_minimization_score(self) -> float:
         """Calculate data minimization compliance score"""
         justifications = self.justify_data_fields()
-        
+
         total_fields = len(justifications)
-        justified_fields = sum(1 for f in justifications.values() if f['collected'] or 'Not collected' in f.get('justification', ''))
-        necessity_high = sum(1 for f in justifications.values() if f.get('necessity') == 'HIGH')
-        
-        score = (justified_fields / total_fields * 0.5) + (necessity_high / total_fields * 0.5)
-        
+        justified_fields = sum(1 for f in justifications.values(
+        ) if f['collected'] or 'Not collected' in f.get('justification', ''))
+        necessity_high = sum(1 for f in justifications.values()
+                             if f.get('necessity') == 'HIGH')
+
+        score = (justified_fields / total_fields * 0.5) + \
+            (necessity_high / total_fields * 0.5)
+
         return min(1.0, score)
-    
+
     def get_assessment(self) -> Dict:
         """Get overall data minimization assessment"""
         justifications = self.justify_data_fields()
         retention_status = self.enforce_retention_policies()
-        
+
         self.score = self.calculate_data_minimization_score()
-        
-        compliant_fields = sum(1 for f in justifications.values() if f.get('retention_period') != 'N/A')
-        
+
+        compliant_fields = sum(
+            1 for f in justifications.values() if f.get('retention_period') != 'N/A')
+
         return {
             'id': self.module_id,
             'name': self.name,
@@ -775,9 +785,9 @@ def api_sai():
         DATA_MINIMIZATION_MODULE.score,
         0.92, 0.88, 0.85, 0.90, 0.87, 0.84, 0.89, 0.86  # Original modules
     ]
-    
+
     sai = sum(module_scores) / len(module_scores) if module_scores else 0
-    
+
     return jsonify({
         'sai': round(sai, 3),
         'sai_percent': round(sai * 100, 1),
@@ -794,16 +804,16 @@ def api_sai():
 def api_all_modules():
     """Get all security modules"""
     modules = []
-    
+
     # Add original modules
     for name, module_data in SECURITY_MODULES.items():
         modules.append(module_data)
-    
+
     # Add new modules
     modules.append(ANONYMIZATION_MODULE.get_assessment())
     modules.append(MODEL_SECURITY_MODULE.get_assessment())
     modules.append(DATA_MINIMIZATION_MODULE.get_assessment())
-    
+
     return jsonify({'modules': modules, 'total': len(modules)})
 
 

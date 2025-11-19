@@ -56,7 +56,7 @@ class Change:
     severity: SeverityLevel
     recommendation: Optional[str] = None
     affected_systems: List[str] = None
-    
+
     def __post_init__(self):
         if self.affected_systems is None:
             self.affected_systems = []
@@ -76,7 +76,7 @@ class NotificationPreference:
     email_enabled: bool = True
     in_app_enabled: bool = True
     channels: List[str] = None
-    
+
     def __post_init__(self):
         if self.channels is None:
             self.channels = ['email', 'in_app']
@@ -85,18 +85,18 @@ class NotificationPreference:
 class EmailNotifier:
     """
     Sends email notifications for regulatory changes
-    
+
     Supports:
     - SMTP configuration (Gmail, Outlook, custom SMTP)
     - HTML email templates
     - Attachment support
     - Batch sending
     """
-    
+
     def __init__(self, smtp_config: Dict = None):
         """
         Initialize email notifier
-        
+
         Args:
             smtp_config: SMTP configuration dict with keys:
                 - host: SMTP server host
@@ -107,8 +107,9 @@ class EmailNotifier:
                 - from_address: From email address
         """
         self.smtp_config = smtp_config or self._default_smtp_config()
-        self.test_mode = smtp_config is None or smtp_config.get('test_mode', False)
-    
+        self.test_mode = smtp_config is None or smtp_config.get(
+            'test_mode', False)
+
     def _default_smtp_config(self) -> Dict:
         """Get default SMTP configuration"""
         return {
@@ -120,7 +121,7 @@ class EmailNotifier:
             'from_address': 'compliance@example.com',
             'test_mode': True
         }
-    
+
     def send_change_notification(
         self,
         to_email: str,
@@ -129,12 +130,12 @@ class EmailNotifier:
     ) -> Tuple[bool, str]:
         """
         Send email notification about regulatory changes
-        
+
         Args:
             to_email: Recipient email address
             changes: List of changes to notify about
             user_name: User's name for personalization
-            
+
         Returns:
             Tuple of (success, message)
         """
@@ -144,44 +145,46 @@ class EmailNotifier:
             msg['Subject'] = self._create_subject(changes)
             msg['From'] = self.smtp_config['from_address']
             msg['To'] = to_email
-            
+
             # Create HTML content
             html_content = self._create_html_content(changes, user_name)
-            
+
             # Attach HTML
             msg.attach(MIMEText(html_content, 'html'))
-            
+
             # Send email
             if self.test_mode:
                 logger.info(f"[TEST MODE] Would send email to {to_email}")
                 logger.info(f"Subject: {msg['Subject']}")
                 return True, "Email would be sent (test mode)"
-            
+
             # Actually send
             self._send_smtp(to_email, msg)
             logger.info(f"Email sent to {to_email}")
             return True, f"Email sent to {to_email}"
-            
+
         except Exception as e:
             error_msg = f"Failed to send email: {str(e)}"
             logger.error(error_msg)
             return False, error_msg
-    
+
     def _create_subject(self, changes: List[Change]) -> str:
         """Create email subject line"""
-        critical_count = sum(1 for c in changes if c.severity == SeverityLevel.CRITICAL)
-        high_count = sum(1 for c in changes if c.severity == SeverityLevel.HIGH)
-        
+        critical_count = sum(
+            1 for c in changes if c.severity == SeverityLevel.CRITICAL)
+        high_count = sum(1 for c in changes if c.severity ==
+                         SeverityLevel.HIGH)
+
         if critical_count > 0:
             return f"CRITICAL: {critical_count} Critical Regulatory Change(s)"
         elif high_count > 0:
             return f"HIGH: {high_count} Important Regulatory Update(s)"
         else:
             return f"Regulatory Updates: {len(changes)} Change(s)"
-    
+
     def _create_html_content(self, changes: List[Change], user_name: str) -> str:
         """Create HTML email content"""
-        
+
         # Group changes by severity
         by_severity = {}
         for change in changes:
@@ -189,7 +192,7 @@ class EmailNotifier:
             if severity not in by_severity:
                 by_severity[severity] = []
             by_severity[severity].append(change)
-        
+
         # Build HTML
         html = f"""
         <html>
@@ -218,13 +221,13 @@ class EmailNotifier:
                 <p>The following regulatory changes have been detected:</p>
             </div>
         """
-        
+
         # Add changes by severity
         for severity in ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFORMATIONAL']:
             if severity in by_severity:
                 html += f"<div class='change-group'>"
                 html += f"<h3>{severity} SEVERITY ({len(by_severity[severity])} changes)</h3>"
-                
+
                 for change in by_severity[severity]:
                     severity_class = severity.lower()
                     html += f"""
@@ -234,21 +237,21 @@ class EmailNotifier:
                         <strong>Change:</strong> {change.new_value[:100]}...<br>
                         <strong>Detected:</strong> {change.detected_at.strftime('%Y-%m-%d %H:%M UTC')}
                     """
-                    
+
                     if change.affected_systems:
                         html += f"<br><strong>Affected Systems:</strong> {', '.join(change.affected_systems)}"
-                    
+
                     if change.recommendation:
                         html += f"""
                         <div class='recommendation'>
                             <strong>Recommendation:</strong> {change.recommendation}
                         </div>
                         """
-                    
+
                     html += "</div>"
-                
+
                 html += "</div>"
-        
+
         html += """
             <div class="footer">
                 <p>This is an automated notification from IRAQAF Compliance Platform.</p>
@@ -257,38 +260,39 @@ class EmailNotifier:
         </body>
         </html>
         """
-        
+
         return html
-    
+
     def _send_smtp(self, to_email: str, msg: MIMEMultipart) -> None:
         """Send email via SMTP"""
         with smtplib.SMTP(self.smtp_config['host'], self.smtp_config['port']) as server:
             if self.smtp_config.get('use_tls', True):
                 server.starttls()
-            
+
             server.login(
                 self.smtp_config['username'],
                 self.smtp_config['password']
             )
-            
+
             server.send_message(msg)
 
 
 class InAppNotificationManager:
     """
     Manages in-app notifications stored in database
-    
+
     Features:
     - Store notifications in database
     - Mark as read/unread
     - Archive notifications
     - Query by user/severity
     """
-    
+
     def __init__(self):
         """Initialize in-app notification manager"""
-        self.notifications: Dict[str, List[Dict]] = {}  # user_id -> notifications
-    
+        self.notifications: Dict[str, List[Dict]
+                                 ] = {}  # user_id -> notifications
+
     def create_notification(
         self,
         user_id: str,
@@ -297,12 +301,12 @@ class InAppNotificationManager:
     ) -> Dict:
         """
         Create in-app notification
-        
+
         Args:
             user_id: User ID
             change: Change object
             title: Notification title
-            
+
         Returns:
             Notification dict
         """
@@ -319,15 +323,15 @@ class InAppNotificationManager:
             'archived': False,
             'recommendation': change.recommendation
         }
-        
+
         if user_id not in self.notifications:
             self.notifications[user_id] = []
-        
+
         self.notifications[user_id].append(notification)
         logger.info(f"In-app notification created for {user_id}")
-        
+
         return notification
-    
+
     def get_notifications(
         self,
         user_id: str,
@@ -336,32 +340,32 @@ class InAppNotificationManager:
     ) -> List[Dict]:
         """
         Get notifications for user
-        
+
         Args:
             user_id: User ID
             include_archived: Include archived notifications
             severity_filter: Filter by severity levels
-            
+
         Returns:
             List of notifications
         """
         if user_id not in self.notifications:
             return []
-        
+
         notifications = self.notifications[user_id]
-        
+
         # Filter
         if not include_archived:
             notifications = [n for n in notifications if not n['archived']]
-        
+
         if severity_filter:
-            notifications = [n for n in notifications 
-                           if n['severity'] in severity_filter]
-        
-        return sorted(notifications, 
-                     key=lambda n: n['created_at'], 
-                     reverse=True)
-    
+            notifications = [n for n in notifications
+                             if n['severity'] in severity_filter]
+
+        return sorted(notifications,
+                      key=lambda n: n['created_at'],
+                      reverse=True)
+
     def mark_as_read(self, user_id: str, notification_id: str) -> bool:
         """Mark notification as read"""
         if user_id in self.notifications:
@@ -370,7 +374,7 @@ class InAppNotificationManager:
                     notif['read'] = True
                     return True
         return False
-    
+
     def archive_notification(self, user_id: str, notification_id: str) -> bool:
         """Archive notification"""
         if user_id in self.notifications:
@@ -384,20 +388,20 @@ class InAppNotificationManager:
 class NotificationManager:
     """
     Orchestrates multi-channel notifications
-    
+
     Coordinates:
     - Email notifications
     - In-app notifications
     - Change summaries
     - Recommendation generation
     """
-    
+
     def __init__(self, smtp_config: Dict = None):
         """Initialize notification manager"""
         self.email_notifier = EmailNotifier(smtp_config)
         self.in_app_manager = InAppNotificationManager()
         self.user_preferences: Dict[str, NotificationPreference] = {}
-    
+
     def notify_changes(
         self,
         changes: List[Change],
@@ -405,11 +409,11 @@ class NotificationManager:
     ) -> Dict:
         """
         Send notifications for changes to all affected users
-        
+
         Args:
             changes: List of changes
             affected_users: List of user IDs to notify (or None for all)
-            
+
         Returns:
             Dict with notification results
         """
@@ -420,19 +424,19 @@ class NotificationManager:
             'in_app_created': 0,
             'failed': 0
         }
-        
+
         # Get users to notify
         users = affected_users or list(self.user_preferences.keys())
-        
+
         for user_id in users:
             # Filter changes based on user preferences
             if user_id in self.user_preferences:
                 pref = self.user_preferences[user_id]
                 filtered_changes = self._filter_by_preference(changes, pref)
-                
+
                 if not filtered_changes:
                     continue
-                
+
                 # Send notifications
                 if pref.email_enabled and 'email' in pref.channels:
                     success, msg = self.email_notifier.send_change_notification(
@@ -444,17 +448,18 @@ class NotificationManager:
                         results['emails_sent'] += 1
                     else:
                         results['failed'] += 1
-                
+
                 if pref.in_app_enabled and 'in_app' in pref.channels:
                     for change in filtered_changes:
-                        self.in_app_manager.create_notification(user_id, change)
+                        self.in_app_manager.create_notification(
+                            user_id, change)
                         results['in_app_created'] += 1
-                
+
                 results['users_notified'] += 1
-        
+
         logger.info(f"Notification results: {results}")
         return results
-    
+
     def _filter_by_preference(
         self,
         changes: List[Change],
@@ -462,10 +467,10 @@ class NotificationManager:
     ) -> List[Change]:
         """Filter changes based on user preferences"""
         filtered = []
-        
+
         for change in changes:
             severity_name = change.severity.name.lower()
-            
+
             if severity_name == 'critical' and pref.notify_critical:
                 filtered.append(change)
             elif severity_name == 'high' and pref.notify_high:
@@ -476,14 +481,14 @@ class NotificationManager:
                 filtered.append(change)
             elif severity_name == 'informational' and pref.notify_informational:
                 filtered.append(change)
-        
+
         return filtered
-    
+
     def set_user_preference(self, pref: NotificationPreference) -> None:
         """Set notification preferences for user"""
         self.user_preferences[pref.user_id] = pref
         logger.info(f"Notification preferences updated for {pref.user_id}")
-    
+
     def get_user_notifications(self, user_id: str) -> List[Dict]:
         """Get all notifications for user"""
         return self.in_app_manager.get_notifications(user_id)
@@ -492,14 +497,14 @@ class NotificationManager:
 class RecommendationEngine:
     """
     Generates recommendations for regulatory changes
-    
+
     Provides:
     - Automatic recommendations based on change type
     - Compliance impact analysis
     - Remediation timelines
     - Priority ranking
     """
-    
+
     RECOMMENDATIONS = {
         ChangeType.NEW_REQUIREMENT.value: {
             SeverityLevel.CRITICAL: "URGENT: Implement immediately within 7 days",
@@ -518,25 +523,25 @@ class RecommendationEngine:
             SeverityLevel.HIGH: "Schedule urgent review meeting. Assess compliance impact.",
         },
     }
-    
+
     @staticmethod
     def generate_recommendation(change: Change) -> str:
         """
         Generate recommendation for a change
-        
+
         Args:
             change: Change object
-            
+
         Returns:
             Recommendation string
         """
         change_type = change.change_type.value
         severity = change.severity
-        
+
         recommendations = RecommendationEngine.RECOMMENDATIONS.get(
             change_type, {}
         )
-        
+
         return recommendations.get(
             severity,
             f"Review this {severity.name.lower()} priority regulatory change."
@@ -546,10 +551,10 @@ class RecommendationEngine:
 if __name__ == '__main__':
     # Example usage
     logging.basicConfig(level=logging.INFO)
-    
+
     # Create notification manager
     nm = NotificationManager()
-    
+
     # Set user preference
     pref = NotificationPreference(
         user_id='user1',
@@ -558,7 +563,7 @@ if __name__ == '__main__':
         notify_high=True
     )
     nm.set_user_preference(pref)
-    
+
     # Create sample changes
     changes = [
         Change(
@@ -572,7 +577,7 @@ if __name__ == '__main__':
             recommendation=RecommendationEngine.generate_recommendation(None)
         )
     ]
-    
+
     # Send notifications
     results = nm.notify_changes(changes, ['user1'])
     print(f"Notification results: {results}")

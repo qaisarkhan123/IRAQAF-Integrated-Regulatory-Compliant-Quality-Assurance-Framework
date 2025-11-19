@@ -467,13 +467,14 @@ def api_analyze():
 
         # Analyze
         analysis = analyzer.analyze(combined_text)
-        
+
         return jsonify(analysis)
-    
+
     except Exception as e:
         print(f"Error in analyze endpoint: {e}")
         # Return sample on any error
-        analysis = analyzer.analyze("Error processing request - returning sample data")
+        analysis = analyzer.analyze(
+            "Error processing request - returning sample data")
         return jsonify(analysis)
 
 

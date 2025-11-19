@@ -1,129 +1,132 @@
 {
-  "scheduler": {
-    "timezone": "UTC",
-    "max_concurrent_jobs": 3,
-    "job_store": "memory",
-    "log_directory": "logs/scraper_jobs",
-    "enable_persistence": false
-  },
-  "scraper_jobs": [
-    {
-      "name": "EU AI Act Daily",
-      "source_name": "EU AI Act",
-      "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
-      "parser_type": "html",
-      "schedule_type": "daily",
-      "schedule_time": "02:00",
-      "retry_count": 3,
-      "timeout_seconds": 30,
-      "enabled": true,
-      "description": "Scrape EU Artificial Intelligence Act updates daily at 2 AM UTC"
+    "scheduler": {
+        "timezone": "UTC",
+        "max_concurrent_jobs": 3,
+        "job_store": "memory",
+        "log_directory": "logs/scraper_jobs",
+        "enable_persistence": false
     },
-    {
-      "name": "FDA Daily",
-      "source_name": "FDA",
-      "url": "https://www.fda.gov/medical-devices/regulatory-guidance",
-      "parser_type": "html",
-      "schedule_type": "daily",
-      "schedule_time": "03:00",
-      "retry_count": 3,
-      "timeout_seconds": 30,
-      "enabled": true,
-      "description": "Scrape FDA medical device guidance daily at 3 AM UTC"
+    "scraper_jobs": [
+        {
+            "name": "EU AI Act Daily",
+            "source_name": "EU AI Act",
+            "url": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+            "parser_type": "html",
+            "schedule_type": "daily",
+            "schedule_time": "02:00",
+            "retry_count": 3,
+            "timeout_seconds": 30,
+            "enabled": true,
+            "description": "Scrape EU Artificial Intelligence Act updates daily at 2 AM UTC"
+        },
+        {
+            "name": "FDA Daily",
+            "source_name": "FDA",
+            "url": "https://www.fda.gov/medical-devices/regulatory-guidance",
+            "parser_type": "html",
+            "schedule_type": "daily",
+            "schedule_time": "03:00",
+            "retry_count": 3,
+            "timeout_seconds": 30,
+            "enabled": true,
+            "description": "Scrape FDA medical device guidance daily at 3 AM UTC"
+        },
+        {
+            "name": "GDPR Daily",
+            "source_name": "GDPR",
+            "url": "https://gdpr-info.eu/",
+            "parser_type": "html",
+            "schedule_type": "daily",
+            "schedule_time": "04:00",
+            "retry_count": 3,
+            "timeout_seconds": 30,
+            "enabled": true,
+            "description": "Scrape GDPR regulations and updates daily at 4 AM UTC"
+        },
+        {
+            "name": "ISO 13485 Weekly",
+            "source_name": "ISO 13485",
+            "url": "https://www.iso.org/standard/59752.html",
+            "parser_type": "html",
+            "schedule_type": "weekly",
+            "schedule_time": "monday",
+            "retry_count": 3,
+            "timeout_seconds": 30,
+            "enabled": true,
+            "description": "Scrape ISO 13485 quality management updates every Monday at 2 AM UTC"
+        },
+        {
+            "name": "IEC 62304 Weekly",
+            "source_name": "IEC 62304",
+            "url": "https://www.iec.ch/standard/62304",
+            "parser_type": "html",
+            "schedule_type": "weekly",
+            "schedule_time": "wednesday",
+            "retry_count": 3,
+            "timeout_seconds": 30,
+            "enabled": true,
+            "description": "Scrape IEC 62304 software lifecycle updates every Wednesday at 2 AM UTC"
+        }
+    ],
+    "email_config": {
+        "smtp_host": "smtp.gmail.com",
+        "smtp_port": 587,
+        "use_tls": true,
+        "username": "your-compliance-email@gmail.com",
+        "password": "your-app-specific-password",
+        "from_address": "compliance-notifications@example.com",
+        "test_mode": true,
+        "description": "Configure SMTP settings for email notifications. For Gmail, use app-specific password."
     },
-    {
-      "name": "GDPR Daily",
-      "source_name": "GDPR",
-      "url": "https://gdpr-info.eu/",
-      "parser_type": "html",
-      "schedule_type": "daily",
-      "schedule_time": "04:00",
-      "retry_count": 3,
-      "timeout_seconds": 30,
-      "enabled": true,
-      "description": "Scrape GDPR regulations and updates daily at 4 AM UTC"
+    "notification_defaults": {
+        "notify_critical": true,
+        "notify_high": true,
+        "notify_medium": false,
+        "notify_low": false,
+        "notify_informational": false,
+        "digest_frequency": "daily",
+        "email_enabled": true,
+        "in_app_enabled": true,
+        "channels": [
+            "email",
+            "in_app"
+        ]
     },
-    {
-      "name": "ISO 13485 Weekly",
-      "source_name": "ISO 13485",
-      "url": "https://www.iso.org/standard/59752.html",
-      "parser_type": "html",
-      "schedule_type": "weekly",
-      "schedule_time": "monday",
-      "retry_count": 3,
-      "timeout_seconds": 30,
-      "enabled": true,
-      "description": "Scrape ISO 13485 quality management updates every Monday at 2 AM UTC"
+    "rate_limiting": {
+        "min_request_interval_seconds": 1.0,
+        "max_requests_per_hour": 3600,
+        "backoff_multiplier": 2,
+        "max_backoff_seconds": 300,
+        "description": "Implement rate limiting to respect robots.txt and avoid blocking"
     },
-    {
-      "name": "IEC 62304 Weekly",
-      "source_name": "IEC 62304",
-      "url": "https://www.iec.ch/standard/62304",
-      "parser_type": "html",
-      "schedule_type": "weekly",
-      "schedule_time": "wednesday",
-      "retry_count": 3,
-      "timeout_seconds": 30,
-      "enabled": true,
-      "description": "Scrape IEC 62304 software lifecycle updates every Wednesday at 2 AM UTC"
+    "monitoring": {
+        "health_check_interval_seconds": 300,
+        "circuit_breaker_threshold": 3,
+        "circuit_breaker_recovery_minutes": 30,
+        "log_level": "INFO",
+        "enable_metrics": true,
+        "description": "Monitoring and health check configuration"
+    },
+    "fallback_urls": {
+        "EU AI Act": [
+            "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+            "https://ec.europa.eu/newsroom/dae/redirection/document/123456"
+        ],
+        "FDA": [
+            "https://www.fda.gov/medical-devices/regulatory-guidance",
+            "https://www.fda.gov/medical-devices/guidance-documents"
+        ],
+        "GDPR": [
+            "https://gdpr-info.eu/",
+            "https://ec.europa.eu/info/law/law-topic/data-protection_en"
+        ],
+        "ISO 13485": [
+            "https://www.iso.org/standard/59752.html",
+            "https://www.iso.org/iso-13485-medical-devices-quality-management"
+        ],
+        "IEC 62304": [
+            "https://www.iec.ch/standard/62304",
+            "https://webstore.iec.ch/preview/info_iec62304%7Bed2.0%7Den.pdf"
+        ]
     }
-  ],
-  "email_config": {
-    "smtp_host": "smtp.gmail.com",
-    "smtp_port": 587,
-    "use_tls": true,
-    "username": "your-compliance-email@gmail.com",
-    "password": "your-app-specific-password",
-    "from_address": "compliance-notifications@example.com",
-    "test_mode": true,
-    "description": "Configure SMTP settings for email notifications. For Gmail, use app-specific password."
-  },
-  "notification_defaults": {
-    "notify_critical": true,
-    "notify_high": true,
-    "notify_medium": false,
-    "notify_low": false,
-    "notify_informational": false,
-    "digest_frequency": "daily",
-    "email_enabled": true,
-    "in_app_enabled": true,
-    "channels": ["email", "in_app"]
-  },
-  "rate_limiting": {
-    "min_request_interval_seconds": 1.0,
-    "max_requests_per_hour": 3600,
-    "backoff_multiplier": 2,
-    "max_backoff_seconds": 300,
-    "description": "Implement rate limiting to respect robots.txt and avoid blocking"
-  },
-  "monitoring": {
-    "health_check_interval_seconds": 300,
-    "circuit_breaker_threshold": 3,
-    "circuit_breaker_recovery_minutes": 30,
-    "log_level": "INFO",
-    "enable_metrics": true,
-    "description": "Monitoring and health check configuration"
-  },
-  "fallback_urls": {
-    "EU AI Act": [
-      "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
-      "https://ec.europa.eu/newsroom/dae/redirection/document/123456"
-    ],
-    "FDA": [
-      "https://www.fda.gov/medical-devices/regulatory-guidance",
-      "https://www.fda.gov/medical-devices/guidance-documents"
-    ],
-    "GDPR": [
-      "https://gdpr-info.eu/",
-      "https://ec.europa.eu/info/law/law-topic/data-protection_en"
-    ],
-    "ISO 13485": [
-      "https://www.iso.org/standard/59752.html",
-      "https://www.iso.org/iso-13485-medical-devices-quality-management"
-    ],
-    "IEC 62304": [
-      "https://www.iec.ch/standard/62304",
-      "https://webstore.iec.ch/preview/info_iec62304%7Bed2.0%7Den.pdf"
-    ]
-  }
 }

@@ -16,6 +16,12 @@ Author: IRAQAF Phase 2
 Date: 2024
 """
 
+from db.models import (
+    RegulatorySource, RegulatoryContent, ChangeHistory,
+    System, Assessment, AssessmentRequirement
+)
+from db.database import init_db
+from db.operations import db_ops
 import pytest
 import sys
 import logging
@@ -26,12 +32,6 @@ from datetime import datetime
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from db.operations import db_ops
-from db.database import init_db
-from db.models import (
-    RegulatorySource, RegulatoryContent, ChangeHistory,
-    System, Assessment, AssessmentRequirement
-)
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -204,7 +204,8 @@ class TestContentStorage:
         )
 
         import hashlib
-        expected_hash = hashlib.sha256(sample_content['content'].encode()).hexdigest()
+        expected_hash = hashlib.sha256(
+            sample_content['content'].encode()).hexdigest()
         assert result.content_hash == expected_hash
 
     def test_retrieve_content(self, setup_database, sample_source, sample_content):
@@ -384,7 +385,8 @@ class TestBatchOperations:
             for i in range(10)
         ]
 
-        result = db_ops.batch_load_content_parallel(content_list, max_workers=3)
+        result = db_ops.batch_load_content_parallel(
+            content_list, max_workers=3)
         assert result['success'] >= 10
 
 

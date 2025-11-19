@@ -86,7 +86,8 @@ class DatabaseOperations:
             session = next(get_db())
 
             # Check if source already exists
-            existing = session.query(RegulatorySource).filter_by(name=source_name).first()
+            existing = session.query(RegulatorySource).filter_by(
+                name=source_name).first()
             if existing:
                 logger.info(f"ℹ Source '{source_name}' already exists")
                 return existing
@@ -219,8 +220,10 @@ class DatabaseOperations:
                 source_id=source_id,
                 content_id=content_id,
                 change_type=change_type,
-                old_value=old_value[:500] if old_value else None,  # Store first 500 chars
-                new_value=new_value[:500] if new_value else None,  # Store first 500 chars
+                # Store first 500 chars
+                old_value=old_value[:500] if old_value else None,
+                # Store first 500 chars
+                new_value=new_value[:500] if new_value else None,
                 detected_at=datetime.utcnow(),
                 notification_sent=False
             )
@@ -338,7 +341,8 @@ class DatabaseOperations:
             history = session.query(SystemComplianceHistory).filter_by(
                 system_id=system_id
             ).order_by(SystemComplianceHistory.assessment_date.desc()).all()
-            logger.info(f"✓ Retrieved {len(history)} compliance history records")
+            logger.info(
+                f"✓ Retrieved {len(history)} compliance history records")
             return history
 
         except Exception as e:
@@ -374,7 +378,8 @@ class DatabaseOperations:
             else:
                 failed_count += 1
 
-        logger.info(f"✓ Batch load complete: {success_count} success, {failed_count} failed")
+        logger.info(
+            f"✓ Batch load complete: {success_count} success, {failed_count} failed")
         return {'success': success_count, 'failed': failed_count}
 
     def batch_load_content_parallel(
@@ -482,7 +487,8 @@ class DatabaseOperations:
         """
         try:
             session = next(get_db())
-            content = session.query(RegulatoryContent).filter_by(is_active=True).all()
+            content = session.query(RegulatoryContent).filter_by(
+                is_active=True).all()
 
             if format_type == "json":
                 data = [
@@ -529,7 +535,8 @@ class DatabaseOperations:
             if source_id:
                 # Filter by source via assessment
                 query = query.join(Assessment).filter(
-                    Assessment.regulation_type == self._get_regulation_type(source_id)
+                    Assessment.regulation_type == self._get_regulation_type(
+                        source_id)
                 )
 
             requirements = query.all()
@@ -581,7 +588,8 @@ class DatabaseOperations:
         """Helper to get regulation type from source"""
         try:
             session = next(get_db())
-            source = session.query(RegulatorySource).filter_by(id=source_id).first()
+            source = session.query(RegulatorySource).filter_by(
+                id=source_id).first()
             return source.abbreviation if source else "UNKNOWN"
         except Exception:
             return "UNKNOWN"

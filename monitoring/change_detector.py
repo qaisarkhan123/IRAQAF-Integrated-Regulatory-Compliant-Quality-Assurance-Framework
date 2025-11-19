@@ -156,7 +156,7 @@ class ChangeDetector:
     ) -> Change:
         """Classify a newly added requirement"""
         severity = self._assess_requirement_severity(content)
-        
+
         return Change(
             change_id=f"CHG-NEW-{requirement_id}-{datetime.now().timestamp()}",
             regulation=regulation,
@@ -194,7 +194,7 @@ class ChangeDetector:
         modification_type = self._identify_modification_type(
             old_content, new_content
         )
-        
+
         return Change(
             change_id=f"CHG-MOD-{requirement_id}-{datetime.now().timestamp()}",
             regulation=regulation,
@@ -226,7 +226,7 @@ class ChangeDetector:
     ) -> Change:
         """Classify a removed requirement"""
         severity = self._assess_removal_severity(content)
-        
+
         return Change(
             change_id=f"CHG-REM-{requirement_id}-{datetime.now().timestamp()}",
             regulation=regulation,
@@ -251,20 +251,20 @@ class ChangeDetector:
     def _assess_requirement_severity(self, content: str) -> SeverityLevel:
         """Assess severity of new requirement"""
         content_lower = content.lower()
-        
+
         # Critical keywords
         critical_keywords = [
             "mandatory", "must", "shall", "required",
             "critical", "breach", "violation", "penalty",
             "non-compliance", "enforcement"
         ]
-        
+
         # High keywords
         high_keywords = [
             "important", "should", "recommended",
             "best practice", "guideline", "significant"
         ]
-        
+
         critical_count = sum(
             1 for kw in critical_keywords
             if kw in content_lower
@@ -273,7 +273,7 @@ class ChangeDetector:
             1 for kw in high_keywords
             if kw in content_lower
         )
-        
+
         if critical_count >= 2:
             return SeverityLevel.CRITICAL
         elif critical_count >= 1 or high_count >= 2:
@@ -293,7 +293,7 @@ class ChangeDetector:
         similarity = difflib.SequenceMatcher(
             None, old_content, new_content
         ).ratio()
-        
+
         if similarity < 0.5:
             # Major change
             return SeverityLevel.CRITICAL
@@ -310,7 +310,7 @@ class ChangeDetector:
     def _assess_removal_severity(self, content: str) -> SeverityLevel:
         """Assess severity of requirement removal"""
         content_lower = content.lower()
-        
+
         if any(kw in content_lower for kw in ["mandatory", "must"]):
             return SeverityLevel.CRITICAL
         elif any(kw in content_lower for kw in ["important", "should"]):
@@ -326,22 +326,22 @@ class ChangeDetector:
         """Identify what type of modification occurred"""
         old_lower = old_content.lower()
         new_lower = new_content.lower()
-        
+
         # Check if deadline changed
         if any(date_kw in old_lower for date_kw in ["2024", "2025", "2026"]):
             if any(date_kw in new_lower for date_kw in ["2024", "2025", "2026"]):
                 if old_lower != new_lower:
                     return ChangeType.DEADLINE_CHANGED
-        
+
         # Check if penalty changed
         if any(kw in old_lower for kw in ["fine", "penalty", "punishment"]):
             if any(kw in new_lower for kw in ["fine", "penalty", "punishment"]):
                 return ChangeType.PENALTY_CHANGED
-        
+
         # Check if clarified
         if len(new_content) > len(old_content) * 1.2:
             return ChangeType.REQUIREMENT_CLARIFIED
-        
+
         return ChangeType.REQUIREMENT_MODIFIED
 
     def _identify_affected_systems(self, regulation: str) -> List[str]:
@@ -362,7 +362,7 @@ class ChangeDetector:
     ) -> str:
         """Assess how this change impacts compliance"""
         content_lower = content.lower()
-        
+
         if "data" in content_lower or "privacy" in content_lower:
             return "Impacts data handling and privacy compliance"
         elif "security" in content_lower:
@@ -387,14 +387,14 @@ class ChangeDetector:
             "modify": 20,
             "remove": 10
         }.get(change_type, 30)
-        
+
         multipliers = {
             SeverityLevel.CRITICAL: 2.0,
             SeverityLevel.HIGH: 1.5,
             SeverityLevel.MEDIUM: 1.0,
             SeverityLevel.LOW: 0.5
         }
-        
+
         return base_hours * multipliers.get(severity, 1.0)
 
     def _estimate_remediation_cost(
@@ -424,7 +424,7 @@ class ChangeDetector:
             previous_requirements,
             current_requirements
         )
-        
+
         # Count by severity
         severity_counts = {
             SeverityLevel.CRITICAL: 0,
@@ -432,13 +432,13 @@ class ChangeDetector:
             SeverityLevel.MEDIUM: 0,
             SeverityLevel.LOW: 0
         }
-        
+
         for change in changes:
             severity_counts[change.severity] += 1
-        
+
         # Generate summary
         summary = self._generate_summary(regulation, changes, severity_counts)
-        
+
         return ChangeDetectionResult(
             detection_date=datetime.now(),
             total_changes=len(changes),
@@ -459,7 +459,7 @@ class ChangeDetector:
         """Generate human-readable summary of changes"""
         if not changes:
             return f"No changes detected in {regulation}"
-        
+
         summary_parts = [
             f"{len(changes)} changes detected in {regulation}:",
             f"  • {severity_counts[SeverityLevel.CRITICAL]} CRITICAL",
@@ -467,7 +467,7 @@ class ChangeDetector:
             f"  • {severity_counts[SeverityLevel.MEDIUM]} MEDIUM",
             f"  • {severity_counts[SeverityLevel.LOW]} LOW"
         ]
-        
+
         if severity_counts[SeverityLevel.CRITICAL] > 0:
             summary_parts.append(
                 "\n⚠️  IMMEDIATE ACTION REQUIRED: Critical changes detected"
@@ -476,7 +476,7 @@ class ChangeDetector:
             summary_parts.append(
                 "\n⚠️  URGENT: High-severity changes require planning"
             )
-        
+
         return "\n".join(summary_parts)
 
     def export_changes_to_json(
@@ -485,13 +485,13 @@ class ChangeDetector:
     ) -> str:
         """Export detection result to JSON format"""
         changes_dict = [asdict(change) for change in result.changes]
-        
+
         # Convert datetime objects to ISO format strings
         for change in changes_dict:
             change['detected_date'] = change['detected_date'].isoformat()
             change['change_type'] = change['change_type'].value
             change['severity'] = change['severity'].value
-        
+
         result_dict = {
             'detection_date': result.detection_date.isoformat(),
             'total_changes': result.total_changes,
@@ -502,42 +502,43 @@ class ChangeDetector:
             'summary': result.summary,
             'changes': changes_dict
         }
-        
+
         return json.dumps(result_dict, indent=2)
 
 
 # Example usage
 if __name__ == "__main__":
     detector = ChangeDetector()
-    
+
     # Sample requirements
     previous_reqs = {
         "GDPR-1": "Organizations must implement data protection measures",
         "GDPR-2": "Data subjects have the right to be forgotten",
         "GDPR-3": "DPA must be notified within 72 hours of breach"
     }
-    
+
     current_reqs = {
         "GDPR-1": "Organizations must implement advanced data protection measures",
         "GDPR-2": "Data subjects have the right to be forgotten",
         "GDPR-4": "Organizations must conduct DPIA for high-risk processing",
         "GDPR-5": "Annual compliance audits are now mandatory"
     }
-    
+
     result = detector.analyze_changes("GDPR", previous_reqs, current_reqs)
-    
+
     print("\n" + "="*70)
     print("CHANGE DETECTION REPORT")
     print("="*70)
     print(f"\n{result.summary}\n")
-    
+
     for change in result.changes:
         print(f"\n{change.change_type.value}")
         print(f"  Requirement: {change.requirement_id}")
         print(f"  Severity: {change.severity.value}")
         print(f"  Impact: {change.compliance_impact}")
-        print(f"  Remediation: {change.estimated_remediation_hours} hours (${change.estimated_remediation_cost:.0f})")
-    
+        print(
+            f"  Remediation: {change.estimated_remediation_hours} hours (${change.estimated_remediation_cost:.0f})")
+
     print("\n" + "="*70)
     print("\nJSON Export Sample:")
     print(result.export_changes_to_json()[:500] + "...")

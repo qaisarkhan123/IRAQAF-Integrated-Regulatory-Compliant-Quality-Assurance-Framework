@@ -48,11 +48,14 @@ class BaseScraper(ABC):
                 return response.text
 
             except requests.exceptions.Timeout:
-                logger.warning(f"{self.source_name}: Timeout on attempt {attempt + 1}/{retries}")
+                logger.warning(
+                    f"{self.source_name}: Timeout on attempt {attempt + 1}/{retries}")
             except requests.exceptions.ConnectionError:
-                logger.warning(f"{self.source_name}: Connection error on attempt {attempt + 1}/{retries}")
+                logger.warning(
+                    f"{self.source_name}: Connection error on attempt {attempt + 1}/{retries}")
             except requests.exceptions.HTTPError as e:
-                logger.error(f"{self.source_name}: HTTP error {e.response.status_code}")
+                logger.error(
+                    f"{self.source_name}: HTTP error {e.response.status_code}")
                 raise
             except Exception as e:
                 logger.error(f"{self.source_name}: Unexpected error: {str(e)}")
@@ -63,7 +66,8 @@ class BaseScraper(ABC):
                 import time
                 time.sleep(wait_time)
 
-        logger.error(f"{self.source_name}: Failed to fetch after {retries} attempts")
+        logger.error(
+            f"{self.source_name}: Failed to fetch after {retries} attempts")
         return None
 
     @staticmethod
@@ -122,7 +126,8 @@ class HTMLScraper(BaseScraper):
         # Extract text and structure
         text = soup.get_text()
         lines = (line.strip() for line in text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+        chunks = (phrase.strip()
+                  for line in lines for phrase in line.split("  "))
         text = '\n'.join(chunk for chunk in chunks if chunk)
 
         results.append({
@@ -155,7 +160,8 @@ class PDFScraper(BaseScraper):
         results = []
         try:
             # Assuming content is already bytes or can be converted
-            pdf_file = BytesIO(content) if isinstance(content, bytes) else content
+            pdf_file = BytesIO(content) if isinstance(
+                content, bytes) else content
 
             with pdfplumber.open(pdf_file) as pdf:
                 full_text = ""

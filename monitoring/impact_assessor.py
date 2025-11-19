@@ -170,7 +170,8 @@ class ImpactAssessor:
         risk_summary = self._generate_risk_summary(drifts, score_change)
 
         # Calculate remediation totals
-        total_remediation_hours = sum(d.metric.remediation_hours for d in drifts)
+        total_remediation_hours = sum(
+            d.metric.remediation_hours for d in drifts)
         total_remediation_cost = sum(d.metric.remediation_cost for d in drifts)
 
         return ImpactAssessmentResult(
@@ -508,9 +509,12 @@ if __name__ == "__main__":
     print(f"System: {result.system_id}")
     print(f"\nCompliance Status:")
     print(f"  Compliant: {result.compliant_count}/{result.total_requirements}")
-    print(f"  Non-Compliant: {result.non_compliant_count}/{result.total_requirements}")
-    print(f"  Partially Compliant: {result.partially_compliant_count}/{result.total_requirements}")
+    print(
+        f"  Non-Compliant: {result.non_compliant_count}/{result.total_requirements}")
+    print(
+        f"  Partially Compliant: {result.partially_compliant_count}/{result.total_requirements}")
     print(f"\nScore Change: {result.score_change:+.1%}")
-    print(f"Remediation Needed: {result.total_remediation_hours} hours (${result.total_remediation_cost:,.0f})")
+    print(
+        f"Remediation Needed: {result.total_remediation_hours} hours (${result.total_remediation_cost:,.0f})")
     print(f"\n{result.risk_summary}")
     print("\n" + "="*70)

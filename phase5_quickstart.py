@@ -5,6 +5,7 @@ Complete 7-step verification and demonstration
 Run: python phase5_quickstart.py
 """
 
+import time
 import sys
 import json
 from pathlib import Path
@@ -51,15 +52,15 @@ try:
         ComplianceLevel, EvidenceMatrix
     )
     print("     ✅ ComplianceScorer imported")
-    
+
     from compliance.gap_analyzer import (
         GapAnalyzer, GapSeverity, RemediationType
     )
     print("     ✅ GapAnalyzer imported")
-    
+
     from compliance.requirement_checklists import RequirementChecklists
     print("     ✅ RequirementChecklists imported")
-    
+
 except ImportError as e:
     print(f"     ❌ Import failed: {e}")
     sys.exit(1)
@@ -113,7 +114,8 @@ test_evidence = [
 
 # Score requirements from each regulation
 test_cases = [
-    ("EU-AI-41.1", "High-risk AI systems must perform risk assessment", "EU-AI-Act", RiskLevel.CRITICAL),
+    ("EU-AI-41.1", "High-risk AI systems must perform risk assessment",
+     "EU-AI-Act", RiskLevel.CRITICAL),
     ("GDPR-5.1", "Personal data processing must be lawful", "GDPR", RiskLevel.CRITICAL),
     ("ISO-13485-4", "Risk management process implemented", "ISO-13485", RiskLevel.HIGH),
 ]
@@ -127,13 +129,14 @@ for req_id, req_text, regulation, risk_level in test_cases:
         evidence_list=test_evidence,
         risk_level=risk_level
     )
-    
+
     if regulation not in scores_by_regulation:
         scores_by_regulation[regulation] = []
     scores_by_regulation[regulation].append(score)
-    
+
     status = "✅" if score.compliance_score > 50 else "❌"
-    print(f"     {status} Scored {req_id}: {score.compliance_score:.1f}% ({score.compliance_level.name})")
+    print(
+        f"     {status} Scored {req_id}: {score.compliance_score:.1f}% ({score.compliance_level.name})")
 
 # ============================================================================
 # STEP 6: Advanced Test - Gap Analysis
@@ -163,17 +166,18 @@ gaps = analyzer.identify_gaps(scorer.requirement_scores, gap_threshold=50.0)
 
 if gaps:
     print(f"     ✅ Identified {len(gaps)} gap(s)")
-    
+
     # Generate remediation for first gap
     gap = gaps[0]
     actions = analyzer.generate_remediation_plan(gap)
-    
+
     total_hours = sum(a.estimated_hours for a in actions)
     total_cost = sum(a.estimated_cost for a in actions)
-    
+
     print(f"        Gap ID: {gap.gap_id}")
     print(f"        Severity: {gap.severity.name}")
-    print(f"        Remediation: {len(actions)} actions, {total_hours}h, ${total_cost:,.0f}")
+    print(
+        f"        Remediation: {len(actions)} actions, {total_hours}h, ${total_cost:,.0f}")
 else:
     print(f"     ⚠️  No gaps detected (all scores > 50)")
 
@@ -183,7 +187,6 @@ else:
 print("\n[7/7] Testing performance and exports...")
 
 # Bulk scoring test
-import time
 start = time.time()
 for i in range(50):
     scorer.score_requirement(
@@ -194,11 +197,13 @@ for i in range(50):
         risk_level=RiskLevel.MEDIUM
     )
 elapsed = time.time() - start
-print(f"     ✅ Scored 50 requirements in {elapsed:.2f}s ({50/elapsed:.0f} req/s)")
+print(
+    f"     ✅ Scored 50 requirements in {elapsed:.2f}s ({50/elapsed:.0f} req/s)")
 
 # Portfolio summary
 portfolio = scorer.get_portfolio_summary()
-print(f"     ✅ Portfolio summary generated ({portfolio['total_requirements_assessed']} total)")
+print(
+    f"     ✅ Portfolio summary generated ({portfolio['total_requirements_assessed']} total)")
 
 # Export test
 Path("reports").mkdir(exist_ok=True)
@@ -208,7 +213,8 @@ scores_file = f"reports/scores-{timestamp}.json"
 gaps_file = f"reports/gaps-{timestamp}.json"
 
 scorer.export_scores_json(scores_file)
-print(f"     ✅ Exported {scorer.requirement_scores.__len__()} scores to reports/")
+print(
+    f"     ✅ Exported {scorer.requirement_scores.__len__()} scores to reports/")
 
 if gaps:
     analyzer.export_gaps_report(gaps_file)
@@ -224,13 +230,15 @@ print("="*80)
 print(f"\n✅ All 7 verification steps completed successfully!\n")
 
 print("Components Status:")
-print(f"  ✅ ComplianceScorer: Ready (5 regulations, {len(scorer.requirement_scores)} scores)")
+print(
+    f"  ✅ ComplianceScorer: Ready (5 regulations, {len(scorer.requirement_scores)} scores)")
 print(f"  ✅ GapAnalyzer: Ready ({len(gaps)} gaps identified)")
 print(f"  ✅ RequirementChecklists: Ready (105 requirements)")
 
 print(f"\nKey Metrics:")
 print(f"  • Overall Compliance: {portfolio['overall_compliance_score']:.1f}%")
-print(f"  • Total Requirements Assessed: {portfolio['total_requirements_assessed']}")
+print(
+    f"  • Total Requirements Assessed: {portfolio['total_requirements_assessed']}")
 print(f"  • Average Confidence: {portfolio['avg_confidence']:.3f}")
 print(f"  • Regulations: {', '.join(portfolio['regulations'].keys())}")
 
@@ -239,7 +247,8 @@ if gaps:
     print(f"\nGap Analysis:")
     print(f"  • Total Gaps: {gap_summary['total_gaps']}")
     print(f"  • Critical: {gap_summary['critical_gaps']}")
-    print(f"  • Total Remediation Effort: {gap_summary['total_remediation_hours']}h")
+    print(
+        f"  • Total Remediation Effort: {gap_summary['total_remediation_hours']}h")
     print(f"  • Estimated Cost: ${gap_summary['total_remediation_cost']:,.2f}")
 
 print(f"\nRequirement Checklists:")

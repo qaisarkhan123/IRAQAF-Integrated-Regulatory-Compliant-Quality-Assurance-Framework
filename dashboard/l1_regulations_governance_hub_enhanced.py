@@ -27,20 +27,21 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max upload
 # REGULATORY COMPLIANCE MODULES
 # ============================================================================
 
+
 class ComplianceModule:
     """Base class for regulatory compliance modules"""
-    
+
     def __init__(self, name, description, framework):
         self.name = name
         self.description = description
         self.framework = framework
         self.criteria = []
         self.score = 0.0
-        
+
     def evaluate(self, text: str) -> Dict:
         """Evaluate text against regulatory criteria"""
         pass
-    
+
     def get_recommendations(self) -> List[str]:
         """Get actionable recommendations"""
         pass
@@ -48,7 +49,7 @@ class ComplianceModule:
 
 class GDPRModule(ComplianceModule):
     """GDPR - Data Protection Regulation (EU 2016/679)"""
-    
+
     def __init__(self):
         super().__init__(
             name="GDPR",
@@ -67,12 +68,12 @@ class GDPRModule(ComplianceModule):
             "Consent management",
             "Data retention policy"
         ]
-    
+
     def evaluate(self, text: str) -> Dict:
         """Evaluate GDPR compliance"""
         score = 0.0
         findings = []
-        
+
         gdpr_keywords = {
             "lawful_basis": ["lawful basis", "article 6", "consent", "contract", "legal obligation"],
             "data_rights": ["data subject rights", "access", "rectification", "erasure", "portability"],
@@ -82,23 +83,23 @@ class GDPRModule(ComplianceModule):
             "breach": ["breach notification", "72 hours", "data breach response"],
             "retention": ["retention policy", "retention schedule", "data retention"]
         }
-        
+
         text_lower = text.lower()
         matches = 0
-        
+
         for criteria, keywords in gdpr_keywords.items():
             if any(kw in text_lower for kw in keywords):
                 matches += 1
                 findings.append(f"✓ {criteria.replace('_', ' ').title()}")
-        
+
         score = (matches / len(gdpr_keywords)) * 100
-        
+
         return {
             "score": score,
             "findings": findings,
             "gaps": [c for c in self.criteria if not any(k in text_lower for k in gdpr_keywords.get(c.lower().replace(' ', '_'), []))]
         }
-    
+
     def get_recommendations(self) -> List[str]:
         return [
             "Implement comprehensive consent management system",
@@ -112,7 +113,7 @@ class GDPRModule(ComplianceModule):
 
 class EUAIActModule(ComplianceModule):
     """EU AI Act - AI System Regulation (EU 2024/1689)"""
-    
+
     def __init__(self):
         super().__init__(
             name="EU AI Act",
@@ -131,12 +132,12 @@ class EUAIActModule(ComplianceModule):
             "Capabilities and limitations documented",
             "Human oversight procedures"
         ]
-    
+
     def evaluate(self, text: str) -> Dict:
         """Evaluate EU AI Act compliance"""
         score = 0.0
         findings = []
-        
+
         ai_keywords = {
             "risk_classification": ["risk", "high-risk", "prohibited", "limited risk", "annex"],
             "intended_purpose": ["intended purpose", "intended use", "use case", "objective"],
@@ -149,23 +150,23 @@ class EUAIActModule(ComplianceModule):
             "documentation": ["documented", "documentation", "recorded"],
             "oversight": ["human oversight", "oversight", "monitoring", "intervention"]
         }
-        
+
         text_lower = text.lower()
         matches = 0
-        
+
         for criteria, keywords in ai_keywords.items():
             if any(kw in text_lower for kw in keywords):
                 matches += 1
                 findings.append(f"✓ {criteria.replace('_', ' ').title()}")
-        
+
         score = (matches / len(ai_keywords)) * 100
-        
+
         return {
             "score": score,
             "findings": findings,
             "gaps": [c for c in self.criteria if not any(k in text_lower for k in ai_keywords.get(c.lower().replace(' ', '_'), []))]
         }
-    
+
     def get_recommendations(self) -> List[str]:
         return [
             "Classify system risk level per Annex III guidelines",
@@ -179,22 +180,22 @@ class EUAIActModule(ComplianceModule):
 
 class ISO13485Module(ComplianceModule):
     """ISO 13485 - Medical Device Quality Management System"""
-    
+
     def __init__(self):
         super().__init__(
             name="ISO 13485",
             description="Medical Device Quality Management System",
             framework="ISO 13485:2016"
         )
-    
+
     def evaluate(self, text: str) -> Dict:
-        keywords = ["quality management", "design control", "risk management", "traceability", 
-                   "validation", "verification", "document control", "training"]
+        keywords = ["quality management", "design control", "risk management", "traceability",
+                    "validation", "verification", "document control", "training"]
         text_lower = text.lower()
         matches = sum(1 for kw in keywords if kw in text_lower)
         score = (matches / len(keywords)) * 100
         return {"score": score, "findings": [f"✓ {kw}" for kw in keywords if kw in text_lower]}
-    
+
     def get_recommendations(self) -> List[str]:
         return [
             "Establish quality management system documentation",
@@ -206,22 +207,22 @@ class ISO13485Module(ComplianceModule):
 
 class IEC62304Module(ComplianceModule):
     """IEC 62304 - Medical Device Software Lifecycle Processes"""
-    
+
     def __init__(self):
         super().__init__(
             name="IEC 62304",
             description="Medical Device Software Lifecycle",
             framework="IEC 62304:2015"
         )
-    
+
     def evaluate(self, text: str) -> Dict:
-        keywords = ["software lifecycle", "software testing", "configuration management", 
-                   "requirements", "design", "implementation", "verification"]
+        keywords = ["software lifecycle", "software testing", "configuration management",
+                    "requirements", "design", "implementation", "verification"]
         text_lower = text.lower()
         matches = sum(1 for kw in keywords if kw in text_lower)
         score = (matches / len(keywords)) * 100
         return {"score": score, "findings": [f"✓ {kw}" for kw in keywords if kw in text_lower]}
-    
+
     def get_recommendations(self) -> List[str]:
         return [
             "Document software lifecycle processes",
@@ -233,22 +234,22 @@ class IEC62304Module(ComplianceModule):
 
 class FDAModule(ComplianceModule):
     """FDA AI/ML Guidance - Software as a Medical Device"""
-    
+
     def __init__(self):
         super().__init__(
             name="FDA Guidance",
             description="FDA AI/ML Guidance for Software as a Medical Device",
             framework="FDA 2021 Guidance"
         )
-    
+
     def evaluate(self, text: str) -> Dict:
         keywords = ["algorithm", "machine learning", "ai", "sop", "validation", "verification",
-                   "documentation", "transparency", "performance"]
+                    "documentation", "transparency", "performance"]
         text_lower = text.lower()
         matches = sum(1 for kw in keywords if kw in text_lower)
         score = (matches / len(keywords)) * 100
         return {"score": score, "findings": [f"✓ {kw}" for kw in keywords if kw in text_lower]}
-    
+
     def get_recommendations(self) -> List[str]:
         return [
             "Document algorithm development methodology",
@@ -260,7 +261,7 @@ class FDAModule(ComplianceModule):
 
 class ComplianceAnalyzer:
     """Analyzes documents against regulatory requirements"""
-    
+
     def __init__(self):
         self.modules = {
             "GDPR": GDPRModule(),
@@ -269,19 +270,19 @@ class ComplianceAnalyzer:
             "IEC 62304": IEC62304Module(),
             "FDA": FDAModule()
         }
-    
+
     def analyze(self, text: str) -> Dict:
         """Analyze text against all regulatory modules"""
         results = {}
         overall_score = 0.0
-        
+
         for module_name, module in self.modules.items():
             result = module.evaluate(text)
             results[module_name] = result
             overall_score += result["score"]
-        
+
         overall_score /= len(self.modules)
-        
+
         return {
             "modules": results,
             "overall_score": overall_score,
@@ -323,42 +324,43 @@ def generate_gauge_chart(score: float, label: str = "Overall Score") -> str:
         import matplotlib.pyplot as plt
         import matplotlib.patches as patches
         from matplotlib.patches import Wedge
-        
+
         fig, ax = plt.subplots(figsize=(6, 4), facecolor='#1e1e1e')
-        
+
         # Draw gauge
         theta = score * 1.8  # 0-100 maps to 0-180 degrees
         colors = ['#ff4444', '#ffaa00', '#ffdd00', '#aadd00', '#00ff41']
-        
+
         for i, color in enumerate(colors):
             start = i * 36
             end = (i + 1) * 36
-            wedge = Wedge((0.5, 0.5), 0.4, start, end, width=0.15, 
-                         facecolor=color, edgecolor='#333', linewidth=2, transform=ax.transAxes)
+            wedge = Wedge((0.5, 0.5), 0.4, start, end, width=0.15,
+                          facecolor=color, edgecolor='#333', linewidth=2, transform=ax.transAxes)
             ax.add_patch(wedge)
-        
+
         # Draw needle
         needle_angle = theta * 3.14159 / 180
         needle_x = 0.5 + 0.35 * (needle_angle - 3.14159/2) / (3.14159/2)
         needle_y = 0.5 + 0.35 * (1 - (needle_angle - 3.14159/2) / (3.14159/2))
         ax.plot([0.5, needle_x], [0.5, needle_y], 'w-', linewidth=3)
-        
+
         # Text
-        ax.text(0.5, 0.2, f"{score:.1f}%", ha='center', va='center', 
-               fontsize=24, color='#00ff41', weight='bold', transform=ax.transAxes)
-        ax.text(0.5, 0.05, label, ha='center', va='center', 
-               fontsize=12, color='#888', transform=ax.transAxes)
-        
+        ax.text(0.5, 0.2, f"{score:.1f}%", ha='center', va='center',
+                fontsize=24, color='#00ff41', weight='bold', transform=ax.transAxes)
+        ax.text(0.5, 0.05, label, ha='center', va='center',
+                fontsize=12, color='#888', transform=ax.transAxes)
+
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         ax.axis('off')
-        
+
         # Save to base64
         buffer = io.BytesIO()
-        plt.savefig(buffer, format='png', facecolor='#1e1e1e', bbox_inches='tight')
+        plt.savefig(buffer, format='png',
+                    facecolor='#1e1e1e', bbox_inches='tight')
         plt.close()
         buffer.seek(0)
-        
+
         return f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}"
     except:
         return ""
@@ -369,30 +371,34 @@ def generate_radar_chart(scores: Dict[str, float]) -> str:
     try:
         import matplotlib.pyplot as plt
         import numpy as np
-        
-        fig, ax = plt.subplots(figsize=(6, 6), facecolor='#1e1e1e', subplot_kw=dict(projection='polar'))
-        
+
+        fig, ax = plt.subplots(
+            figsize=(6, 6), facecolor='#1e1e1e', subplot_kw=dict(projection='polar'))
+
         categories = list(scores.keys())
         values = list(scores.values())
-        angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
+        angles = np.linspace(0, 2 * np.pi, len(categories),
+                             endpoint=False).tolist()
         values += values[:1]
         angles += angles[:1]
-        
+
         ax.plot(angles, values, 'o-', linewidth=2, color='#00ff41')
         ax.fill(angles, values, alpha=0.25, color='#00ff41')
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(categories, color='#888', size=10)
         ax.set_ylim(0, 100)
         ax.set_yticks([20, 40, 60, 80, 100])
-        ax.set_yticklabels(['20%', '40%', '60%', '80%', '100%'], color='#555', size=8)
+        ax.set_yticklabels(['20%', '40%', '60%', '80%',
+                           '100%'], color='#555', size=8)
         ax.grid(True, color='#333', alpha=0.3)
-        
+
         # Save to base64
         buffer = io.BytesIO()
-        plt.savefig(buffer, format='png', facecolor='#1e1e1e', bbox_inches='tight')
+        plt.savefig(buffer, format='png',
+                    facecolor='#1e1e1e', bbox_inches='tight')
         plt.close()
         buffer.seek(0)
-        
+
         return f"data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode()}"
     except:
         return ""
@@ -411,7 +417,7 @@ def index():
 @app.route('/api/analyze', methods=['POST'])
 def api_analyze():
     """Analyze uploaded documents"""
-    
+
     # Check if files were uploaded
     if 'files' not in request.files or len(request.files.getlist('files')) == 0:
         # Return sample analysis if no files
@@ -435,15 +441,15 @@ def api_analyze():
         FDA guidance compliance for medical devices
         """)
         return jsonify(analysis)
-    
+
     # Read uploaded files
     files = request.files.getlist('files')
     combined_text = ""
-    
+
     for file in files:
         if file.filename == '':
             continue
-        
+
         try:
             if file.filename.endswith(('.txt', '.md')):
                 combined_text += file.read().decode('utf-8') + "\n"
@@ -453,13 +459,13 @@ def api_analyze():
                 combined_text += f"[DOCX: {file.filename}] Document uploaded\n"
         except Exception as e:
             print(f"Error reading {file.filename}: {e}")
-    
+
     if not combined_text.strip():
         combined_text = "Empty document"
-    
+
     # Analyze
     analysis = analyzer.analyze(combined_text)
-    
+
     return jsonify(analysis)
 
 
@@ -956,7 +962,7 @@ if __name__ == '__main__':
     ║                                                                ║
     ╚════════════════════════════════════════════════════════════════╝
     """)
-    
+
     app.run(
         host='127.0.0.1',
         port=8504,

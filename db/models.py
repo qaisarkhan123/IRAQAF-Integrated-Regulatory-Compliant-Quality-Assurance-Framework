@@ -29,7 +29,8 @@ class RegulatorySource(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    regulatory_content = relationship("RegulatoryContent", back_populates="source")
+    regulatory_content = relationship(
+        "RegulatoryContent", back_populates="source")
     change_history = relationship("ChangeHistory", back_populates="source")
 
     def __repr__(self):
@@ -43,7 +44,8 @@ class RegulatoryContent(Base):
     __tablename__ = "regulatory_content"
 
     id = Column(Integer, primary_key=True)
-    source_id = Column(Integer, ForeignKey("regulatory_sources.id"), nullable=False)
+    source_id = Column(Integer, ForeignKey(
+        "regulatory_sources.id"), nullable=False)
     title = Column(String(500), nullable=False)
     section = Column(String(255))
     subsection = Column(String(255))
@@ -53,7 +55,8 @@ class RegulatoryContent(Base):
     is_active = Column(Boolean, default=True)
 
     # Relationships
-    source = relationship("RegulatorySource", back_populates="regulatory_content")
+    source = relationship("RegulatorySource",
+                          back_populates="regulatory_content")
     change_history = relationship("ChangeHistory", back_populates="content")
 
     def __repr__(self):
@@ -67,7 +70,8 @@ class ChangeHistory(Base):
     __tablename__ = "change_history"
 
     id = Column(Integer, primary_key=True)
-    source_id = Column(Integer, ForeignKey("regulatory_sources.id"), nullable=False)
+    source_id = Column(Integer, ForeignKey(
+        "regulatory_sources.id"), nullable=False)
     content_id = Column(Integer, ForeignKey("regulatory_content.id"))
     change_type = Column(String(50))  # added, modified, removed
     old_value = Column(Text)
@@ -77,7 +81,8 @@ class ChangeHistory(Base):
 
     # Relationships
     source = relationship("RegulatorySource", back_populates="change_history")
-    content = relationship("RegulatoryContent", back_populates="change_history")
+    content = relationship("RegulatoryContent",
+                           back_populates="change_history")
 
     def __repr__(self):
         return f"<ChangeHistory {self.change_type} at {self.detected_at}>"
@@ -95,10 +100,12 @@ class System(Base):
     owner = Column(String(255))
     type = Column(String(100))  # ai_system, medical_device, data_processor
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow,
+                        onupdate=datetime.utcnow)
 
     # Relationships
-    compliance_history = relationship("SystemComplianceHistory", back_populates="system")
+    compliance_history = relationship(
+        "SystemComplianceHistory", back_populates="system")
     assessments = relationship("Assessment", back_populates="system")
 
     def __repr__(self):
@@ -163,7 +170,8 @@ class Assessment(Base):
 
     # Relationships
     system = relationship("System", back_populates="assessments")
-    requirements = relationship("AssessmentRequirement", back_populates="assessment")
+    requirements = relationship(
+        "AssessmentRequirement", back_populates="assessment")
 
     def __repr__(self):
         return f"<Assessment {self.system_id} - {self.regulation_type}>"
@@ -176,10 +184,12 @@ class AssessmentRequirement(Base):
     __tablename__ = "assessment_requirements"
 
     id = Column(Integer, primary_key=True)
-    assessment_id = Column(Integer, ForeignKey("assessments.id"), nullable=False)
+    assessment_id = Column(Integer, ForeignKey(
+        "assessments.id"), nullable=False)
     requirement_id = Column(String(100))  # e.g., "EU-AI-41.1"
     requirement_text = Column(Text, nullable=False)
-    status = Column(String(50))  # compliant, non_compliant, partial, not_applicable
+    # compliant, non_compliant, partial, not_applicable
+    status = Column(String(50))
     score = Column(Float)  # 0-100
     evidence = Column(Text)  # Description of evidence
     gaps = Column(Text)  # Description of gaps

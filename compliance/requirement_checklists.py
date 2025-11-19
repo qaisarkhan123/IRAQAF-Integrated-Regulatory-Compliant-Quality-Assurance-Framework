@@ -42,7 +42,7 @@ class ChecklistItem:
 
 class RequirementChecklists:
     """Comprehensive requirement checklists for all regulations"""
-    
+
     def __init__(self):
         """Initialize checklists"""
         self.checklists = {
@@ -52,7 +52,7 @@ class RequirementChecklists:
             "IEC-62304": self._get_iec_62304_requirements(),
             "FDA": self._get_fda_requirements()
         }
-    
+
     def _get_eu_ai_act_requirements(self) -> List[ChecklistItem]:
         """EU AI Act - 25 Requirements"""
         return [
@@ -235,7 +235,7 @@ class RequirementChecklists:
                 "Assessment Report", "Medium"
             ),
         ]
-    
+
     def _get_gdpr_requirements(self) -> List[ChecklistItem]:
         """GDPR - 20 Requirements"""
         return [
@@ -380,7 +380,7 @@ class RequirementChecklists:
                 "Documentation", "Critical"
             ),
         ]
-    
+
     def _get_iso_13485_requirements(self) -> List[ChecklistItem]:
         """ISO 13485 - 22 Requirements"""
         return [
@@ -539,7 +539,7 @@ class RequirementChecklists:
                 "Complaint Log", "High"
             ),
         ]
-    
+
     def _get_iec_62304_requirements(self) -> List[ChecklistItem]:
         """IEC 62304 - 18 Requirements"""
         return [
@@ -670,7 +670,7 @@ class RequirementChecklists:
                 "Maintenance Log", "Medium"
             ),
         ]
-    
+
     def _get_fda_requirements(self) -> List[ChecklistItem]:
         """FDA - 20 Requirements"""
         return [
@@ -815,38 +815,39 @@ class RequirementChecklists:
                 "Submission", "High"
             ),
         ]
-    
+
     def get_checklist(self, regulation: str) -> List[Dict]:
         """Get checklist for a specific regulation"""
         if regulation not in self.checklists:
             return []
-        
+
         return [asdict(item) for item in self.checklists[regulation]]
-    
+
     def get_all_checklists(self) -> Dict[str, List[Dict]]:
         """Get all checklists"""
         return {
             reg: [asdict(item) for item in items]
             for reg, items in self.checklists.items()
         }
-    
+
     def get_summary(self) -> Dict:
         """Get checklist summary"""
-        total_requirements = sum(len(items) for items in self.checklists.values())
-        
+        total_requirements = sum(len(items)
+                                 for items in self.checklists.values())
+
         summary = {
             "total_requirements": total_requirements,
             "regulations": {}
         }
-        
+
         for reg, items in self.checklists.items():
             summary["regulations"][reg] = {
                 "count": len(items),
                 "categories": self._get_category_breakdown(items)
             }
-        
+
         return summary
-    
+
     def _get_category_breakdown(self, items: List[ChecklistItem]) -> Dict:
         """Get category breakdown for items"""
         categories = {}
@@ -854,22 +855,23 @@ class RequirementChecklists:
             cat = item.category
             categories[cat] = categories.get(cat, 0) + 1
         return categories
-    
+
     def export_checklists(self, filepath: str) -> bool:
         """Export all checklists to JSON"""
         try:
             all_checklists = self.get_all_checklists()
             summary = self.get_summary()
-            
+
             export_data = {
                 "summary": summary,
                 "checklists": all_checklists
             }
-            
+
             with open(filepath, 'w') as f:
                 json.dump(export_data, f, indent=2)
-            
-            print(f"Exported {sum(len(v) for v in all_checklists.values())} requirements to {filepath}")
+
+            print(
+                f"Exported {sum(len(v) for v in all_checklists.values())} requirements to {filepath}")
             return True
         except Exception as e:
             print(f"Error exporting checklists: {e}")
@@ -879,17 +881,17 @@ class RequirementChecklists:
 # Example usage
 if __name__ == "__main__":
     checklists = RequirementChecklists()
-    
+
     # Get summary
     summary = checklists.get_summary()
     print("\n=== CHECKLIST SUMMARY ===")
     print(json.dumps(summary, indent=2))
-    
+
     # Get specific regulation checklist
     eu_ai = checklists.get_checklist("EU-AI-Act")
     print(f"\n=== EU AI ACT CHECKLIST ({len(eu_ai)} items) ===")
     for item in eu_ai[:3]:  # First 3 items
         print(f"  {item['req_id']}: {item['description']}")
-    
+
     # Export all
     checklists.export_checklists("compliance/checklists_export.json")
