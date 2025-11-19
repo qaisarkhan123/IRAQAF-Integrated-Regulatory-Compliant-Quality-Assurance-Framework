@@ -902,6 +902,38 @@ with st.sidebar:
               onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
                 🔐 Privacy & Security Hub
             </a>
+            <a href="http://localhost:8504" target="_blank" style="
+                display: inline-block;
+                background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: 600;
+                text-align: center;
+                transition: all 0.3s ease;
+                width: 100%;
+                box-sizing: border-box;
+            " onmouseover="this.style.boxShadow='0 8px 20px rgba(0, 212, 255, 0.3)'; this.style.transform='translateY(-2px)';" 
+              onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+                ⚖️ L1 Regulations & Governance Hub
+            </a>
+            <a href="http://localhost:8506" target="_blank" style="
+                display: inline-block;
+                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 6px;
+                text-decoration: none;
+                font-weight: 600;
+                text-align: center;
+                transition: all 0.3s ease;
+                width: 100%;
+                box-sizing: border-box;
+            " onmouseover="this.style.boxShadow='0 8px 20px rgba(17, 153, 142, 0.3)'; this.style.transform='translateY(-2px)';" 
+              onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+                ⚙️ L3 Operations & Control Hub
+            </a>
         </div>
     """, unsafe_allow_html=True)
 
