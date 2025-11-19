@@ -1,0 +1,115 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                  QUICK START REFERENCE CARD                        ║
+║         HOW TO RUN ALL THREE DASHBOARDS - EVERY TIME               ║
+╚════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 LOCATION:
+   C:\Users\khan\Downloads\iraqaf_starter_kit
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 FASTEST WAY (Copy & Paste):
+
+   1. Open PowerShell
+   2. Paste this:
+      cd C:\Users\khan\Downloads\iraqaf_starter_kit; .\START_ALL_DASHBOARDS.ps1
+
+   DONE! All three dashboards start in ~10 seconds.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌐 YOUR DASHBOARDS:
+
+   📊 Main        → http://localhost:8501   (Login: admin/admin_default_123)
+   🔐 Security    → http://localhost:8502   (8 Security Modules)
+   🔍 L4 Hub      → http://localhost:5000   (5 Tabs, Score: 85/100)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📂 WHAT YOU GET:
+
+   ✅ START_ALL_DASHBOARDS.ps1  → PowerShell launcher (Windows best)
+   ✅ START_ALL_DASHBOARDS.py   → Python launcher (Mac/Linux too)
+   ✅ HOW_TO_RUN_ALL_DASHBOARDS.md → Full documentation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏱️  WHAT HAPPENS:
+
+   Step 1  Cleans old processes  (5 seconds)
+   Step 2  Starts Main Dashboard (3 seconds)
+   Step 3  Starts Security Hub   (2 seconds)
+   Step 4  Starts L4 Hub         (2 seconds)
+   Step 5  Opens browser tabs    (Auto)
+   ─────────────────────────────
+   Total                          ~10 seconds ✨
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 THREE METHODS:
+
+   METHOD 1 - PowerShell (Recommended)
+   ───────────────────────────────────
+   .\START_ALL_DASHBOARDS.ps1
+
+   METHOD 2 - Python (Cross-platform)
+   ──────────────────────────────────
+   python START_ALL_DASHBOARDS.py
+
+   METHOD 3 - Manual (If scripts fail)
+   ──────────────────────────────────
+   Terminal 1: python -m streamlit run dashboard/app.py --server.port 8501
+   Terminal 2: python dashboard/privacy_security_hub.py
+   Terminal 3: python dashboard/hub_explainability_app.py
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔑 LOGIN:
+   Username: admin
+   Password: admin_default_123
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 L4 HUB FEATURES (5 TABS):
+
+   Overview              → 12 modules, overall score
+   🔍 How Model Decides → SHAP, LIME, GradCAM, Paths
+   Detailed Analysis     → Full module breakdown
+   How Scores Calc.      → Formulas & calculations
+   Recommendations       → Improvements needed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🛑 TO STOP:
+
+   Close PowerShell/Terminal window, or press Ctrl+C
+   (Dashboards will stop automatically)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  TROUBLESHOOTING:
+
+   Port in use?        → taskkill /F /IM python.exe
+   Scripts won't run?  → Set-ExecutionPolicy RemoteSigned
+   Module not found?   → .\venv\Scripts\pip install flask shap lime
+   Still stuck?        → See HOW_TO_RUN_ALL_DASHBOARDS.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💾 GIT COMMITS:
+   8e2d94f - Fixed L4 Hub tabs (Detailed Analysis, Calculations, Recommendations)
+   9230aa2 - Added startup scripts and comprehensive guide
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ REMEMBER:
+
+   Next time you need all three dashboards:
+   
+   Just run:  .\START_ALL_DASHBOARDS.ps1
+   
+   Everything else is automatic! 🚀
+
+╚════════════════════════════════════════════════════════════════════╝
