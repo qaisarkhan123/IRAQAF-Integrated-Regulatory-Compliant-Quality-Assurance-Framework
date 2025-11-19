@@ -53,6 +53,7 @@ DASHBOARDS = {
 # HELPER FUNCTIONS
 # ============================================================================
 
+
 def print_header():
     """Print startup header"""
     print("""
@@ -60,6 +61,7 @@ def print_header():
 ║          IRAQAF - STARTING ALL THREE DASHBOARDS               ║
 ╚════════════════════════════════════════════════════════════════╝
 """)
+
 
 def print_dashboard_info():
     """Print dashboard information"""
@@ -69,6 +71,7 @@ def print_dashboard_info():
         print(f"     Port: {config['port']} | Type: {config['type'].upper()}")
         print(f"     Desc: {config['desc']}")
         print()
+
 
 def kill_existing_processes():
     """Kill any existing Python/Streamlit processes"""
@@ -82,18 +85,19 @@ def kill_existing_processes():
             os.system("pkill -f 'python.*dashboard'")
     except Exception as e:
         print(f"   ⚠️  Could not kill processes: {e}")
-    
+
     time.sleep(2)
     print("✅ Cleaned up old processes\n")
+
 
 def start_dashboard(name, config):
     """Start a single dashboard"""
     dashboard_path = os.path.join(DASHBOARD_DIR, config['file'])
-    
+
     if not os.path.exists(dashboard_path):
         print(f"   ❌ File not found: {dashboard_path}")
         return None
-    
+
     try:
         if config['type'] == 'streamlit':
             cmd = [
@@ -103,7 +107,7 @@ def start_dashboard(name, config):
             ]
         else:  # flask
             cmd = [VENV_PYTHON, dashboard_path]
-        
+
         # Start process
         process = subprocess.Popen(
             cmd,
@@ -112,13 +116,14 @@ def start_dashboard(name, config):
             stderr=subprocess.PIPE,
             creationflags=subprocess.CREATE_NEW_CONSOLE if sys.platform == "win32" else 0
         )
-        
+
         print(f"✅ {name} started on {config['url']}")
         return process
-    
+
     except Exception as e:
         print(f"❌ Failed to start {name}: {e}")
         return None
+
 
 def print_success_message():
     """Print success message with all URLs"""
@@ -129,13 +134,13 @@ def print_success_message():
 
 📊 DASHBOARD ACCESS:
 """)
-    
+
     for name, config in DASHBOARDS.items():
         print(f"\n   {config['icon']} {name}")
         print(f"       URL: {config['url']}")
         print(f"       Type: {config['type'].upper()}")
         print(f"       Port: {config['port']}")
-    
+
     print(f"""
 
 🔐 LOGIN CREDENTIALS:
@@ -165,6 +170,7 @@ def print_success_message():
 
 """)
 
+
 def open_browsers():
     """Open all dashboards in default browser"""
     print("🌐 Opening dashboards in browser...\n")
@@ -179,37 +185,39 @@ def open_browsers():
 # MAIN
 # ============================================================================
 
+
 def main():
     """Main startup function"""
     try:
         print_header()
         print_dashboard_info()
-        
+
         # Kill existing processes
         kill_existing_processes()
-        
+
         # Start all dashboards
         print("🚀 Starting dashboards...\n")
         processes = []
-        
+
         for name, config in DASHBOARDS.items():
-            print(f"{config['icon']} Starting {name} (Port {config['port']})...")
+            print(
+                f"{config['icon']} Starting {name} (Port {config['port']})...")
             process = start_dashboard(name, config)
             if process:
                 processes.append((name, process))
             time.sleep(2)
-        
+
         # Print success message
         print_success_message()
-        
+
         # Open browsers
         time.sleep(3)
         open_browsers()
-        
+
         print("=" * 70)
         print("All dashboards are running! Press Ctrl+C to stop.\n")
         print("=" * 70 + "\n")
-        
+
         # Keep script running
         try:
             while True:
@@ -223,10 +231,11 @@ def main():
                 except:
                     pass
             print("\n✅ All dashboards stopped\n")
-    
+
     except Exception as e:
         print(f"\n❌ Error: {e}\n")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
