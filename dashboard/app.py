@@ -857,88 +857,140 @@ if AUTH_UI_AVAILABLE:
 # User is now authenticated - render dashboard
 # Add sidebar controls
 with st.sidebar:
-    st.markdown("---")
+    # Premium Header
+    st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        ">
+            <h2 style="margin: 0; color: white; font-size: 24px;">🛡️ IRAQAF</h2>
+            <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 500;">
+                Integrated Regulatory Compliance Framework
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # User Section
     if AUTH_UI_AVAILABLE:
         render_user_info()
-        st.markdown("---")
+        st.divider()
         render_logout_button()
-    st.markdown("---")
+    st.divider()
 
-    # Quick Access Hubs
-    st.markdown("### 🎯 Advanced Tools")
-
-    # Create clickable links styled as buttons
+    # Advanced Tools Section
     st.markdown("""
-        <div style="display: grid; gap: 10px;">
-            <a href="http://localhost:5000" target="_blank" style="
-                display: inline-block;
+        <div style="margin-bottom: 10px;">
+            <h3 style="margin: 0; color: #667eea; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                🎯 Advanced Tools
+            </h3>
+            <div style="height: 2px; background: linear-gradient(90deg, #667eea 0%, transparent 100%); margin-top: 8px;"></div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Hub Buttons with Enhanced Styling
+    st.markdown("""
+        <style>
+            .hub-button {
+                display: block;
+                width: 100%;
+                padding: 14px 16px;
+                margin-bottom: 10px;
+                border-radius: 10px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 14px;
+                text-align: left;
+                border-left: 4px solid;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                color: white;
+            }
+            
+            .hub-button:hover {
+                transform: translateX(8px);
+                box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            }
+            
+            .hub-button.l4 {
+                background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%);
+                border-left-color: #f5576c;
+                color: #f5576c;
+            }
+            
+            .hub-button.l4:hover {
                 background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
                 color: white;
-                padding: 12px 24px;
-                border-radius: 6px;
-                text-decoration: none;
-                font-weight: 600;
-                text-align: center;
-                transition: all 0.3s ease;
-                width: 100%;
-                box-sizing: border-box;
-            " onmouseover="this.style.boxShadow='0 8px 20px rgba(245, 87, 108, 0.3)'; this.style.transform='translateY(-2px)';" 
-              onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
-                🔍 L4 Explainability & Transparency Hub
-            </a>
-            <a href="http://localhost:8502" target="_blank" style="
-                display: inline-block;
+            }
+            
+            .hub-button.l2 {
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+                border-left-color: #667eea;
+                color: #667eea;
+            }
+            
+            .hub-button.l2:hover {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
-                padding: 12px 24px;
-                border-radius: 6px;
-                text-decoration: none;
-                font-weight: 600;
-                text-align: center;
-                transition: all 0.3s ease;
-                width: 100%;
-                box-sizing: border-box;
-            " onmouseover="this.style.boxShadow='0 8px 20px rgba(102, 126, 234, 0.3)'; this.style.transform='translateY(-2px)';" 
-              onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
-                🔐 Privacy & Security Hub
-            </a>
-            <a href="http://localhost:8504" target="_blank" style="
-                display: inline-block;
+            }
+            
+            .hub-button.l1 {
+                background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 255, 0.1) 100%);
+                border-left-color: #00d4ff;
+                color: #00d4ff;
+            }
+            
+            .hub-button.l1:hover {
                 background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
                 color: white;
-                padding: 12px 24px;
-                border-radius: 6px;
-                text-decoration: none;
-                font-weight: 600;
-                text-align: center;
-                transition: all 0.3s ease;
-                width: 100%;
-                box-sizing: border-box;
-            " onmouseover="this.style.boxShadow='0 8px 20px rgba(0, 212, 255, 0.3)'; this.style.transform='translateY(-2px)';" 
-              onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
-                ⚖️ L1 Regulations & Governance Hub
-            </a>
-            <a href="http://localhost:8503" target="_blank" style="
-                display: inline-block;
+            }
+            
+            .hub-button.l3 {
+                background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+                border-left-color: #38ef7d;
+                color: #38ef7d;
+            }
+            
+            .hub-button.l3:hover {
                 background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
                 color: white;
-                padding: 12px 24px;
-                border-radius: 6px;
-                text-decoration: none;
-                font-weight: 600;
-                text-align: center;
-                transition: all 0.3s ease;
-                width: 100%;
-                box-sizing: border-box;
-            " onmouseover="this.style.boxShadow='0 8px 20px rgba(17, 153, 142, 0.3)'; this.style.transform='translateY(-2px)';" 
-              onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)';">
-                ⚙️ L3 Operations & Control Hub
+            }
+        </style>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="http://localhost:5000" target="_blank" class="hub-button l4">
+                🔍 L4 Explainability Hub
+            </a>
+            <a href="http://localhost:8502" target="_blank" class="hub-button l2">
+                🔐 L2 Privacy & Security
+            </a>
+            <a href="http://localhost:8504" target="_blank" class="hub-button l1">
+                ⚖️ L1 Regulations Hub
+            </a>
+            <a href="http://localhost:8503" target="_blank" class="hub-button l3">
+                ⚙️ L3 Operations Center
             </a>
         </div>
     """, unsafe_allow_html=True)
 
-    st.caption("📌 Access specialized assessment tools")
-    st.markdown("---")
+    st.markdown("""
+        <p style="
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            font-size: 12px;
+            color: #667eea;
+            border-left: 3px solid #667eea;
+        ">
+            💡 <b>Tip:</b> Click any hub to access specialized assessment tools
+        </p>
+    """, unsafe_allow_html=True)
+
+    st.divider()
 
     # UX Enhancements - Session Info
     if UX_ENHANCEMENTS_AVAILABLE:
