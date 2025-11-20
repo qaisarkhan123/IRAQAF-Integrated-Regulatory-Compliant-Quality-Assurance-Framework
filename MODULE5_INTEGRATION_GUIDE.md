@@ -84,13 +84,14 @@ This guide describes **Module 5 Hub**, which is one layer of the two-layer **Mod
 ## Hub Clients (Module 5 Hub Layer)
 
 | Hub | Client | Port | Metrics | Weight in CQS |
-|-----|--------|------|---------|---------------|\n| L4 Explainability | `L4ExplainabilityClient` | 5000 | SHAP/LIME/GradCAM, Feature Importance, Transparency Score | 20% |
+|-----|--------|------|---------|---------------| 
+| L4 Explainability | `L4ExplainabilityClient` | 5000 | SHAP/LIME/GradCAM, Feature Importance, Transparency Score | 20% |
 | L2 Security | `L2SecurityClient` | 8502 | SAI Score, Vulnerability Count, PII Detection, Encryption Status | 25% |
 | L1 Regulations | `L1RegulationsClient` | 8504 | GDPR/EU AI Act/ISO/IEC/FDA Compliance Scores, Gaps | 25% |
 | L3 Operations | `L3OperationsClient` | 8503 | System Health, Uptime, Response Time, Throughput | 15% |
 | L3 Fairness & Ethics | `L3FairnessClient` | 8506 | Demographic Parity, Equalized Odds, Bias Detection | 15% |
 
-**Note**: L3 Fairness & Ethics hub runs on **port 8506** (Module 3 Fairness moved from 8505).
+**Note**: L3 Fairness & Ethics hub runs on **port 8506** (Module 3 Fairness moved from 8505 for Module 5 integration).
 
 ## Continuous QA Score (CQS) – Hub-Level Aggregation
 
@@ -113,21 +114,25 @@ Range: 0.0 - 1.0 (displayed as 0% - 100%)
 
 ### Internal CQS (Module 5 Core – Separate Spec)
 
-**Module 5 Core** defines a separate **Internal CQS** that weights its own monitoring categories:
+**Module 5 Core** implements a separate **Internal CQS** that applies granular monitoring across its automation categories.
+
+**Internal CQS formula** (see Module 5 Core System-Level Requirements spec for authoritative definition):
 
 ```
 Internal CQS = (0.30 × Performance) + (0.20 × Fairness) + (0.15 × Security/Privacy) 
              + (0.20 × Compliance) + (0.15 × System Health)
 
 Where:
-  • Performance     = AUC, accuracy, calibration, no-drift score
-  • Fairness        = demographic parity, equalized odds, fairness drift
-  • Security/Privacy= privacy breach score, access anomalies, model integrity
-  • Compliance      = GDPR/EU AI Act/ISO score, compliance drift detected
-  • System Health   = uptime, response time, error rates
+  • Performance     = AUC, accuracy, calibration, input stability, concept drift metrics
+  • Fairness        = demographic parity, equalized odds, fairness drift detection
+  • Security/Privacy= privacy breach score, access anomalies, model integrity checks
+  • Compliance      = GDPR/EU AI Act/ISO score, compliance drift detection
+  • System Health   = uptime, response time, error rates, resource utilization
 ```
 
-**Relationship**: Module 5 Hub polls both hub-level scores and Module 5 Core's internal CQS, exposing both via `/api/cqs` (system-level) and `/api/module5-core/cqs` (internal).
+**Relationship**: Module 5 Hub polls both hub-level scores and Module 5 Core's internal CQS, exposing both via:
+- `/api/cqs` → System-level CQS (hub-weighted aggregate)
+- `/api/module5-core/cqs` → Internal CQS (Core category-weighted)
 
 ## Data Flow
 
@@ -283,8 +288,9 @@ Module 5 Core implements **much more granular thresholds** for internal monitori
 
 | Category | Metric | Threshold | Action |
 |----------|--------|-----------|--------|
-| **Performance** | AUC Drop (1 week) | PSI > 0.1 | Warning → Investigate |
-| | Accuracy Drop | > 5% from baseline | Critical → Alert squad |
+| **Performance** | AUC Drop (1 week) | > 5% from baseline | Critical → Alert squad |
+| | Accuracy Drop | > 3% from baseline | Warning → Investigate |
+| | Input Stability (PSI) | > 0.1 | Warning → Check distribution drift |
 | | Calibration (ECE) | > 0.15 | Warning → Recalibrate |
 | **Fairness** | Demographic Parity Gap | > 10% | Warning |
 | | Equalized Odds Gap | > 15% | Critical |
@@ -297,6 +303,21 @@ Module 5 Core implements **much more granular thresholds** for internal monitori
 | | Audit Log Gap | > 1 hour missing | Warning → Check logs |
 
 **Design**: Hub-level alerts are surfaced in Module 5 Hub dashboard; granular core alerts are sent to Module 5 Core alert routing system.
+
+### Blended CQS Strategy (Hub + Core Integration)
+
+Once Module 5 Core is deployed, the **Global Continuous QA Score** can blend Hub-level and Core-level insights:
+
+```
+Global_CQS = (0.60 × System-Level CQS [Hub]) + (0.40 × Internal CQS [Core])
+
+Where:
+  • System-Level CQS = Weighted aggregate of L1/L2/L3/L4/L3-Fairness hubs (cross-hub view)
+  • Internal CQS = Core's category-weighted automation metrics (deep dive view)
+  • 60%/40% split: Emphasize hub reliability while incorporating Core's automation intelligence
+```
+
+**Status**: Currently **Hub-only** (System-Level CQS). Global_CQS activation is **TBD** pending Core deployment and tuning.
 
 ## Integration Points
 
@@ -356,13 +377,19 @@ When Module 5 Core is deployed:
 
 1. Create `module5_core_client.py` in `module5/hub_clients/`
 2. Implement methods:
-   - `get_internal_cqs()` – Core's category-weighted CQS
+   - `get_internal_cqs()` – Core's category-weighted CQS (Performance, Fairness, Security/Privacy, Compliance, System Health)
    - `get_active_alerts()` – All drift/security/compliance alerts
-   - `get_drift_summary()` – Performance, fairness, compliance drift
-   - `get_reports()` – Automated QA reports
-3. Update orchestrator to poll Core every 30s
-4. Expose Core metrics via `/api/module5-core/*` endpoints
-5. Optionally blend Core CQS into system-level CQS (e.g., 40% hub avg, 60% core internal)
+   - `get_drift_summary()` – Performance, fairness, compliance drift details
+   - `get_reports()` – Automated QA reports (PDF/HTML)
+3. Update orchestrator to poll Core every 30s (same cadence as hub polling)
+4. Expose Core metrics via `/api/module5-core/*` endpoints:
+   - `GET /api/module5-core/cqs` → Internal CQS + category breakdown
+   - `GET /api/module5-core/alerts` → All active core alerts
+   - `GET /api/module5-core/drift` → Drift detection summary
+5. Implement **Blended CQS** (see section above):
+   - Add `Global_CQS = (0.60 × System CQS) + (0.40 × Internal CQS)`
+   - Expose as `GET /api/global-cqs`
+   - Update dashboard to show all three scores (Hub, Core, Global)
 
 ## Troubleshooting
 
