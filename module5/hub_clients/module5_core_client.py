@@ -33,8 +33,10 @@ class CoreMetrics:
 class DriftAnalysis:
     """Drift detection analysis"""
     timestamp: str
-    psi_input: float  # Population Stability Index (0.0 = stable, >0.25 = significant drift)
-    ks_statistic: float  # K-S test (0.0 = identical, 1.0 = completely different)
+    # Population Stability Index (0.0 = stable, >0.25 = significant drift)
+    psi_input: float
+    # K-S test (0.0 = identical, 1.0 = completely different)
+    ks_statistic: float
     ece_score: float  # Expected Calibration Error (0.0 = perfect, 1.0 = worst)
     concept_drift_detected: bool
     performance_trend: str  # "stable", "improving", "degrading"
@@ -96,11 +98,16 @@ class Module5CoreClient:
             return CoreMetrics(
                 timestamp=data.get('timestamp', datetime.now().isoformat()),
                 internal_cqs=float(data.get('overall_cqs', 0)),
-                performance_score=float(data.get('categories', {}).get('performance', 0)),
-                fairness_score=float(data.get('categories', {}).get('fairness', 0)),
-                security_score=float(data.get('categories', {}).get('security_privacy', 0)),
-                compliance_score=float(data.get('categories', {}).get('compliance', 0)),
-                system_health_score=float(data.get('categories', {}).get('system_health', 0)),
+                performance_score=float(
+                    data.get('categories', {}).get('performance', 0)),
+                fairness_score=float(
+                    data.get('categories', {}).get('fairness', 0)),
+                security_score=float(
+                    data.get('categories', {}).get('security_privacy', 0)),
+                compliance_score=float(
+                    data.get('categories', {}).get('compliance', 0)),
+                system_health_score=float(
+                    data.get('categories', {}).get('system_health', 0)),
                 is_healthy=True
             )
         except Exception as e:
@@ -138,7 +145,8 @@ class Module5CoreClient:
                 psi_input=float(data.get('psi_input', 0)),
                 ks_statistic=float(data.get('ks_statistic', 0)),
                 ece_score=float(data.get('ece_score', 0)),
-                concept_drift_detected=data.get('concept_drift_detected', False),
+                concept_drift_detected=data.get(
+                    'concept_drift_detected', False),
                 performance_trend=data.get('trend', 'stable')
             )
         except Exception as e:
@@ -163,7 +171,8 @@ class Module5CoreClient:
             data = response.json()
             return FairnessMetrics(
                 timestamp=data.get('timestamp', datetime.now().isoformat()),
-                demographic_parity_gap=float(data.get('demographic_parity_gap', 0)),
+                demographic_parity_gap=float(
+                    data.get('demographic_parity_gap', 0)),
                 equalized_odds_gap=float(data.get('equalized_odds_gap', 0)),
                 fairness_score=float(data.get('fairness_score', 0)),
                 groups_analyzed=int(data.get('groups_analyzed', 0)),
@@ -232,7 +241,8 @@ class Module5CoreClient:
             for alert_data in data.get('active_alerts', []):
                 alerts.append(Alert(
                     alert_id=alert_data.get('alert_id', ''),
-                    timestamp=alert_data.get('timestamp', datetime.now().isoformat()),
+                    timestamp=alert_data.get(
+                        'timestamp', datetime.now().isoformat()),
                     severity=alert_data.get('severity', 'INFO'),
                     category=alert_data.get('category', 'OTHER'),
                     message=alert_data.get('message', ''),

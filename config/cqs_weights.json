@@ -1,0 +1,13 @@
+{
+  "cqs_weights": {
+    "crs": 0.20,
+    "sai": 0.25,
+    "ts": 0.20,
+    "fi": 0.20,
+    "ops_score": 0.10,
+    "eml_score": 0.05
+  },
+  "description": "Configurable weights for Unified CQS calculation",
+  "formula": "CQS = 0.20*CRS + 0.25*SAI + 0.20*TS + 0.20*FI + 0.10*OPS + 0.05*(EML*20)",
+  "last_updated": "2025-11-20"
+}

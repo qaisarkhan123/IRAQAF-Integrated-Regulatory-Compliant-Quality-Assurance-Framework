@@ -44,6 +44,7 @@ from streamlit_autorefresh import st_autorefresh
 
 # Local imports
 from audit_utils import audit_locked, hash_file, record_audit_event
+from css_loader import load_main_styles
 from helpers import (
     _delta_badge,
     _evidence_count,
@@ -849,148 +850,91 @@ if UX_ENHANCEMENTS_AVAILABLE:
 # AUTHENTICATION GATE - Check authentication FIRST before showing dashboard
 # ============================================================================
 if AUTH_UI_AVAILABLE:
-    # Check if user is authenticated
-    if not check_authentication():
-        # User is not authenticated, show login page only
+    try:
+        if not check_authentication():
+            st.stop()
+    except Exception as e:
+        st.error(f"Authentication error: {str(e)}")
         st.stop()
 
 # User is now authenticated - render dashboard
 # Add sidebar controls
 with st.sidebar:
-    # Premium Header
+    # Load main CSS stylesheet
+    load_main_styles()
+    
+    # Enhanced Premium Header with Modern Design
     st.markdown("""
-        <div style="
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
-        ">
-            <h2 style="margin: 0; color: white; font-size: 24px;">🛡️ IRAQAF</h2>
-            <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.9); font-size: 12px; font-weight: 500;">
-                Integrated Regulatory Compliance Framework
-            </p>
+        <div class="sidebar-container">
+            <div class="header-card">
+                <h2>🛡️ IRAQAF</h2>
+                <p>Integrated Regulatory Compliance Framework</p>
+            </div>
         </div>
     """, unsafe_allow_html=True)
 
     # User Section
     if AUTH_UI_AVAILABLE:
         render_user_info()
-        st.divider()
-        render_logout_button()
-    st.divider()
+        st.markdown("<div style='margin: 16px 0;'></div>", unsafe_allow_html=True)
 
-    # Advanced Tools Section
+    # Hub Navigation Section
     st.markdown("""
-        <div style="margin-bottom: 10px;">
-            <h3 style="margin: 0; color: #667eea; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-                🎯 Advanced Tools
-            </h3>
-            <div style="height: 2px; background: linear-gradient(90deg, #667eea 0%, transparent 100%); margin-top: 8px;"></div>
+        <div class="section-title">
+            <span>🚀 HUB NAVIGATION</span>
         </div>
-    """, unsafe_allow_html=True)
-
-    # Hub Buttons with Enhanced Styling
-    st.markdown("""
-        <style>
-            .hub-button {
-                display: block;
-                width: 100%;
-                padding: 14px 16px;
-                margin-bottom: 10px;
-                border-radius: 10px;
-                text-decoration: none;
-                font-weight: 600;
-                font-size: 14px;
-                text-align: left;
-                border-left: 4px solid;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                color: white;
-            }
-            
-            .hub-button:hover {
-                transform: translateX(8px);
-                box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-            }
-            
-            .hub-button.l4 {
-                background: linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%);
-                border-left-color: #f5576c;
-                color: #f5576c;
-            }
-            
-            .hub-button.l4:hover {
-                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-                color: white;
-            }
-            
-            .hub-button.l2 {
-                background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-                border-left-color: #667eea;
-                color: #667eea;
-            }
-            
-            .hub-button.l2:hover {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-            }
-            
-            .hub-button.l1 {
-                background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 153, 255, 0.1) 100%);
-                border-left-color: #00d4ff;
-                color: #00d4ff;
-            }
-            
-            .hub-button.l1:hover {
-                background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
-                color: white;
-            }
-            
-            .hub-button.l3 {
-                background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
-                border-left-color: #38ef7d;
-                color: #38ef7d;
-            }
-            
-            .hub-button.l3:hover {
-                background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-                color: white;
-            }
-        </style>
         
-        <div style="display: flex; flex-direction: column; gap: 8px;">
-            <a href="http://localhost:5000" target="_blank" class="hub-button l4">
-                🔍 L4 Explainability Hub
-            </a>
-            <a href="http://localhost:8502" target="_blank" class="hub-button l2">
-                🔐 L2 Privacy & Security
-            </a>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- 1. L1 – Regulations & Governance Hub -->
             <a href="http://localhost:8504" target="_blank" class="hub-button l1">
-                ⚖️ L1 Regulations Hub
+                <span class="hub-button-icon">⚖️</span>
+                <span class="hub-button-text">L1 Regulations & Governance</span>
+                <span class="hub-button-arrow">→</span>
             </a>
+            <!-- 2. L2 – Privacy & Security Hub -->
+            <a href="http://localhost:8502" target="_blank" class="hub-button l2">
+                <span class="hub-button-icon">🔐</span>
+                <span class="hub-button-text">L2 Privacy & Security</span>
+                <span class="hub-button-arrow">→</span>
+            </a>
+            <!-- 3. L3 – Fairness & Ethics Hub -->
+            <a href="http://localhost:8506" target="_blank" class="hub-button l3-fairness">
+                <span class="hub-button-icon">⚖️</span>
+                <span class="hub-button-text">L3 Fairness & Ethics</span>
+                <span class="hub-button-arrow">→</span>
+            </a>
+            <!-- 4. L4 – Explainability & Transparency Hub -->
+            <a href="http://localhost:5000" target="_blank" class="hub-button l4">
+                <span class="hub-button-icon">🔍</span>
+                <span class="hub-button-text">L4 Explainability & Transparency</span>
+                <span class="hub-button-arrow">→</span>
+            </a>
+            <!-- 5. System Operations & QA Monitor (SOQM) -->
             <a href="http://localhost:8503" target="_blank" class="hub-button l3">
-                ⚙️ L3 Operations Center
+                <span class="hub-button-icon">⚙️</span>
+                <span class="hub-button-text">System Operations & QA Monitor (SOQM)</span>
+                <span class="hub-button-arrow">→</span>
             </a>
+            <!-- 6. Unified QA Orchestrator (UQO) -->
+            <a href="http://localhost:8507" target="_blank" class="hub-button m5-hub">
+                <span class="hub-button-icon">📊</span>
+                <span class="hub-button-text">Unified QA Orchestrator<br><small style="font-size: 11px; opacity: 0.8;">(UQO)</small></span>
+                <span class="hub-button-arrow">→</span>
+            </a>
+            <!-- 7. Continuous Assurance Engine (CAE) -->
+            <a href="http://localhost:8508" target="_blank" class="hub-button m5-core">
+                <span class="hub-button-icon">🤖</span>
+                <span class="hub-button-text">Continuous Assurance Engine<br><small style="font-size: 11px; opacity: 0.8;">(CAE)</small></span>
+                <span class="hub-button-arrow">→</span>
+            </a>
+        </div>
+        
+        <div class="tip-box">
+            💡 <b>Quick Tip:</b> Click any hub to access specialized assessment tools in a new tab
         </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
-        <p style="
-            margin-top: 12px;
-            padding: 10px;
-            background: rgba(102, 126, 234, 0.05);
-            border-radius: 8px;
-            font-size: 12px;
-            color: #667eea;
-            border-left: 3px solid #667eea;
-        ">
-            💡 <b>Tip:</b> Click any hub to access specialized assessment tools
-        </p>
-    """, unsafe_allow_html=True)
-
-    st.divider()
+    st.markdown("<div style='margin: 20px 0;'></div>", unsafe_allow_html=True)
 
     # UX Enhancements - Session Info
     if UX_ENHANCEMENTS_AVAILABLE:
@@ -5326,9 +5270,12 @@ else:
                     show=False,
                     plot_type="dot",
                 )
-                st.pyplot(fig, clear_figure=True)
+                # SHAP visualization disabled due to rendering issues
+                # st.pyplot(fig, clear_figure=True)
                 # Keep shap_vals around for the right-side panels
-                computed_shap_vals = shap_vals
+                # computed_shap_vals = shap_vals
+                st.info("📊 SHAP visualization temporarily unavailable")
+                computed_shap_vals = None
 
             except ImportError:
                 st.warning(

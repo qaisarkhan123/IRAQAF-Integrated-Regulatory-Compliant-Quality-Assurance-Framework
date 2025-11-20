@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+   # -*- coding: utf-8 -*-
 """
 L4 EXPLAINABILITY & TRANSPARENCY HUB
 Comprehensive Assessment Tool for AI System Transparency
@@ -522,14 +522,159 @@ CATEGORY_SCORES = {
     }
 }
 
-# Calculate transparency score
+# ============================================================================
+# METRIC COMPUTATION FUNCTIONS
+# ============================================================================
+
+def get_explainability_block_scores() -> dict:
+    """
+    Return block-level scores for L4:
+      - explanation_generation (EGC) - 35% weight
+      - explanation_reliability (ERF) - 30% weight
+      - traceability_auditability (TA) - 25% weight
+      - comprehensibility (CU) - 10% weight
+    
+    All in 0-100 scale.
+    """
+    return {
+        "explanation_generation": round(CATEGORY_SCORES["Explanation Generation"]["score"] * 100, 2),
+        "explanation_reliability": round(CATEGORY_SCORES["Explanation Reliability"]["score"] * 100, 2),
+        "traceability_auditability": round(CATEGORY_SCORES["Traceability"]["score"] * 100, 2),
+        "comprehensibility": round(CATEGORY_SCORES["Documentation"]["score"] * 100, 2),
+    }
 
 
+def get_raw_explainability_metrics() -> dict:
+    """
+    Extract raw metrics from modules for composite metric calculations.
+    Returns structured dict with all sub-metrics needed for EFI, FIC, AIx.
+    """
+    fidelity_module = EXPLAINABILITY_MODULES.get("Fidelity Testing", {})
+    consistency_module = EXPLAINABILITY_MODULES.get("Feature Consistency", {})
+    stability_module = EXPLAINABILITY_MODULES.get("Stability Testing", {})
+    logging_module = EXPLAINABILITY_MODULES.get("Prediction Logging", {})
+    versioning_module = EXPLAINABILITY_MODULES.get("Model Versioning", {})
+    audit_module = EXPLAINABILITY_MODULES.get("Audit Trail", {})
+    
+    fidelity_calc = fidelity_module.get("calculation", {})
+    consistency_calc = consistency_module.get("calculation", {})
+    stability_calc = stability_module.get("calculation", {})
+    
+    # Extract fidelity components
+    fidelity_components = {comp.get("name", ""): comp.get("value", 0.0) 
+                          for comp in fidelity_calc.get("components", [])}
+    
+    # Extract consistency components
+    consistency_components = {comp.get("name", ""): comp.get("value", 0.0) 
+                             for comp in consistency_calc.get("components", [])}
+    
+    return {
+        "fidelity": {
+            "reconstruction_accuracy": fidelity_components.get("Prediction Reconstruction", 0.75),
+            "feature_impact_alignment": fidelity_components.get("Feature Impact Accuracy", 0.70),
+            "masking_consistency": fidelity_components.get("Feature Masking Test", 0.70),
+        },
+        "consistency": {
+            "jaccard_similarity": TEST_RESULTS.get("consistency_test", {}).get("mean_jaccard", 0.68),
+            "spearman_correlation": TEST_RESULTS.get("stability_test", {}).get("mean_correlation", 0.85),
+        },
+        "traceability": {
+            "prediction_logging_score": logging_module.get("score", 1.0) * 100,
+            "model_versioning_score": versioning_module.get("score", 0.95) * 100,
+            "audit_trail_score": audit_module.get("score", 0.98) * 100,
+        }
+    }
+
+
+def compute_explainability_fidelity_index(raw_metrics: dict) -> float:
+    """
+    Compute Explainability Fidelity Index (EFI) on a 0-100 scale.
+    
+    Uses existing fidelity testing metrics:
+      - reconstruction_accuracy (0-1)
+      - feature_impact_alignment (0-1)
+      - masking_consistency (0-1)
+    """
+    fidelity = raw_metrics.get("fidelity", {})
+    
+    recon = fidelity.get("reconstruction_accuracy", 0.75)  # 0-1
+    impact = fidelity.get("feature_impact_alignment", 0.70)  # 0-1
+    masking = fidelity.get("masking_consistency", 0.70)  # 0-1
+    
+    # Simple weighted average: reconstruction 40%, impact 30%, masking 30%
+    efi01 = 0.4 * recon + 0.3 * impact + 0.3 * masking
+    efi = max(0.0, min(efi01 * 100.0, 100.0))
+    
+    return round(efi, 2)
+
+
+def compute_feature_importance_consistency(raw_metrics: dict) -> float:
+    """
+    Compute Feature Importance Consistency (FIC) on a 0-100 scale.
+    
+    Uses:
+      - jaccard_similarity (0-1)
+      - spearman_rank_correlation (-1 to 1, but typically 0-1 here)
+    """
+    consistency = raw_metrics.get("consistency", {})
+    
+    jaccard = consistency.get("jaccard_similarity", 0.68)  # 0-1
+    spearman = consistency.get("spearman_correlation", 0.85)  # -1..1
+    
+    # Normalize spearman to 0-1
+    spearman_norm = (spearman + 1.0) / 2.0
+    
+    # Weighted average: 50% jaccard, 50% spearman
+    fic01 = 0.5 * jaccard + 0.5 * spearman_norm
+    fic = max(0.0, min(fic01 * 100.0, 100.0))
+    
+    return round(fic, 2)
+
+
+def compute_auditability_index(raw_metrics: dict) -> float:
+    """
+    Compute Auditability Index (AIx) on a 0-100 scale.
+    
+    Combines:
+      - prediction_logging_score (0-100)
+      - model_versioning_score (0-100)
+      - audit_trail_score (0-100)
+    """
+    traceability = raw_metrics.get("traceability", {})
+    
+    log_score = traceability.get("prediction_logging_score", 100.0)
+    version_score = traceability.get("model_versioning_score", 95.0)
+    audit_trail_score = traceability.get("audit_trail_score", 98.0)
+    
+    # Example weights: logs 35%, versioning 30%, audit trail 35%
+    aix = 0.35 * log_score + 0.30 * version_score + 0.35 * audit_trail_score
+    
+    return round(aix, 2)
+
+
+def compute_transparency_score(block_scores: dict) -> float:
+    """
+    Compute Transparency Score (TS) as weighted combination of:
+      - explanation_generation (35%)
+      - explanation_reliability (30%)
+      - traceability_auditability (25%)
+      - comprehensibility (10%)
+    """
+    egc = block_scores.get("explanation_generation", 0.0)
+    erf = block_scores.get("explanation_reliability", 0.0)
+    ta = block_scores.get("traceability_auditability", 0.0)
+    cu = block_scores.get("comprehensibility", 0.0)
+    
+    ts = 0.35 * egc + 0.30 * erf + 0.25 * ta + 0.10 * cu
+    
+    return round(ts, 2)
+
+
+# Calculate transparency score using formal formula
 def calculate_transparency_score():
-    total = sum(cat["score"] * cat["weight"]
-                for cat in CATEGORY_SCORES.values())
-    weight_sum = sum(cat["weight"] for cat in CATEGORY_SCORES.values())
-    return round(total / weight_sum, 2)
+    """Calculate overall transparency score using formal TS formula."""
+    block_scores = get_explainability_block_scores()
+    return compute_transparency_score(block_scores)
 
 
 OVERALL_SCORE = calculate_transparency_score()
@@ -811,17 +956,60 @@ def get_categories():
 
 @app.route('/api/transparency-score')
 def get_score():
+    """Get Transparency Score (TS) using formal weighted formula."""
     try:
+        block_scores = get_explainability_block_scores()
+        ts = compute_transparency_score(block_scores)
+        
         response_data = {
-            "transparency_score": OVERALL_SCORE,
+            "transparency_score": ts,
+            "blocks": block_scores,
             "category_breakdown": {k: v["score"] for k, v in CATEGORY_SCORES.items()},
-            "categories": CATEGORY_SCORES
+            "categories": CATEGORY_SCORES,
+            "timestamp": datetime.now().isoformat()
         }
-        logger.info(f"Returning transparency score: {OVERALL_SCORE}")
+        logger.info(f"Returning transparency score: {ts}")
         return jsonify(response_data)
     except Exception as e:
         logger.error(f"Error in /api/transparency-score: {e}", exc_info=True)
         return jsonify({"error": "Failed to get score", "message": str(e)}), 500
+
+
+@app.route('/api/explainability-metrics', methods=['GET'])
+def get_explainability_metrics():
+    """
+    Returns all key explainability metrics:
+      - TS (Transparency Score)
+      - EFI (Explainability Fidelity Index)
+      - FIC (Feature Importance Consistency)
+      - AIx (Auditability Index)
+      - Block scores (EGC, ERF, TA, CU)
+    """
+    try:
+        # 1. Gather raw metrics and block scores from existing logic
+        raw_metrics = get_raw_explainability_metrics()
+        block_scores = get_explainability_block_scores()
+        
+        # 2. Compute named metrics
+        efi = compute_explainability_fidelity_index(raw_metrics)
+        fic = compute_feature_importance_consistency(raw_metrics)
+        aix = compute_auditability_index(raw_metrics)
+        ts = compute_transparency_score(block_scores)
+        
+        response = {
+            "transparency_score": ts,
+            "efi": efi,
+            "fic": fic,
+            "auditability_index": aix,
+            "blocks": block_scores,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        logger.info(f"Returning explainability metrics: TS={ts}, EFI={efi}, FIC={fic}, AIx={aix}")
+        return jsonify(response)
+    except Exception as e:
+        logger.error(f"Error in /api/explainability-metrics: {e}", exc_info=True)
+        return jsonify({"error": "Failed to get metrics", "message": str(e)}), 500
 
 
 @app.route('/api/tests')
@@ -1514,10 +1702,12 @@ HTML_TEMPLATE = '''
             fetch(api + '/api/transparency-score')
                 .then(response => response.json())
                 .then(score => {
-                    const percentage = Math.round(score.transparency_score * 100);
+                    // TS is already in 0-100 scale, so use it directly
+                    const percentage = Math.round(score.transparency_score);
                     document.getElementById('score').textContent = percentage + '%';
                     const cat = score.categories;
                     if (cat['Explanation Generation']) {
+                        // Category scores are in 0-1 scale, so multiply by 100
                         document.getElementById('kpi1').textContent = Math.round(cat['Explanation Generation'].score * 100) + '%';
                     }
                     if (cat['Explanation Reliability']) {

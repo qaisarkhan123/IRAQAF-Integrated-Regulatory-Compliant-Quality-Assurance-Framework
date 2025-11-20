@@ -1,13 +1,13 @@
 """
 ╔════════════════════════════════════════════════════════════════════════════╗
 ║                                                                            ║
-║              L3 OPERATIONS CONTROL CENTER - IRAQAF PLATFORM               ║
+║          SYSTEM OPERATIONS & QA MONITOR (SOQM) - IRAQAF PLATFORM         ║
 ║                                                                            ║
 ║         Integrated Dashboard for All 8 Phases - Developers/Operators      ║
 ║                                                                            ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 
-This is the operational cockpit for the entire IRAQAF platform.
+This is the System Operations & QA Monitor (SOQM) for the entire IRAQAF platform.
 Displays real-time status, metrics, and controls for all 8 phases.
 
 Port: 8503
@@ -363,7 +363,7 @@ def get_testing_status():
 
 @app.route('/')
 def dashboard():
-    """Main L3 Operations Control Center dashboard"""
+    """Main System Operations & QA Monitor (SOQM) dashboard"""
     return render_template_string(L3_DASHBOARD_HTML)
 
 
@@ -418,7 +418,7 @@ def health():
     })
 
 # ============================================================================
-# HTML TEMPLATE - L3 Operations Control Center
+# HTML TEMPLATE - System Operations & QA Monitor (SOQM)
 # ============================================================================
 
 
@@ -428,7 +428,7 @@ L3_DASHBOARD_HTML = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L3 Operations Control Center - IRAQAF</title>
+    <title>System Operations & QA Monitor (SOQM) - IRAQAF</title>
     <style>
         * {
             margin: 0;
@@ -745,13 +745,343 @@ L3_DASHBOARD_HTML = """
         .phase-body::-webkit-scrollbar-thumb:hover {
             background: #60a5fa;
         }
+
+        /* Enhanced UI Styles */
+        .status-operational {
+            background: #10b981;
+            color: white;
+        }
+
+        .status-ready {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .status-unknown {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .module-list, .capability-list, .test-breakdown {
+            display: grid;
+            gap: 8px;
+        }
+
+        .module-item, .capability-item, .test-type {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .module-name, .capability-name, .test-name {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 12px;
+        }
+
+        .module-desc, .capability-value, .test-count {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .info-text {
+            padding: 15px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            color: #6ee7b7;
+            font-size: 14px;
+        }
+
+        .scraper-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .scraper-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            border-left: 3px solid #8b5cf6;
+        }
+
+        .scraper-name {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .scraper-status {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .scraper-time {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .checklist-item {
+            padding: 12px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .framework-name {
+            font-weight: 600;
+            color: #c4b5fd;
+            margin-bottom: 5px;
+        }
+
+        .requirement-count {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .changes-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .change-item {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+            border-left: 3px solid #f59e0b;
+        }
+
+        .change-regulation {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .change-type {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .change-severity {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .severity-high {
+            background: #dc2626;
+            color: white;
+        }
+
+        .severity-medium {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .severity-low {
+            background: #10b981;
+            color: white;
+        }
+
+        .change-date {
+            font-size: 10px;
+            color: #64748b;
+        }
+
+        .endpoint-groups {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .endpoint-group {
+            padding: 12px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .group-name {
+            font-weight: 600;
+            color: #6ee7b7;
+            margin-bottom: 5px;
+        }
+
+        .endpoint-count {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .endpoints-summary h3, .coverage-summary h3 {
+            color: #60a5fa;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .api-stats, .coverage-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            padding: 6px 12px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            font-size: 12px;
+            color: #93c5fd;
+        }
+
+        .endpoints-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .endpoint-group-card {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .endpoint-group-card h4 {
+            color: #60a5fa;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .endpoint-list {
+            display: grid;
+            gap: 6px;
+        }
+
+        .endpoint-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 10px;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 4px;
+        }
+
+        .method {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .method-get {
+            background: #10b981;
+            color: white;
+        }
+
+        .method-post {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .method-put {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .method-delete {
+            background: #dc2626;
+            color: white;
+        }
+
+        .path {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .coverage-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .coverage-item {
+            display: grid;
+            grid-template-columns: 200px 1fr auto;
+            gap: 15px;
+            align-items: center;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 6px;
+        }
+
+        .coverage-bar {
+            height: 8px;
+            background: rgba(51, 65, 85, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .coverage-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .coverage-excellent {
+            background: #10b981;
+        }
+
+        .coverage-good {
+            background: #3b82f6;
+        }
+
+        .coverage-fair {
+            background: #f59e0b;
+        }
+
+        .coverage-poor {
+            background: #dc2626;
+        }
+
+        .coverage-percent {
+            font-weight: 600;
+            color: #e2e8f0;
+            min-width: 40px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1>🎛️ L3 Operations Control Center</h1>
+            <h1>🎛️ System Operations & QA Monitor (SOQM)</h1>
             <p>IRAQAF Platform - Integrated Dashboard for All 8 Phases</p>
             <div class="status-bar">
                 <div class="status-item">
@@ -817,7 +1147,7 @@ L3_DASHBOARD_HTML = """
 
         <!-- Footer -->
         <div class="footer">
-            <p>L3 Operations Control Center | IRAQAF Platform v1.0 | All 8 Phases Integrated</p>
+            <p>System Operations & QA Monitor (SOQM) | IRAQAF Platform v1.0 | All 8 Phases Integrated</p>
             <p>For more details: <strong>L1</strong> (Regulations) | <strong>L2</strong> (Privacy/Security) | <strong>L4</strong> (Explainability)</p>
         </div>
     </div>
@@ -878,16 +1208,281 @@ L3_DASHBOARD_HTML = """
                                 <span class="phase-number">${phase.phase}</span>
                                 ${icon} ${phase.name || 'Phase ' + phase.phase}
                             </div>
-                            <div class="phase-status">${phase.status || 'UNKNOWN'}</div>
+                            <div class="phase-status status-${phase.status?.toLowerCase() || 'unknown'}">${phase.status || 'UNKNOWN'}</div>
                         </div>
                         <div class="phase-body">
-                            <pre style="color: #60a5fa; font-size: 11px; overflow: auto;">${JSON.stringify(phase, null, 2)}</pre>
+                            ${renderPhaseContent(phase)}
                         </div>
                     </div>
                 `;
             }
             
             container.innerHTML = html;
+        }
+
+        function renderPhaseContent(phase) {
+            switch(phase.phase) {
+                case 1: return renderArchitecturePhase(phase);
+                case 2: return renderDatabasePhase(phase);
+                case 3: return renderScrapersPhase(phase);
+                case 4: return renderNLPPhase(phase);
+                case 5: return renderCompliancePhase(phase);
+                case 6: return renderMonitoringPhase(phase);
+                case 7: return renderAPIPhase(phase);
+                case 8: return renderTestingPhase(phase);
+                default: return `<div class="metric-card">Phase ${phase.phase} - No specific renderer</div>`;
+            }
+        }
+
+        function renderArchitecturePhase(phase) {
+            const modules = phase.modules || {};
+            const moduleCount = Object.keys(modules).length;
+            
+            return `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">${moduleCount}</div>
+                        <div class="metric-label">Core Modules</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">✓</div>
+                        <div class="metric-label">Architecture Ready</div>
+                    </div>
+                </div>
+                <div class="module-list">
+                    ${Object.entries(modules).map(([key, desc]) => 
+                        `<div class="module-item">
+                            <span class="module-name">${key.replace(/_/g, ' ').toUpperCase()}</span>
+                            <span class="module-desc">${desc}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function renderDatabasePhase(phase) {
+            return `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">✓</div>
+                        <div class="metric-label">Database Ready</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">SQLite</div>
+                        <div class="metric-label">Database Type</div>
+                    </div>
+                </div>
+                <div class="info-text">${phase.message || 'Database layer initialized and operational'}</div>
+            `;
+        }
+
+        function renderScrapersPhase(phase) {
+            const scrapers = phase.scrapers || {};
+            const scraperCount = Object.keys(scrapers).length;
+            
+            return `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">${scraperCount}</div>
+                        <div class="metric-label">Active Scrapers</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${phase.content_items || '0'}</div>
+                        <div class="metric-label">Content Items</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${phase.rate_limit || 'N/A'}</div>
+                        <div class="metric-label">Rate Limit</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${phase.concurrent_jobs || '0'}</div>
+                        <div class="metric-label">Concurrent Jobs</div>
+                    </div>
+                </div>
+                <div class="scraper-list">
+                    ${Object.entries(scrapers).map(([name, info]) => 
+                        `<div class="scraper-item">
+                            <div class="scraper-name">${name}</div>
+                            <div class="scraper-status status-${info.status?.toLowerCase() || 'unknown'}">${info.status}</div>
+                            <div class="scraper-time">${info.last_run}</div>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function renderNLPPhase(phase) {
+            const metrics = phase.metrics || {};
+            const capabilities = phase.capabilities || {};
+            
+            return `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">${metrics.accuracy || '0%'}</div>
+                        <div class="metric-label">Accuracy</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${metrics.avg_query_response || '0ms'}</div>
+                        <div class="metric-label">Avg Response</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${metrics.requirements_extracted || '0'}</div>
+                        <div class="metric-label">Requirements</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${metrics.cross_regulation_links || '0'}</div>
+                        <div class="metric-label">Cross Links</div>
+                    </div>
+                </div>
+                <div class="capability-list">
+                    ${Object.entries(capabilities).map(([key, value]) => 
+                        `<div class="capability-item">
+                            <span class="capability-name">${key.replace(/_/g, ' ').toUpperCase()}</span>
+                            <span class="capability-value">${value}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function renderCompliancePhase(phase) {
+            const checklists = phase.requirement_checklists || {};
+            const gaps = phase.gap_analysis || {};
+            
+            return `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">${checklists.total || '0'}</div>
+                        <div class="metric-label">Total Requirements</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${phase.avg_assessment_time || 'N/A'}</div>
+                        <div class="metric-label">Avg Assessment</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${gaps.critical_gaps || '0'}</div>
+                        <div class="metric-label">Critical Gaps</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${gaps.high_gaps || '0'}</div>
+                        <div class="metric-label">High Gaps</div>
+                    </div>
+                </div>
+                <div class="checklist-grid">
+                    ${Object.entries(checklists).filter(([key]) => key !== 'total').map(([framework, count]) => 
+                        `<div class="checklist-item">
+                            <div class="framework-name">${framework}</div>
+                            <div class="requirement-count">${count} requirements</div>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function renderMonitoringPhase(phase) {
+            const notifications = phase.notifications || {};
+            const changes = phase.recent_changes || [];
+            
+            return `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">${notifications.critical_changes || '0'}</div>
+                        <div class="metric-label">Critical Changes</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${notifications.pending_reviews || '0'}</div>
+                        <div class="metric-label">Pending Reviews</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${phase.real_time_monitoring ? '✓' : '✗'}</div>
+                        <div class="metric-label">Real-time Monitor</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${changes.length}</div>
+                        <div class="metric-label">Recent Changes</div>
+                    </div>
+                </div>
+                <div class="changes-list">
+                    ${changes.slice(0, 3).map(change => 
+                        `<div class="change-item">
+                            <div class="change-regulation">${change.regulation}</div>
+                            <div class="change-type">${change.type}</div>
+                            <div class="change-severity severity-${change.severity?.toLowerCase() || 'unknown'}">${change.severity}</div>
+                            <div class="change-date">${change.date}</div>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function renderAPIPhase(phase) {
+            const api = phase.rest_api || {};
+            const endpoints = api.endpoints || {};
+            const cli = phase.cli || {};
+            
+            return `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">${api.endpoints_count || '0'}</div>
+                        <div class="metric-label">API Endpoints</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${cli.commands || '0'}</div>
+                        <div class="metric-label">CLI Commands</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${api.port || 'N/A'}</div>
+                        <div class="metric-label">API Port</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${api.rate_limiting ? '✓' : '✗'}</div>
+                        <div class="metric-label">Rate Limiting</div>
+                    </div>
+                </div>
+                <div class="endpoint-groups">
+                    ${Object.entries(endpoints).map(([group, eps]) => 
+                        `<div class="endpoint-group">
+                            <div class="group-name">${group}</div>
+                            <div class="endpoint-count">${eps.length} endpoints</div>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+        }
+
+        function renderTestingPhase(phase) {
+            const testing = phase.testing || {};
+            const breakdown = phase.test_breakdown || {};
+            const performance = phase.performance || {};
+            
+            return `
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-value">${testing.coverage || '0%'}</div>
+                        <div class="metric-label">Code Coverage</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${testing.pass_rate || '0%'}</div>
+                        <div class="metric-label">Pass Rate</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${testing.total_tests || '0'}</div>
+                        <div class="metric-label">Total Tests</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${testing.failing || '0'}</div>
+                        <div class="metric-label">Failing Tests</div>
+                    </div>
+                </div>
+                <div class="test-breakdown">
+                    ${Object.entries(breakdown).map(([type, count]) => 
+                        `<div class="test-type">
+                            <span class="test-name">${type.replace(/_/g, ' ').toUpperCase()}</span>
+                            <span class="test-count">${count}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
         }
 
         function renderEndpoints(phases) {
@@ -899,7 +1494,36 @@ L3_DASHBOARD_HTML = """
                 return;
             }
             
-            container.innerHTML = '<pre style="color: #60a5fa; font-size: 11px; overflow: auto;">' + JSON.stringify(apiPhase, null, 2) + '</pre>';
+            const api = apiPhase.rest_api || {};
+            const endpoints = api.endpoints || {};
+            
+            let html = '<div class="endpoints-summary">';
+            html += `<h3>🔌 REST API Endpoints (Phase 7)</h3>`;
+            html += `<div class="api-stats">`;
+            html += `<span class="stat-item">Framework: ${api.framework || 'N/A'}</span>`;
+            html += `<span class="stat-item">Port: ${api.port || 'N/A'}</span>`;
+            html += `<span class="stat-item">Total: ${api.endpoints_count || '0'} endpoints</span>`;
+            html += `<span class="stat-item">Auth: ${api.authentication || 'N/A'}</span>`;
+            html += `</div></div>`;
+            
+            html += '<div class="endpoints-grid">';
+            Object.entries(endpoints).forEach(([group, eps]) => {
+                html += `<div class="endpoint-group-card">`;
+                html += `<h4>${group}</h4>`;
+                html += `<div class="endpoint-list">`;
+                eps.forEach(endpoint => {
+                    const method = endpoint.split(' ')[0];
+                    const path = endpoint.split(' ')[1];
+                    html += `<div class="endpoint-item">`;
+                    html += `<span class="method method-${method.toLowerCase()}">${method}</span>`;
+                    html += `<span class="path">${path}</span>`;
+                    html += `</div>`;
+                });
+                html += `</div></div>`;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
         }
 
         function renderCoverage(phases) {
@@ -911,7 +1535,34 @@ L3_DASHBOARD_HTML = """
                 return;
             }
             
-            container.innerHTML = '<pre style="color: #60a5fa; font-size: 11px; overflow: auto;">' + JSON.stringify(testPhase, null, 2) + '</pre>';
+            const testing = testPhase.testing || {};
+            const coverage = testing.coverage_by_module || {};
+            
+            let html = '<div class="coverage-summary">';
+            html += `<h3>📈 Code Coverage by Module (Phase 8)</h3>`;
+            html += `<div class="coverage-stats">`;
+            html += `<span class="stat-item">Overall: ${testing.coverage || '0%'}</span>`;
+            html += `<span class="stat-item">Target: ${testing.target_coverage || '80%'}</span>`;
+            html += `<span class="stat-item">Pass Rate: ${testing.pass_rate || '0%'}</span>`;
+            html += `<span class="stat-item">Total Tests: ${testing.total_tests || '0'}</span>`;
+            html += `</div></div>`;
+            
+            html += '<div class="coverage-grid">';
+            Object.entries(coverage).forEach(([module, percent]) => {
+                const percentage = parseFloat(percent.replace('%', ''));
+                const colorClass = percentage >= 90 ? 'excellent' : percentage >= 80 ? 'good' : percentage >= 70 ? 'fair' : 'poor';
+                
+                html += `<div class="coverage-item">`;
+                html += `<div class="module-name">${module}</div>`;
+                html += `<div class="coverage-bar">`;
+                html += `<div class="coverage-fill coverage-${colorClass}" style="width: ${percentage}%"></div>`;
+                html += `</div>`;
+                html += `<div class="coverage-percent">${percent}</div>`;
+                html += `</div>`;
+            });
+            html += '</div>';
+            
+            container.innerHTML = html;
         }
     </script>
 </body>

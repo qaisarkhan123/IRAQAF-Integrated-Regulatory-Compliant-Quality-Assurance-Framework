@@ -316,26 +316,138 @@ def render_logout_button():
 
 
 def render_user_info():
-    """Display user information in sidebar"""
+    """Display user information in sidebar with modern styling"""
     if st.session_state.get('authenticated', False):
         user = st.session_state.get('current_user', {})
-
-        st.sidebar.markdown("---")
-        st.sidebar.markdown("### 👤 User Information")
-
-        col1, col2 = st.sidebar.columns([1, 1])
-        with col1:
-            st.metric("Role", user.get('role', 'N/A').title())
-        with col2:
-            permissions = user.get('permissions', [])
-            st.metric("Permissions", len(permissions))
-
-        if st.sidebar.checkbox("👥 View Details"):
-            st.sidebar.markdown(f"**Username:** {user.get('username', 'N/A')}")
-            st.sidebar.markdown(f"**Email:** {user.get('email', 'N/A')}")
-            st.sidebar.markdown(f"**Role:** {user.get('role', 'N/A')}")
-            st.sidebar.markdown(
-                f"**Permissions:** {', '.join(permissions) if permissions else 'None'}")
+        permissions = user.get('permissions', [])
+        role = user.get('role', 'N/A').title()
+        username = user.get('username', 'N/A')
+        email = user.get('email', 'N/A')
+        
+        # Role badge colors
+        role_colors = {
+            'Admin': {'bg': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 'text': 'white'},
+            'Analyst': {'bg': 'linear-gradient(135deg, #00d4ff 0%, #0099ff 100%)', 'text': 'white'},
+            'Viewer': {'bg': 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)', 'text': 'white'}
+        }
+        role_style = role_colors.get(role, {'bg': '#e2e8f0', 'text': '#475569'})
+        
+        # CSS Styles
+        st.markdown("""
+        <style>
+            .user-info-card {
+                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 18px;
+                margin: 16px 0;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            }
+            
+            .user-info-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 16px;
+                padding-bottom: 12px;
+                border-bottom: 2px solid #e2e8f0;
+            }
+            
+            .user-info-header h4 {
+                margin: 0;
+                font-size: 14px;
+                font-weight: 700;
+                color: #1e293b;
+                letter-spacing: 0.5px;
+            }
+            
+            .user-info-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 0;
+                border-bottom: 1px solid #f1f5f9;
+            }
+            
+            .user-info-row:last-child {
+                border-bottom: none;
+            }
+            
+            .user-info-label {
+                font-size: 12px;
+                font-weight: 600;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            
+            .role-badge {
+                display: inline-block;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .permissions-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 32px;
+                height: 24px;
+                padding: 0 10px;
+                border-radius: 12px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                font-size: 12px;
+                font-weight: 700;
+                box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # HTML Content
+        html_content = f"""
+        <div class="user-info-card">
+            <div class="user-info-header">
+                <span style="font-size: 18px;">👤</span>
+                <h4>User Information</h4>
+            </div>
+            <div class="user-info-row">
+                <span class="user-info-label">Role</span>
+                <span class="role-badge" style="background: {role_style['bg']}; color: {role_style['text']};">
+                    {role}
+                </span>
+            </div>
+            <div class="user-info-row">
+                <span class="user-info-label">Permissions</span>
+                <span class="permissions-badge">{len(permissions)}</span>
+            </div>
+        </div>
+        """
+        st.markdown(html_content, unsafe_allow_html=True)
+        
+        # Optional expandable details
+        with st.sidebar.expander("📋 View Full Details", expanded=False):
+            st.markdown(f"""
+                <div style="padding: 8px 0;">
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;">Username:</span><br>
+                        <span style="font-size: 13px; color: #1e293b; font-weight: 600;">{username}</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;">Email:</span><br>
+                        <span style="font-size: 13px; color: #1e293b; font-weight: 600;">{email if email != 'N/A' else 'Not provided'}</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase;">Permission List:</span><br>
+                        <span style="font-size: 12px; color: #475569;">{', '.join(permissions) if permissions else 'None assigned'}</span>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
 
 
 def check_authentication():

@@ -1,5 +1,5 @@
 """
-IRAQAF Privacy & Security Hub - Enhanced with Reasoning & Visualizations
+IRAQAF Privacy & Security Hub - with Reasoning & Visualizations
 ===========================================================================
 
 Security assessment hub with 11 modules including detailed reasoning,
@@ -592,6 +592,237 @@ def generate_score_gauge(score, title):
 
 
 # ============================================================================
+# METRIC COMPUTATION FUNCTIONS
+# ============================================================================
+
+def get_all_modules():
+    """Get all security modules as a list."""
+    return [
+        AnonymizationModule(),
+        ModelSecurityModule(),
+        DataMinimizationModule(),
+        PIIDetectionModule(),
+        EncryptionValidatorModule(),
+        DataRetentionModule(),
+        AccessControlModule(),
+        ThreatDetectionModule(),
+        GDPRComplianceModule(),
+        AuditLoggingModule(),
+        APISecurityModule()
+    ]
+
+
+def get_module_scores() -> dict:
+    """
+    Get module scores as a dictionary.
+    Returns dict mapping module names to scores (0-100).
+    """
+    modules = get_all_modules()
+    return {
+        "anonymization": modules[0].score,
+        "model_security": modules[1].score,
+        "data_minimization": modules[2].score,
+        "pii_detection": modules[3].score,
+        "encryption": modules[4].score,
+        "retention": modules[5].score,
+        "access_control": modules[6].score,
+        "threat_detection": modules[7].score,
+        "gdpr": modules[8].score,
+        "audit_logging": modules[9].score,
+        "api_security": modules[10].score,
+    }
+
+
+def get_detailed_metrics() -> dict:
+    """
+    Extract detailed metrics from modules for composite metric calculations.
+    Returns structured dict with all sub-metrics needed for DLP, ES, ARI.
+    """
+    modules = get_all_modules()
+    
+    # Extract metrics from AnonymizationModule
+    anonymization = modules[0]
+    anonymization_metrics = anonymization.metrics
+    
+    # Extract metrics from ModelSecurityModule
+    model_security = modules[1]
+    model_security_metrics = model_security.metrics
+    
+    # Extract metrics from PIIDetectionModule
+    pii_detection = modules[3]
+    pii_detection_metrics = pii_detection.metrics
+    
+    # Extract metrics from EncryptionValidatorModule
+    encryption = modules[4]
+    encryption_metrics = encryption.metrics
+    
+    return {
+        "model_security": {
+            "membership_inference_rate": model_security_metrics.get("Membership Inference (%)", 5) / 100.0,
+            "adversarial_robustness": model_security_metrics.get("Adversarial Robustness (%)", 92),
+            "fgsm_attack_success_rate": model_security_metrics.get("FGSM Attack Success (%)", 8) / 100.0,
+            "model_integrity_ok": model_security_metrics.get("Model Integrity (%)", 100) == 100,
+        },
+        "anonymization": {
+            "reidentification_risk": anonymization_metrics.get("Re-identification Risk (%)", 42) / 100.0,
+        },
+        "pii_detection": {
+            "detection_rate": pii_detection_metrics.get("Email Accuracy (%)", 99) / 100.0,  # Use email as proxy
+        },
+        "encryption": {
+            "aes256_coverage": encryption_metrics.get("AES-256 Coverage (%)", 100),
+            "tls13_coverage": encryption_metrics.get("TLS 1.3 Endpoints (%)", 95),
+            "key_rotation_score": encryption_metrics.get("Key Rotation Compliance (%)", 85),
+            "certificate_health": 100 if encryption_metrics.get("Certificate Validity (days)", 45) > 30 else 70,
+        }
+    }
+
+
+def compute_data_leakage_probability(metrics: dict) -> float:
+    """
+    Compute Data Leakage Probability (DLP) on a 0–100 scale.
+    
+    Uses:
+      - membership_inference_rate (0–1 or %)
+      - reidentification_risk (0–1 or %)
+      - pii_detection_rate (0–1 or %; higher is better -> lowers DLP)
+    
+    Example weights: MIR 40%, Re-ID 40%, PII protection 20%
+    """
+    ms = metrics.get("model_security", {})
+    anon = metrics.get("anonymization", {})
+    pii = metrics.get("pii_detection", {})
+    
+    mir = ms.get("membership_inference_rate", 0.05)  # e.g. 0.05
+    reid = anon.get("reidentification_risk", 0.42)  # e.g. 0.42
+    pii_det = pii.get("detection_rate", 0.92)  # e.g. 0.92
+    
+    # Normalize to 0–1 and build a weighted risk score (higher means more leakage)
+    # Example weights: MIR 40%, Re-ID 40%, PII protection 20%
+    base_risk = 0.4 * mir + 0.4 * reid + 0.2 * (1.0 - pii_det)
+    
+    # Convert to 0–100, clipping to [0, 100]
+    dlp = max(0.0, min(base_risk * 100.0, 100.0))
+    
+    return round(dlp, 2)
+
+
+def compute_encryption_score(metrics: dict) -> float:
+    """
+    Compute Encryption Score (ES) on a 0–100 scale from encryption-related submetrics.
+    
+    Uses:
+      - aes256_coverage (0–100)
+      - tls13_coverage (0–100)
+      - key_rotation_score (0–100)
+      - certificate_health (0–100)
+    
+    Example weights: AES 30%, TLS 30%, key rotation 20%, certificate status 20%
+    """
+    enc = metrics.get("encryption", {})
+    
+    aes_cov = enc.get("aes256_coverage", 100)  # 0–100
+    tls_cov = enc.get("tls13_coverage", 95)  # 0–100
+    key_rotation = enc.get("key_rotation_score", 85)  # 0–100
+    cert_health = enc.get("certificate_health", 100)  # 0–100
+    
+    # Example weights: AES 30%, TLS 30%, key rotation 20%, certificate status 20%
+    es = 0.30 * aes_cov + 0.30 * tls_cov + 0.20 * key_rotation + 0.20 * cert_health
+    
+    return round(es, 2)
+
+
+def compute_attack_robustness_index(metrics: dict) -> float:
+    """
+    Compute Attack Robustness Index (ARI) on a 0–100 scale.
+    
+    Combines:
+      - adversarial_robustness_score (0–100)
+      - fgsm_attack_success_rate (0–1 or %; lower is better)
+      - model_integrity_ok (bool)
+    """
+    ms = metrics.get("model_security", {})
+    
+    adv_robust = ms.get("adversarial_robustness", 92)  # 0–100
+    fgsm_success = ms.get("fgsm_attack_success_rate", 0.08)  # 0–1
+    integrity_ok = ms.get("model_integrity_ok", True)  # bool
+    
+    # Penalize high attack success; reward robustness; penalize if integrity fails
+    robustness_factor = adv_robust / 100.0
+    attack_penalty = 1.0 - fgsm_success  # 1 is good (no success), 0 is bad
+    integrity_factor = 1.0 if integrity_ok else 0.5  # arbitrary penalty if integrity fails
+    
+    ari = 100.0 * robustness_factor * attack_penalty * integrity_factor
+    
+    return round(max(0.0, min(ari, 100.0)), 2)
+
+
+def compute_category_scores(module_scores: dict) -> dict:
+    """
+    Compute category-based scores from module scores.
+    
+    Args:
+        module_scores: dict of per-module scores (0–100), e.g.
+          {
+            "anonymization": 48,
+            "pii_detection": 92,
+            "data_minimization": 70,
+            "model_security": 96,
+            "encryption": 88,
+            "access_control": 90,
+            "threat_detection": 87,
+            "api_security": 86,
+            "retention": 85,
+            "gdpr": 84,
+            "audit_logging": 89,
+          }
+    
+    Returns:
+        Dict with category aggregates (0–100).
+    """
+    data_privacy_modules = ["anonymization", "pii_detection", "data_minimization"]
+    model_integrity_modules = ["model_security"]
+    system_security_modules = ["encryption", "access_control", "threat_detection", "api_security"]
+    governance_modules = ["retention", "gdpr", "audit_logging"]
+    
+    def avg(keys):
+        vals = [module_scores[k] for k in keys if k in module_scores]
+        return round(sum(vals) / len(vals) if vals else 0.0, 2)
+    
+    return {
+        "data_privacy": avg(data_privacy_modules),
+        "model_integrity": avg(model_integrity_modules),
+        "system_security": avg(system_security_modules),
+        "governance": avg(governance_modules),
+    }
+
+
+def compute_sai(module_scores: dict) -> dict:
+    """
+    Compute category scores and overall SAI using formal weighted formula.
+    
+    SAI = 0.30 * DataPrivacy + 0.25 * ModelIntegrity +
+          0.25 * SystemSecurity + 0.20 * Governance
+    
+    Returns:
+        Dict with SAI score and category breakdown.
+    """
+    cats = compute_category_scores(module_scores)
+    
+    sai = (
+        0.30 * cats["data_privacy"] +
+        0.25 * cats["model_integrity"] +
+        0.25 * cats["system_security"] +
+        0.20 * cats["governance"]
+    )
+    
+    return {
+        "sai": round(sai, 2),
+        "categories": cats,
+    }
+
+
+# ============================================================================
 # FLASK ROUTES WITH ENHANCED RESPONSES
 # ============================================================================
 
@@ -655,39 +886,59 @@ def get_module_details(module_name):
 
 @app.route('/api/sai')
 def get_sai():
-    """Get overall SAI score breakdown"""
-    modules = [
-        AnonymizationModule(),
-        ModelSecurityModule(),
-        DataMinimizationModule(),
-        PIIDetectionModule(),
-        EncryptionValidatorModule(),
-        DataRetentionModule(),
-        AccessControlModule(),
-        ThreatDetectionModule(),
-        GDPRComplianceModule(),
-        AuditLoggingModule(),
-        APISecurityModule()
-    ]
+    """Get overall SAI score breakdown using formal category-based weighted formula."""
+    module_scores = get_module_scores()
+    sai_result = compute_sai(module_scores)
+    modules = get_all_modules()
     
-    scores_by_category = {}
-    for module in modules:
-        if module.category not in scores_by_category:
-            scores_by_category[module.category] = []
-        scores_by_category[module.category].append(module.score)
-    
-    category_scores = {cat: sum(scores)/len(scores) 
-                      for cat, scores in scores_by_category.items()}
-    overall = sum(m.score for m in modules) / len(modules)
+    # Also compute simple average for comparison
+    simple_avg = sum(module_scores.values()) / len(module_scores) if module_scores else 0
     
     return jsonify({
-        'overall_sai': round(overall, 1),
+        'sai': sai_result['sai'],
+        'overall_sai': sai_result['sai'],  # For backward compatibility
         'previous_sai': 52,
-        'improvement': round(overall - 52, 1),
-        'category_breakdown': category_scores,
+        'improvement': round(sai_result['sai'] - 52, 1),
+        'category_breakdown': sai_result['categories'],
+        'categories': sai_result['categories'],  # Formal category scores
+        'simple_average': round(simple_avg, 2),  # For comparison
         'total_modules': len(modules),
-        'modules_passing': sum(1 for m in modules if m.score >= 70)
+        'modules_passing': sum(1 for s in module_scores.values() if s >= 70),
+        'timestamp': datetime.now().isoformat()
     })
+
+
+@app.route('/api/metrics', methods=['GET'])
+def get_l2_metrics():
+    """
+    Returns main L2 metrics:
+      - SAI (overall + categories)
+      - DLP (Data Leakage Probability)
+      - ES (Encryption Score)
+      - ARI (Attack Robustness Index)
+      - Per-module scores (optional)
+    """
+    # 1. Gather per-module scores and raw technical metrics from existing logic
+    module_scores = get_module_scores()
+    detailed_metrics = get_detailed_metrics()
+    
+    # 2. Compute composite metrics
+    sai_result = compute_sai(module_scores)
+    dlp = compute_data_leakage_probability(detailed_metrics)
+    es = compute_encryption_score(detailed_metrics)
+    ari = compute_attack_robustness_index(detailed_metrics)
+    
+    response = {
+        "sai": sai_result["sai"],
+        "categories": sai_result["categories"],
+        "dlp": dlp,
+        "encryption_score": es,
+        "attack_robustness_index": ari,
+        "module_scores": module_scores,
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    return jsonify(response)
 
 
 # ============================================================================
@@ -699,7 +950,7 @@ def get_html_template(modules, sai):
 <!DOCTYPE html>
 <html>
 <head>
-    <title>IRAQAF - Privacy & Security Hub (Enhanced)</title>
+    <title>IRAQAF - Privacy & Security Hub</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -950,7 +1201,7 @@ def get_html_template(modules, sai):
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 PRIVACY & SECURITY HUB - ENHANCED</h1>
+            <h1>🔐 PRIVACY & SECURITY HUB</h1>
             <p>Comprehensive security assessment with detailed reasoning and recommendations</p>
             <div style="margin-top: 15px;">
                 <span class="sai-badge">SAI: 85%</span>
@@ -959,7 +1210,7 @@ def get_html_template(modules, sai):
         </div>
         
         <div class="improvement-banner">
-            ✅ 11 Modules | 8 Original + 3 New Enhanced | SAI Improved from 52% to 85%
+            ✅ 11 Modules | SAI Improved from 52% to 85%
         </div>
         
         <div class="modules-grid">
@@ -998,7 +1249,7 @@ def get_html_template(modules, sai):
         </div>
         
         <div class="footer">
-            <p>IRAQAF Enhanced Security Hub | Real-time Monitoring | Last Updated: Now</p>
+            <p>IRAQAF Security Hub | Real-time Monitoring | Last Updated: Now</p>
             <p style="margin-top: 10px; font-size: 11px;">
                 For detailed metrics and visualizations, click any module card.
             </p>
@@ -1010,12 +1261,19 @@ def get_html_template(modules, sai):
 
 
 if __name__ == '__main__':
+    import sys
+    import io
+    # Set UTF-8 encoding for Windows console
+    if sys.platform == 'win32':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+    
     print("\n" + "="*80)
-    print("🔐 PRIVACY & SECURITY HUB - ENHANCED WITH REASONING & VISUALIZATIONS")
+    print("🔐 PRIVACY & SECURITY HUB - WITH REASONING & VISUALIZATIONS")
     print("="*80)
     print("> Port: 8502")
     print("> Features: 11 modules with detailed reasoning, explanations & charts")
-    print("> SAI: 85% (8 original + 3 new enhanced modules)")
+    print("> SAI: 85% (8 original + 3 new modules)")
     print("> Running on http://127.0.0.1:8502")
     print("> Press CTRL+C to stop\n")
     

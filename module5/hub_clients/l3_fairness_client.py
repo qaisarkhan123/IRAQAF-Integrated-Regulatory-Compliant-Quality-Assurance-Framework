@@ -46,17 +46,41 @@ class L3FairnessClient(BaseHubClient):
     def get_fairness_score(self) -> FairnessSnapshot:
         """Get overall fairness score and bias metrics."""
         try:
-            data = self.get("/api/fairness-score")
+            # Get FI and detailed metrics
+            fi_data = self.get("/api/fi")
+            metrics_data = self.get("/api/fairness-metrics")
+            eml_data = self.get("/api/eml")
+            
+            fairness_index_pct = fi_data.get("fairness_index", 0.0)
+            fairness_index = fairness_index_pct / 100.0  # Convert to 0-1 scale
+            
+            # Extract gaps from metrics
+            all_attrs = metrics_data.get("attributes", {})
+            max_dpg = 0.0
+            max_eod_gap = 0.0
+            
+            for attr, scores in all_attrs.items():
+                raw_metrics = scores.get("raw_metrics", {})
+                max_dpg = max(max_dpg, raw_metrics.get("demographic_parity_gap", 0.0))
+                max_eod_gap = max(max_eod_gap, raw_metrics.get("equalized_odds_gap", 0.0))
+            
+            eml_score_pct = eml_data.get("score", 0.0)
+            governance_score = eml_score_pct / 100.0  # Convert to 0-1 scale
+            
+            bias_detected = max_dpg > 0.1 or max_eod_gap > 0.1
+            at_risk_count = len([a for a in all_attrs.values() if a.get("fairness_score", 100) < 70])
+            status = "healthy" if fairness_index > 0.7 else "warning"
+            
             return FairnessSnapshot(
-                timestamp=data.get("timestamp", ""),
-                overall_fairness_score=data.get("overall_fairness_score", 0),
-                demographic_parity_gap=data.get("demographic_parity_gap", 0),
-                equalized_odds_gap=data.get("equalized_odds_gap", 0),
-                calibration_score=data.get("calibration_score", 0),
-                governance_score=data.get("governance_score", 0),
-                bias_detected=data.get("bias_detected", False),
-                at_risk_subgroups=data.get("at_risk_subgroups", 0),
-                status=data.get("status", "unknown"),
+                timestamp=fi_data.get("timestamp", ""),
+                overall_fairness_score=fairness_index,
+                demographic_parity_gap=max_dpg,
+                equalized_odds_gap=max_eod_gap,
+                calibration_score=fairness_index,  # Use FI as proxy for now
+                governance_score=governance_score,
+                bias_detected=bias_detected,
+                at_risk_subgroups=at_risk_count,
+                status=status,
             )
         except Exception as e:
             raise ValueError(f"Failed to get L3 fairness score: {str(e)}")

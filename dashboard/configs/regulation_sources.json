@@ -1,0 +1,43 @@
+[
+  {
+    "framework": "GDPR",
+    "source_type": "html",
+    "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32016R0679",
+    "poll_interval_hours": 24,
+    "selector": "body",
+    "description": "GDPR Official Text from EUR-Lex"
+  },
+  {
+    "framework": "EU_AI_ACT",
+    "source_type": "html",
+    "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689",
+    "poll_interval_hours": 24,
+    "selector": "body",
+    "description": "EU AI Act Official Text from EUR-Lex"
+  },
+  {
+    "framework": "HIPAA",
+    "source_type": "html",
+    "url": "https://www.hhs.gov/hipaa/for-professionals/index.html",
+    "poll_interval_hours": 24,
+    "selector": "main",
+    "description": "HIPAA Information from HHS.gov"
+  },
+  {
+    "framework": "PCI_DSS",
+    "source_type": "html",
+    "url": "https://www.pcisecuritystandards.org/document_library/",
+    "poll_interval_hours": 168,
+    "selector": "body",
+    "description": "PCI-DSS Standards Documentation"
+  },
+  {
+    "framework": "ISO_13485",
+    "source_type": "html",
+    "url": "https://www.iso.org/standard/59752.html",
+    "poll_interval_hours": 168,
+    "selector": "body",
+    "description": "ISO 13485 Standard Information"
+  }
+]
+

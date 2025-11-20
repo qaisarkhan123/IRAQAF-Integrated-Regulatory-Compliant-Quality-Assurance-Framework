@@ -1,0 +1,396 @@
+/* ============================================================================
+   IRAQAF DASHBOARD - STYLESHEET
+   ============================================================================
+   This file contains all CSS styles for the IRAQAF Dashboard application.
+   Organized by component/section for easy maintenance.
+   ============================================================================ */
+
+/* ============================================================================
+   FONTS & BASE STYLES
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap');
+
+.sidebar-container {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ============================================================================
+   SIDEBAR HEADER
+   ============================================================================ */
+
+.header-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    padding: 24px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    position: relative;
+    overflow: hidden;
+}
+
+.header-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+}
+
+.header-card h2 {
+    margin: 0;
+    color: white;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.header-card p {
+    margin: 8px 0 0 0;
+    color: rgba(255,255,255,0.95);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================================================
+   SECTION TITLES
+   ============================================================================ */
+
+.section-title {
+    margin: 24px 0 16px 0;
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, #e2e8f0 0%, transparent 100%);
+}
+
+/* ============================================================================
+   HUB BUTTONS - Modern Redesign
+   ============================================================================ */
+
+.hub-button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+    background: white;
+    cursor: pointer;
+}
+
+.hub-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    transition: width 0.3s ease;
+    z-index: 0;
+}
+
+.hub-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.hub-button:hover::before {
+    width: 100%;
+}
+
+.hub-button:hover::after {
+    opacity: 1;
+}
+
+.hub-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: transparent;
+}
+
+.hub-button-icon {
+    font-size: 24px;
+    margin-right: 14px;
+    min-width: 28px;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease;
+}
+
+.hub-button:hover .hub-button-icon {
+    transform: scale(1.15) rotate(5deg);
+}
+
+.hub-button-text {
+    flex: 1;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.hub-button-text small {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.7;
+    margin-top: 2px;
+}
+
+.hub-button-arrow {
+    font-size: 18px;
+    margin-left: 8px;
+    position: relative;
+    z-index: 1;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    transform: translateX(-4px);
+}
+
+.hub-button:hover .hub-button-arrow {
+    opacity: 1;
+    transform: translateX(4px);
+}
+
+/* L4 Explainability Hub - Pink/Red */
+.hub-button.l4 {
+    border-color: rgba(245, 87, 108, 0.2);
+    color: #1e293b;
+}
+
+.hub-button.l4::before {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.hub-button.l4:hover {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    box-shadow: 0 8px 24px rgba(245, 87, 108, 0.35);
+}
+
+.hub-button.l4 .hub-button-icon {
+    color: #f5576c;
+    /* Remove gradient text effect for emoji compatibility */
+}
+
+.hub-button.l4:hover .hub-button-icon {
+    -webkit-text-fill-color: white;
+}
+
+/* L2 Privacy & Security Hub - Purple */
+.hub-button.l2 {
+    border-color: rgba(102, 126, 234, 0.2);
+    color: #1e293b;
+}
+
+.hub-button.l2::before {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hub-button.l2:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35);
+}
+
+.hub-button.l2 .hub-button-icon {
+    color: #667eea;
+    /* Remove gradient text effect for emoji compatibility */
+}
+
+.hub-button.l2:hover .hub-button-icon {
+    -webkit-text-fill-color: white;
+}
+
+/* L1 Regulations Hub - Cyan */
+.hub-button.l1 {
+    border-color: rgba(0, 212, 255, 0.2);
+    color: #1e293b;
+}
+
+.hub-button.l1::before {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+}
+
+.hub-button.l1:hover {
+    background: linear-gradient(135deg, #00d4ff 0%, #0099ff 100%);
+    color: white;
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.35);
+}
+
+.hub-button.l1 .hub-button-icon {
+    color: #00d4ff;
+    /* Remove gradient text effect for emoji compatibility */
+}
+
+.hub-button.l1:hover .hub-button-icon {
+    -webkit-text-fill-color: white;
+}
+
+/* L3 Operations Center - Green */
+.hub-button.l3 {
+    border-color: rgba(56, 239, 125, 0.2);
+    color: #1e293b;
+}
+
+.hub-button.l3::before {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.hub-button.l3:hover {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    box-shadow: 0 8px 24px rgba(56, 239, 125, 0.35);
+}
+
+.hub-button.l3 .hub-button-icon {
+    color: #38ef7d;
+    /* Remove gradient text effect for emoji compatibility */
+}
+
+.hub-button.l3:hover .hub-button-icon {
+    -webkit-text-fill-color: white;
+}
+
+/* L3 Fairness & Ethics Hub - Gold/Orange */
+.hub-button.l3-fairness {
+    border-color: rgba(251, 191, 36, 0.2);
+    color: #1e293b;
+}
+
+.hub-button.l3-fairness::before {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.hub-button.l3-fairness:hover {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+    box-shadow: 0 8px 24px rgba(251, 191, 36, 0.35);
+}
+
+.hub-button.l3-fairness .hub-button-icon {
+    color: #fbbf24;
+    /* Remove gradient text effect for emoji compatibility */
+}
+
+.hub-button.l3-fairness:hover .hub-button-icon {
+    -webkit-text-fill-color: white;
+}
+
+/* Module 5 Hub - Purple/Violet */
+.hub-button.m5-hub {
+    border-color: rgba(124, 58, 237, 0.2);
+    color: #1e293b;
+}
+
+.hub-button.m5-hub::before {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+}
+
+.hub-button.m5-hub:hover {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    color: white;
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
+}
+
+.hub-button.m5-hub .hub-button-icon {
+    color: #7c3aed;
+    /* Remove gradient text effect for emoji compatibility */
+}
+
+.hub-button.m5-hub:hover .hub-button-icon {
+    -webkit-text-fill-color: white;
+}
+
+/* Module 5 Core - Orange/Red */
+.hub-button.m5-core {
+    border-color: rgba(249, 115, 22, 0.2);
+    color: #1e293b;
+}
+
+.hub-button.m5-core::before {
+    background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+}
+
+.hub-button.m5-core:hover {
+    background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+    color: white;
+    box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
+}
+
+.hub-button.m5-core .hub-button-icon {
+    color: #f97316;
+    /* Remove gradient text effect for emoji compatibility */
+}
+
+.hub-button.m5-core:hover .hub-button-icon {
+    -webkit-text-fill-color: white;
+}
+
+/* ============================================================================
+   TIP BOX
+   ============================================================================ */
+
+.tip-box {
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    border-radius: 12px;
+    font-size: 12px;
+    color: #475569;
+    border-left: 3px solid #667eea;
+    line-height: 1.6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.tip-box b {
+    color: #667eea;
+    font-weight: 700;
+}
+

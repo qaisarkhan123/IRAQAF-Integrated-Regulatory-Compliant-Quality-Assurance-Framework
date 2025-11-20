@@ -1,17 +1,21 @@
 """
-Module 5: Continuous QA Automation & Monitoring - Flask Hub
+Unified QA Orchestrator (UQO) - Module 5 Hub
 
-Serves Module 5 as the 6th hub in the IRAQAF system (port 8507).
+Serves as the unified orchestrator in the IRAQAF system (port 8507).
 Integrates and orchestrates all 5 existing hubs to produce unified QA monitoring.
 
 PORT: 8507
 URL: http://localhost:8507
 """
 
-from flask import Flask, render_template_string, jsonify
+from flask import Flask, render_template_string, jsonify, request
 import logging
 import threading
+import requests
+import json
+import os
 from datetime import datetime, timezone
+from typing import Dict, Any, Optional
 
 from module5.orchestrator import Module5Orchestrator
 
@@ -29,6 +33,196 @@ app.config['JSON_SORT_KEYS'] = False
 # Initialize orchestrator
 orchestrator = Module5Orchestrator(polling_interval_seconds=30)
 
+# Hub URLs for cross-hub integration
+HUB_URLS = {
+    "L1_CRS": "http://localhost:8504/api/crs",
+    "L1_DRIFT": "http://localhost:8504/api/regulations/drift",
+    "L2_METRICS": "http://localhost:8502/api/metrics",
+    "L3_FAIRNESS": "http://localhost:8506/api/fairness-metrics",
+    "L3_EML": "http://localhost:8506/api/eml",
+    "L4_EXPLAINABILITY": "http://localhost:5000/api/explainability-metrics",
+    "L3_OPS": "http://localhost:8503/api/status",
+    "M5_CORE_CQS": "http://localhost:8508/api/internal-cqs",
+    "M5_CORE_ALERTS": "http://localhost:8508/api/alerts",
+    "M5_CORE_DRIFT_PERF": "http://localhost:8508/api/drift/performance",
+    "M5_CORE_DRIFT_FAIR": "http://localhost:8508/api/drift/fairness",
+    "M5_CORE_DRIFT_COMP": "http://localhost:8508/api/compliance/drift"
+}
+
+# QA History storage
+QA_HISTORY_FILE = "qa_history/qa_history.jsonl"
+
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
+
+def fetch_json(url: str, timeout: int = 3) -> Dict[str, Any]:
+    """Fetch JSON data from URL with error handling."""
+    try:
+        response = requests.get(url, timeout=timeout)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.warning(f"Failed to fetch {url}: {e}")
+        return {"error": True, "message": str(e)}
+
+def load_cqs_weights() -> Dict[str, float]:
+    """Load CQS weights from config file."""
+    try:
+        with open("config/cqs_weights.json", "r") as f:
+            config = json.load(f)
+            return config["cqs_weights"]
+    except Exception as e:
+        logger.warning(f"Failed to load CQS weights: {e}")
+        # Default weights
+        return {
+            "crs": 0.20,
+            "sai": 0.25,
+            "ts": 0.20,
+            "fi": 0.20,
+            "ops_score": 0.10,
+            "eml_score": 0.05
+        }
+
+def compute_unified_cqs(crs: float, sai: float, ts: float, fi: float, ops_score: float, eml_score: float) -> float:
+    """
+    Compute unified CQS using configurable weights.
+    
+    Args:
+        crs: Compliance Readiness Score (0-100)
+        sai: Security Assurance Index (0-100)
+        ts: Transparency Score (0-100)
+        fi: Fairness Index (0-100)
+        ops_score: Operations Score (0-100)
+        eml_score: Ethical Maturity Level (1-5, converted to 20-100)
+    
+    Returns:
+        Unified CQS (0-100)
+    """
+    weights = load_cqs_weights()
+    
+    # Convert EML (1-5) to 0-100 scale
+    eml_normalized = (eml_score * 20) if eml_score <= 5 else eml_score
+    
+    # Normalize all scores to 0-1 range for calculation
+    # Handle both 0-1 and 0-100 scales
+    def normalize_score(score):
+        if score == 0:
+            return 0.0
+        elif score <= 1:
+            return score  # Already normalized
+        else:
+            return score / 100.0  # Convert from 0-100 to 0-1
+    
+    crs_norm = normalize_score(crs)
+    sai_norm = normalize_score(sai)
+    ts_norm = normalize_score(ts)
+    fi_norm = normalize_score(fi)
+    ops_norm = normalize_score(ops_score)
+    eml_norm = normalize_score(eml_normalized)
+    
+    unified_cqs = (
+        weights["crs"] * crs_norm +
+        weights["sai"] * sai_norm +
+        weights["ts"] * ts_norm +
+        weights["fi"] * fi_norm +
+        weights["ops_score"] * ops_norm +
+        weights["eml_score"] * eml_norm
+    )
+    
+    # Return as 0-100 scale
+    result = unified_cqs * 100
+    return round(max(0, min(result, 100)), 2)
+
+def classify_alerts(drift_data: Dict, security_alerts: list, fairness_alerts: list) -> list:
+    """Classify and prioritize alerts from different sources."""
+    alerts = []
+    
+    # Performance drift alerts
+    perf_drift = drift_data.get("performance", {})
+    if perf_drift.get("drift_detected", False):
+        alerts.append({
+            "severity": "critical",
+            "type": "performance_drift",
+            "message": "Performance drift detected",
+            "source": "CAE",
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    # Fairness drift alerts
+    fair_drift = drift_data.get("fairness", {})
+    if fair_drift.get("drift_detected", False):
+        alerts.append({
+            "severity": "critical",
+            "type": "fairness_drift",
+            "message": "Fairness drift detected",
+            "source": "CAE",
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    # Compliance drift alerts
+    comp_drift = drift_data.get("compliance", {})
+    if comp_drift.get("drift_detected", False):
+        alerts.append({
+            "severity": "warning",
+            "type": "compliance_drift",
+            "message": "Compliance drift detected",
+            "source": "CAE",
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    # Add security alerts
+    for alert in security_alerts:
+        alerts.append({
+            "severity": "high",
+            "type": "security_anomaly",
+            "message": str(alert),
+            "source": "L2 Security Hub",
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    # Add fairness alerts
+    for alert in fairness_alerts:
+        alerts.append({
+            "severity": "medium",
+            "type": "fairness_issue",
+            "message": str(alert),
+            "source": "L3 Fairness Hub",
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    return alerts
+
+def log_qa_history(qa_data: Dict[str, Any]) -> None:
+    """Log QA metrics to history file."""
+    try:
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(QA_HISTORY_FILE), exist_ok=True)
+        
+        # Append to JSONL file
+        with open(QA_HISTORY_FILE, "a") as f:
+            f.write(json.dumps(qa_data) + "\n")
+    except Exception as e:
+        logger.error(f"Failed to log QA history: {e}")
+
+def load_qa_history(limit: int = 100) -> list:
+    """Load recent QA history."""
+    try:
+        if not os.path.exists(QA_HISTORY_FILE):
+            return []
+        
+        history = []
+        with open(QA_HISTORY_FILE, "r") as f:
+            for line in f:
+                if line.strip():
+                    history.append(json.loads(line.strip()))
+        
+        # Return most recent entries
+        return history[-limit:] if len(history) > limit else history
+    except Exception as e:
+        logger.error(f"Failed to load QA history: {e}")
+        return []
+
 # HTML Template
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -36,7 +230,7 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Module 5: Continuous QA Automation & Monitoring</title>
+    <title>Unified QA Orchestrator (UQO) - QA Automation & Monitoring</title>
     <style>
         * {
             margin: 0;
@@ -67,9 +261,7 @@ HTML_TEMPLATE = """
         header h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
-            background: linear-gradient(90deg, #00d4ff, #0084ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #00d4ff;
         }
 
         header p {
@@ -285,8 +477,8 @@ HTML_TEMPLATE = """
 <body>
     <div class="container">
         <header>
-            <h1>📊 Module 5: Continuous QA Automation & Monitoring</h1>
-            <p>Unified Quality Assurance Control Tower - Integrating All 5 IRAQAF Hubs</p>
+            <h1>📊 Unified QA Orchestrator (UQO)</h1>
+            <p>Cross-Hub Integration • Unified CQS • Drift Awareness • Alert Classification</p>
         </header>
 
         <div class="cqs-card">
@@ -327,7 +519,7 @@ HTML_TEMPLATE = """
                     <div class="info-value" id="l1Score">-- %</div>
                 </div>
                 <div class="info-box">
-                    <div class="info-label">L3 Operations</div>
+                    <div class="info-label">SOQM</div>
                     <div class="info-value" id="l3OpsScore">-- %</div>
                 </div>
                 <div class="info-box">
@@ -357,7 +549,7 @@ HTML_TEMPLATE = """
 
         <footer>
             <p>Module 5 v1.0 | Continuous QA Automation & Monitoring</p>
-            <p>Integrating: L4 Explainability • L2 Security • L1 Compliance • L3 Operations • L3 Fairness</p>
+            <p>Integrating: L4 Explainability • L2 Security • L1 Compliance • SOQM • L3 Fairness</p>
             <p>Port 8507 | <span id="status-indicator">●</span> Live</p>
         </footer>
     </div>
@@ -365,11 +557,20 @@ HTML_TEMPLATE = """
     <script>
         async function refreshData() {
             try {
-                const response = await fetch('/api/overview');
+                // Use the new unified QA overview API
+                const response = await fetch('/api/qa-overview');
                 const data = await response.json();
-                updateUI(data);
+                updateUnifiedUI(data);
             } catch (error) {
                 console.error('Error refreshing:', error);
+                // Fallback to legacy API
+                try {
+                    const fallbackResponse = await fetch('/api/overview');
+                    const fallbackData = await fallbackResponse.json();
+                    updateUI(fallbackData);
+                } catch (fallbackError) {
+                    console.error('Fallback error:', fallbackError);
+                }
             }
         }
 
@@ -380,7 +581,8 @@ HTML_TEMPLATE = """
             }
 
             const cqs = data.cqs;
-            const percent = (cqs.overall_cqs * 100).toFixed(1);
+            // CQS is already in 0-100 scale, use directly
+            const percent = (cqs.overall_cqs > 1 ? cqs.overall_cqs : cqs.overall_cqs * 100).toFixed(1);
             document.getElementById('cqsScore').textContent = percent + '%';
             
             const time = new Date(cqs.timestamp).toLocaleTimeString();
@@ -388,6 +590,7 @@ HTML_TEMPLATE = """
             document.getElementById('criticalCount').textContent = cqs.critical_issues;
             document.getElementById('warningCount').textContent = cqs.warnings;
 
+            // Hub scores are in 0-1 scale, multiply by 100
             document.getElementById('l4Score').textContent = (cqs.l4_explainability_score * 100).toFixed(1) + ' %';
             document.getElementById('l2Score').textContent = (cqs.l2_security_score * 100).toFixed(1) + ' %';
             document.getElementById('l1Score').textContent = (cqs.l1_compliance_score * 100).toFixed(1) + ' %';
@@ -422,6 +625,80 @@ HTML_TEMPLATE = """
                     </div>
                 `;
             }).join('');
+        }
+
+        function updateUnifiedUI(data) {
+            if (data.error) {
+                document.getElementById('hubGrid').innerHTML = '<p style="color: #ff6b6b;">Error loading data: ' + data.error + '</p>';
+                return;
+            }
+
+            // Update unified CQS (already in 0-100 scale)
+            const cqsPercent = data.unified_cqs ? data.unified_cqs.toFixed(1) : '0.0';
+            document.getElementById('cqsScore').textContent = cqsPercent + '%';
+            
+            const time = new Date(data.timestamp).toLocaleTimeString();
+            document.getElementById('lastUpdate').textContent = time;
+            
+            // Update alert counts
+            const criticalCount = data.alerts ? data.alerts.filter(a => a.severity === 'critical').length : 0;
+            const warningCount = data.alerts ? data.alerts.filter(a => a.severity === 'warning' || a.severity === 'medium').length : 0;
+            document.getElementById('criticalCount').textContent = criticalCount;
+            document.getElementById('warningCount').textContent = warningCount;
+
+            // Update individual hub scores (all in 0-100 scale from new APIs)
+            const metrics = data.metrics || {};
+            document.getElementById('l4Score').textContent = (metrics.ts || 0).toFixed(1) + ' %';
+            document.getElementById('l2Score').textContent = (metrics.sai || 0).toFixed(1) + ' %';
+            document.getElementById('l1Score').textContent = (metrics.crs || 0).toFixed(1) + ' %';
+            document.getElementById('l3OpsScore').textContent = (metrics.ops || 0).toFixed(1) + ' %';
+            document.getElementById('l3FairnessScore').textContent = (metrics.fi || 0).toFixed(1) + ' %';
+
+            // Update alerts section
+            if (data.alerts && data.alerts.length > 0) {
+                document.getElementById('alertsSection').style.display = 'block';
+                const alertsList = document.getElementById('alertsList');
+                alertsList.innerHTML = data.alerts.map(alert => 
+                    `<div class="alert-item">${alert.message} (${alert.source})</div>`
+                ).join('');
+            } else {
+                document.getElementById('alertsSection').style.display = 'none';
+            }
+
+            // Update hub status grid (use legacy orchestrator data if available)
+            const hubGrid = document.getElementById('hubGrid');
+            if (data.hub_data) {
+                const hubStatuses = [
+                    { name: 'L4 Explainability', healthy: !data.hub_data.ts.error, data: data.hub_data.ts },
+                    { name: 'L2 Security', healthy: !data.hub_data.sai.error, data: data.hub_data.sai },
+                    { name: 'L1 Compliance', healthy: !data.hub_data.crs.error, data: data.hub_data.crs },
+                    { name: 'SOQM', healthy: !data.hub_data.operations.error, data: data.hub_data.operations },
+                    { name: 'L3 Fairness', healthy: !data.hub_data.fi.error, data: data.hub_data.fi }
+                ];
+
+                hubGrid.innerHTML = hubStatuses.map(hub => {
+                    const statusClass = hub.healthy ? 'healthy' : 'error';
+                    const statusText = hub.healthy ? '✓ Online' : '✗ Offline';
+                    const responseTime = hub.healthy ? '< 5ms' : 'N/A';
+                    return `
+                        <div class="hub-card ${statusClass}">
+                            <div class="hub-header">
+                                <div class="hub-name">${hub.name}</div>
+                                <div class="hub-status ${!hub.healthy ? 'error' : ''}">${statusText}</div>
+                            </div>
+                            <div class="hub-metric">
+                                <span>Response Time:</span>
+                                <span class="hub-metric-value">${responseTime}</span>
+                            </div>
+                            <div class="hub-metric">
+                                <span>Last Update:</span>
+                                <span class="hub-metric-value">${time}</span>
+                            </div>
+                            ${!hub.healthy ? `<div style="color: #ff6b6b; margin-top: 10px; font-size: 0.85em;">Error: ${hub.data.message || 'Connection failed'}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
         }
 
         // Refresh every 30 seconds
@@ -513,7 +790,7 @@ def api_global_cqs():
 
 @app.route('/api/module5-core/cqs')
 def api_core_cqs():
-    """Module 5 Core Internal CQS endpoint."""
+    """Continuous Assurance Engine (CAE) Internal CQS endpoint."""
     if orchestrator.latest_cqs is None:
         return jsonify({"status": "initializing"})
     internal = 0.85
@@ -527,18 +804,194 @@ def api_core_cqs():
 
 @app.route('/api/module5-core/alerts')
 def api_core_alerts():
-    """Module 5 Core alerts and anomalies."""
+    """Continuous Assurance Engine (CAE) alerts and anomalies."""
     return jsonify({"alerts": [], "count": 0})
 
 @app.route('/api/module5-core/drift')
 def api_core_drift():
-    """Module 5 Core drift detection metrics."""
+    """Continuous Assurance Engine (CAE) drift detection metrics."""
     psi = 0.15
     return jsonify({
         "psi_score": psi,
         "psi_threshold_exceeded": psi > 0.25,
         "status": "NORMAL"
     })
+
+# ============================================================================
+# NEW UNIFIED API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/qa-overview')
+def qa_overview():
+    """Unified QA overview with cross-hub metrics and unified CQS."""
+    try:
+        # Fetch data from all hubs
+        data = {
+            "crs": fetch_json(HUB_URLS["L1_CRS"]),
+            "l1_drift": fetch_json(HUB_URLS["L1_DRIFT"]),
+            "sai": fetch_json(HUB_URLS["L2_METRICS"]),
+            "ts": fetch_json(HUB_URLS["L4_EXPLAINABILITY"]),
+            "fi": fetch_json(HUB_URLS["L3_FAIRNESS"]),
+            "eml": fetch_json(HUB_URLS["L3_EML"]),
+            "operations": fetch_json(HUB_URLS["L3_OPS"]),
+            "internal_cqs": fetch_json(HUB_URLS["M5_CORE_CQS"]),
+            "drift": {
+                "performance": fetch_json(HUB_URLS["M5_CORE_DRIFT_PERF"]),
+                "fairness": fetch_json(HUB_URLS["M5_CORE_DRIFT_FAIR"]),
+                "compliance": fetch_json(HUB_URLS["M5_CORE_DRIFT_COMP"])
+            }
+        }
+        
+        # Extract scores with fallbacks
+        crs_score = data["crs"].get("crs", 0) if not data["crs"].get("error") else 0
+        sai_score = data["sai"].get("sai", 0) if not data["sai"].get("error") else 0
+        ts_score = data["ts"].get("transparency_score", 0) if not data["ts"].get("error") else 0
+        fi_score = data["fi"].get("fairness_index", 0) if not data["fi"].get("error") else 0
+        eml_score = data["eml"].get("eml_level", 1) if not data["eml"].get("error") else 1
+        ops_score = data["operations"].get("ops_score", 0) if not data["operations"].get("error") else 0
+        
+        # Compute unified CQS
+        unified_cqs = compute_unified_cqs(crs_score, sai_score, ts_score, fi_score, ops_score, eml_score)
+        
+        # Classify alerts
+        alerts = classify_alerts(
+            data["drift"],
+            data["sai"].get("alerts", []) if not data["sai"].get("error") else [],
+            data["fi"].get("alerts", []) if not data["fi"].get("error") else []
+        )
+        
+        # Prepare response
+        response = {
+            "timestamp": datetime.now().isoformat(),
+            "unified_cqs": unified_cqs,
+            "metrics": {
+                "crs": crs_score,
+                "sai": sai_score,
+                "ts": ts_score,
+                "fi": fi_score,
+                "eml": eml_score,
+                "ops": ops_score
+            },
+            "hub_data": data,
+            "alerts": alerts,
+            "drift_status": {
+                "performance_drift": data["drift"]["performance"].get("drift_detected", False),
+                "fairness_drift": data["drift"]["fairness"].get("drift_detected", False),
+                "compliance_drift": data["drift"]["compliance"].get("drift_detected", False),
+                "regulatory_drift": data["l1_drift"].get("drift_detected", False) if not data["l1_drift"].get("error") else False
+            },
+            "weights": load_cqs_weights()
+        }
+        
+        # Log to history
+        history_entry = {
+            "timestamp": response["timestamp"],
+            "cqs": unified_cqs,
+            "crs": crs_score,
+            "sai": sai_score,
+            "ts": ts_score,
+            "fi": fi_score,
+            "eml": eml_score,
+            "ops": ops_score,
+            "internal_cqs": data["internal_cqs"].get("internal_cqs", 0) if not data["internal_cqs"].get("error") else 0
+        }
+        log_qa_history(history_entry)
+        
+        return jsonify(response)
+        
+    except Exception as e:
+        logger.error(f"Error in qa-overview: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/qa-history')
+def qa_history():
+    """Get QA metrics history."""
+    try:
+        limit = int(request.args.get('limit', 100))
+        history = load_qa_history(limit)
+        return jsonify({
+            "history": history,
+            "count": len(history),
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        logger.error(f"Error in qa-history: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/alerts')
+def api_alerts():
+    """Get classified alerts from all sources."""
+    try:
+        # Fetch drift data
+        drift_data = {
+            "performance": fetch_json(HUB_URLS["M5_CORE_DRIFT_PERF"]),
+            "fairness": fetch_json(HUB_URLS["M5_CORE_DRIFT_FAIR"]),
+            "compliance": fetch_json(HUB_URLS["M5_CORE_DRIFT_COMP"])
+        }
+        
+        # Fetch security and fairness alerts
+        security_data = fetch_json(HUB_URLS["L2_METRICS"])
+        fairness_data = fetch_json(HUB_URLS["L3_FAIRNESS"])
+        
+        security_alerts = security_data.get("alerts", []) if not security_data.get("error") else []
+        fairness_alerts = fairness_data.get("alerts", []) if not fairness_data.get("error") else []
+        
+        # Classify alerts
+        alerts = classify_alerts(drift_data, security_alerts, fairness_alerts)
+        
+        return jsonify({
+            "alerts": alerts,
+            "count": len(alerts),
+            "critical_count": len([a for a in alerts if a["severity"] == "critical"]),
+            "warning_count": len([a for a in alerts if a["severity"] in ["warning", "medium"]]),
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in alerts: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/unified-cqs')
+def api_unified_cqs():
+    """Get unified CQS with detailed breakdown."""
+    try:
+        # Fetch current metrics
+        crs_data = fetch_json(HUB_URLS["L1_CRS"])
+        sai_data = fetch_json(HUB_URLS["L2_METRICS"])
+        ts_data = fetch_json(HUB_URLS["L4_EXPLAINABILITY"])
+        fi_data = fetch_json(HUB_URLS["L3_FAIRNESS"])
+        eml_data = fetch_json(HUB_URLS["L3_EML"])
+        ops_data = fetch_json(HUB_URLS["L3_OPS"])
+        
+        # Extract scores
+        crs = crs_data.get("crs", 0) if not crs_data.get("error") else 0
+        sai = sai_data.get("sai", 0) if not sai_data.get("error") else 0
+        ts = ts_data.get("transparency_score", 0) if not ts_data.get("error") else 0
+        fi = fi_data.get("fairness_index", 0) if not fi_data.get("error") else 0
+        eml = eml_data.get("eml_level", 1) if not eml_data.get("error") else 1
+        ops = ops_data.get("ops_score", 0) if not ops_data.get("error") else 0
+        
+        # Compute unified CQS
+        unified_cqs = compute_unified_cqs(crs, sai, ts, fi, ops, eml)
+        
+        return jsonify({
+            "unified_cqs": unified_cqs,
+            "components": {
+                "crs": crs,
+                "sai": sai,
+                "ts": ts,
+                "fi": fi,
+                "eml": eml,
+                "ops": ops
+            },
+            "weights": load_cqs_weights(),
+            "formula": "CQS = 0.20*CRS + 0.25*SAI + 0.20*TS + 0.20*FI + 0.10*OPS + 0.05*(EML*20)",
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in unified-cqs: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
@@ -547,7 +1000,7 @@ if __name__ == '__main__':
     polling_thread.start()
 
     logger.info("=" * 80)
-    logger.info(" Module 5: Continuous QA Automation & Monitoring")
+    logger.info(" Unified QA Orchestrator (UQO): Continuous QA Automation & Monitoring")
     logger.info("=" * 80)
     logger.info("")
     logger.info("  Server: http://127.0.0.1:8507")
@@ -557,7 +1010,7 @@ if __name__ == '__main__':
     logger.info("    • L4 Explainability (port 5000)")
     logger.info("    • L2 Privacy & Security (port 8502)")
     logger.info("    • L1 Regulations (port 8504)")
-    logger.info("    • L3 Operations (port 8503)")
+    logger.info("    • SOQM - System Operations & QA Monitor (port 8503)")
     logger.info("    • L3 Fairness & Ethics (port 8506)")
     logger.info("")
     logger.info("  API Endpoints:")

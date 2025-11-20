@@ -178,37 +178,117 @@ def get_session_duration() -> str:
 
 
 def render_session_info():
-    """Render compact session information widget"""
-    st.markdown("<h5 style='margin: 0.5rem 0;'>📊 Session Info</h5>", unsafe_allow_html=True)
+    """Render compact session information widget with modern styling"""
+    duration = get_session_duration()
+    actions = st.session_state.get("actions_count", 0)
+    last_activity = st.session_state.get("last_activity", datetime.now())
+    time_since_activity = datetime.now() - last_activity
+    time_str = f"{int(time_since_activity.total_seconds())}s" if time_since_activity.total_seconds() < 60 else "Active"
     
-    # Compact 3-column layout with minimal spacing
-    col1, col2, col3 = st.columns(3, gap="small")
+    # CSS Styles
+    st.markdown("""
+    <style>
+        .session-info-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        .session-info-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .session-info-header h5 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: 0.5px;
+        }
+        
+        .session-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .session-info-item {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        
+        .session-info-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .session-info-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        
+        .session-info-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.2;
+        }
+        
+        .session-info-duration {
+            color: #667eea;
+        }
+        
+        .session-info-actions {
+            color: #10b981;
+        }
+        
+        .session-info-activity {
+            color: #f59e0b;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
-    with col1:
-        st.metric(
-            "Duration",
-            get_session_duration(),
-            help="Time since dashboard opened"
-        )
-    
-    with col2:
-        st.metric(
-            "Actions",
-            st.session_state.get("actions_count", 0),
-            help="Actions performed"
-        )
-    
-    with col3:
-        last_activity = st.session_state.get("last_activity", datetime.now())
-        time_since_activity = datetime.now() - last_activity
-        time_str = f"{int(time_since_activity.total_seconds())}s" if time_since_activity.total_seconds() < 60 else "Active"
-        st.metric(
-            "Last Activity",
-            time_str,
-            help="Time since last action"
-        )
-    
-    st.divider()
+    # HTML Content
+    html_content = f"""
+    <div class="session-info-card">
+        <div class="session-info-header">
+            <span style="font-size: 18px;">📊</span>
+            <h5>Session Info</h5>
+        </div>
+        <div class="session-info-grid">
+            <div class="session-info-item">
+                <div class="session-info-label">Duration</div>
+                <div class="session-info-value session-info-duration">{duration}</div>
+            </div>
+            <div class="session-info-item">
+                <div class="session-info-label">Actions</div>
+                <div class="session-info-value session-info-actions">{actions}</div>
+            </div>
+            <div class="session-info-item">
+                <div class="session-info-label">Last Activity</div>
+                <div class="session-info-value session-info-activity">{time_str}</div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(html_content, unsafe_allow_html=True)
 def increment_action_count():
     """Increment action counter"""
     if "actions_count" not in st.session_state:

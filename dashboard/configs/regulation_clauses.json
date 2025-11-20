@@ -1,0 +1,681 @@
+{
+  "frameworks": {
+    "GDPR": {
+      "name": "General Data Protection Regulation",
+      "version": "2018",
+      "jurisdiction": "EU",
+      "clauses": [
+        {
+          "clause_id": "Art.5",
+          "title": "Principles relating to processing of personal data",
+          "description": "Personal data shall be processed lawfully, fairly and in a transparent manner",
+          "category": "Data Processing Principles",
+          "evidence_required": ["policy", "documentation", "logs"],
+          "sdlc_phase": ["Design", "Data Collection"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Art.6",
+          "title": "Lawfulness of processing",
+          "description": "Processing shall be lawful only if and to the extent that at least one of the legal bases applies",
+          "category": "Legal Basis",
+          "evidence_required": ["policy", "documentation", "consent_records"],
+          "sdlc_phase": ["Design", "Data Collection"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Art.7",
+          "title": "Conditions for consent",
+          "description": "Consent must be freely given, specific, informed and unambiguous",
+          "category": "Consent Management",
+          "evidence_required": ["consent_records", "logs", "documentation"],
+          "sdlc_phase": ["Data Collection", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Art.12",
+          "title": "Transparent information, communication and modalities",
+          "description": "Data subjects must be provided with clear and transparent information",
+          "category": "Transparency",
+          "evidence_required": ["documentation", "policy", "user_interface"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "Art.15",
+          "title": "Right of access",
+          "description": "Data subjects have the right to obtain confirmation and access to their personal data",
+          "category": "Data Subject Rights",
+          "evidence_required": ["logs", "documentation", "system_capability"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Art.17",
+          "title": "Right to erasure ('right to be forgotten')",
+          "description": "Data subjects have the right to obtain erasure of personal data",
+          "category": "Data Subject Rights",
+          "evidence_required": ["system_capability", "logs", "documentation"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Art.20",
+          "title": "Right to data portability",
+          "description": "Data subjects have the right to receive their personal data in a structured format",
+          "category": "Data Subject Rights",
+          "evidence_required": ["system_capability", "documentation"],
+          "sdlc_phase": ["Deployment"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "Art.25",
+          "title": "Data protection by design and by default",
+          "description": "Appropriate technical and organizational measures must be implemented",
+          "category": "Privacy by Design",
+          "evidence_required": ["documentation", "design_docs", "architecture"],
+          "sdlc_phase": ["Design", "Model Training"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Art.32",
+          "title": "Security of processing",
+          "description": "Appropriate technical and organizational measures to ensure security",
+          "category": "Security",
+          "evidence_required": ["security_docs", "logs", "audit_trails"],
+          "sdlc_phase": ["Design", "Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Art.33",
+          "title": "Notification of a personal data breach",
+          "description": "Controller must notify supervisory authority within 72 hours",
+          "category": "Incident Management",
+          "evidence_required": ["incident_logs", "documentation", "procedures"],
+          "sdlc_phase": ["Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Art.35",
+          "title": "Data protection impact assessment",
+          "description": "DPIA required for high-risk processing operations",
+          "category": "Risk Assessment",
+          "evidence_required": ["dpia_document", "risk_assessment", "documentation"],
+          "sdlc_phase": ["Design", "Data Collection"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        }
+      ]
+    },
+    "EU_AI_ACT": {
+      "name": "European Union Artificial Intelligence Act",
+      "version": "2024",
+      "jurisdiction": "EU",
+      "clauses": [
+        {
+          "clause_id": "Art.6",
+          "title": "Prohibited AI practices",
+          "description": "AI systems that deploy subliminal techniques or exploit vulnerabilities are prohibited",
+          "category": "Prohibited Practices",
+          "evidence_required": ["risk_assessment", "documentation", "testing"],
+          "sdlc_phase": ["Design", "Model Training"],
+          "risk_level": "critical",
+          "compliance_threshold": 1.0
+        },
+        {
+          "clause_id": "Art.8",
+          "title": "Classification rules for high-risk AI systems",
+          "description": "AI systems used in specific areas are classified as high-risk",
+          "category": "Risk Classification",
+          "evidence_required": ["risk_assessment", "classification_doc", "documentation"],
+          "sdlc_phase": ["Design"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Art.10",
+          "title": "Data and data governance",
+          "description": "Training, validation and testing data sets must meet quality criteria",
+          "category": "Data Quality",
+          "evidence_required": ["data_documentation", "quality_metrics", "logs"],
+          "sdlc_phase": ["Data Collection", "Model Training", "Validation"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Art.13",
+          "title": "Technical documentation",
+          "description": "High-risk AI systems must have technical documentation",
+          "category": "Documentation",
+          "evidence_required": ["technical_docs", "design_docs", "architecture"],
+          "sdlc_phase": ["Design", "Model Training", "Validation"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Art.14",
+          "title": "Record-keeping",
+          "description": "Automated logging of AI system operations",
+          "category": "Traceability",
+          "evidence_required": ["logs", "audit_trails", "system_capability"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Art.15",
+          "title": "Transparency and provision of information",
+          "description": "Users must be informed that they are interacting with an AI system",
+          "category": "Transparency",
+          "evidence_required": ["user_interface", "documentation", "policy"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "Art.17",
+          "title": "Human oversight",
+          "description": "High-risk AI systems must have human oversight mechanisms",
+          "category": "Human Oversight",
+          "evidence_required": ["documentation", "procedures", "system_capability"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Art.48",
+          "title": "Obligations of providers of high-risk AI systems",
+          "description": "Providers must ensure compliance with requirements",
+          "category": "Provider Obligations",
+          "evidence_required": ["documentation", "certificates", "compliance_records"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        }
+      ]
+    },
+    "ISO_13485": {
+      "name": "ISO 13485 - Medical Devices Quality Management Systems",
+      "version": "2016",
+      "jurisdiction": "International",
+      "clauses": [
+        {
+          "clause_id": "4.1",
+          "title": "General requirements",
+          "description": "Organization must establish, document, implement and maintain a quality management system",
+          "category": "Quality Management System",
+          "evidence_required": ["documentation", "procedures", "policy"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "4.2.1",
+          "title": "General - Documentation requirements",
+          "description": "Quality management system documentation must be established and maintained",
+          "category": "Documentation",
+          "evidence_required": ["documentation", "procedures", "records"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "7.3",
+          "title": "Design and development",
+          "description": "Design and development planning, inputs, outputs, review, verification, validation",
+          "category": "Design Control",
+          "evidence_required": ["design_docs", "validation_records", "review_records"],
+          "sdlc_phase": ["Design", "Model Training", "Validation"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "7.5.1",
+          "title": "Control of production and service provision",
+          "description": "Production must be planned, carried out and controlled under controlled conditions",
+          "category": "Production Control",
+          "evidence_required": ["procedures", "logs", "records"],
+          "sdlc_phase": ["Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "8.2.1",
+          "title": "Feedback",
+          "description": "Organization must establish a process for feedback",
+          "category": "Post-Market Surveillance",
+          "evidence_required": ["procedures", "logs", "records"],
+          "sdlc_phase": ["Post-Market Monitoring"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "8.5.1",
+          "title": "General - Corrective action",
+          "description": "Organization must take action to eliminate causes of nonconformities",
+          "category": "Corrective Action",
+          "evidence_required": ["procedures", "records", "logs"],
+          "sdlc_phase": ["Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        }
+      ]
+    },
+    "HIPAA": {
+      "name": "Health Insurance Portability and Accountability Act",
+      "version": "1996",
+      "jurisdiction": "US",
+      "clauses": [
+        {
+          "clause_id": "164.308(a)(1)",
+          "title": "Security management process",
+          "description": "Implement policies and procedures to prevent, detect, contain, and correct security violations",
+          "category": "Security Management",
+          "evidence_required": ["policy", "procedures", "logs"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "164.308(a)(3)",
+          "title": "Workforce security",
+          "description": "Implement procedures for authorization and/or supervision of workforce members",
+          "category": "Access Control",
+          "evidence_required": ["procedures", "logs", "records"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "164.312(a)(1)",
+          "title": "Access control",
+          "description": "Implement technical policies and procedures to allow access only to authorized persons",
+          "category": "Access Control",
+          "evidence_required": ["system_capability", "logs", "documentation"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "164.312(c)(1)",
+          "title": "Integrity controls",
+          "description": "Implement policies and procedures to protect electronic PHI from improper alteration or destruction",
+          "category": "Data Integrity",
+          "evidence_required": ["system_capability", "logs", "documentation"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "164.312(e)(1)",
+          "title": "Transmission security",
+          "description": "Implement technical security measures to guard against unauthorized access to PHI during transmission",
+          "category": "Encryption",
+          "evidence_required": ["system_capability", "documentation", "certificates"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "164.502",
+          "title": "Uses and disclosures of protected health information",
+          "description": "PHI may only be used or disclosed as permitted or required",
+          "category": "Privacy",
+          "evidence_required": ["policy", "procedures", "logs"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "164.524",
+          "title": "Access of individuals to protected health information",
+          "description": "Individuals have a right of access to inspect and obtain a copy of their PHI",
+          "category": "Individual Rights",
+          "evidence_required": ["system_capability", "procedures", "logs"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        }
+      ]
+    },
+    "NIST_800": {
+      "name": "NIST Special Publication 800-series",
+      "version": "Various",
+      "jurisdiction": "US",
+      "clauses": [
+        {
+          "clause_id": "NIST_800_53_AC",
+          "title": "Access Control",
+          "description": "Limit information system access to authorized users, processes, and devices",
+          "category": "Access Control",
+          "evidence_required": ["system_capability", "logs", "documentation"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "NIST_800_53_AU",
+          "title": "Audit and Accountability",
+          "description": "Create, protect, and retain information system audit records",
+          "category": "Audit Logging",
+          "evidence_required": ["logs", "audit_trails", "system_capability"],
+          "sdlc_phase": ["Design", "Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "NIST_800_53_CM",
+          "title": "Configuration Management",
+          "description": "Establish and maintain baseline configurations and inventories",
+          "category": "Configuration Management",
+          "evidence_required": ["documentation", "inventory", "procedures"],
+          "sdlc_phase": ["All"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "NIST_800_53_CP",
+          "title": "Contingency Planning",
+          "description": "Establish, maintain, and implement plans for emergency response and recovery",
+          "category": "Business Continuity",
+          "evidence_required": ["procedures", "documentation", "testing_records"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "NIST_800_53_IA",
+          "title": "Identification and Authentication",
+          "description": "Identify and authenticate organizational users, processes, and devices",
+          "category": "Authentication",
+          "evidence_required": ["system_capability", "procedures", "logs"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "NIST_800_53_RA",
+          "title": "Risk Assessment",
+          "description": "Periodically assess risk to organizational operations and assets",
+          "category": "Risk Management",
+          "evidence_required": ["risk_assessment", "documentation", "records"],
+          "sdlc_phase": ["Design", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "NIST_800_53_SC",
+          "title": "System and Communications Protection",
+          "description": "Monitor, control, and protect organizational communications",
+          "category": "Network Security",
+          "evidence_required": ["system_capability", "documentation", "logs"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "NIST_800_53_SI",
+          "title": "System and Information Integrity",
+          "description": "Identify, report, and correct information and information system flaws",
+          "category": "System Integrity",
+          "evidence_required": ["procedures", "logs", "records"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        }
+      ]
+    },
+    "PCI_DSS": {
+      "name": "Payment Card Industry Data Security Standard",
+      "version": "4.0",
+      "jurisdiction": "International",
+      "clauses": [
+        {
+          "clause_id": "Req_1",
+          "title": "Install and maintain network security controls",
+          "description": "Firewall and router configurations must be maintained",
+          "category": "Network Security",
+          "evidence_required": ["documentation", "configuration", "logs"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Req_2",
+          "title": "Apply secure configurations",
+          "description": "Vendor defaults must be changed and unnecessary default accounts removed",
+          "category": "Configuration Management",
+          "evidence_required": ["documentation", "configuration", "procedures"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Req_3",
+          "title": "Protect stored cardholder data",
+          "description": "Cardholder data must be protected using strong cryptography",
+          "category": "Data Protection",
+          "evidence_required": ["system_capability", "documentation", "encryption_certs"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "critical",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Req_4",
+          "title": "Protect cardholder data with strong cryptography during transmission",
+          "description": "Strong cryptography and security protocols must be used",
+          "category": "Encryption",
+          "evidence_required": ["system_capability", "documentation", "certificates"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "critical",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Req_5",
+          "title": "Protect all systems and networks from malicious software",
+          "description": "Anti-virus and anti-malware solutions must be deployed",
+          "category": "Malware Protection",
+          "evidence_required": ["system_capability", "documentation", "logs"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Req_6",
+          "title": "Develop and maintain secure systems and software",
+          "description": "Secure development lifecycle processes must be followed",
+          "category": "Secure Development",
+          "evidence_required": ["documentation", "procedures", "code_reviews"],
+          "sdlc_phase": ["Design", "Model Training", "Validation"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Req_7",
+          "title": "Restrict access to cardholder data by business need to know",
+          "description": "Access must be restricted to only those who need it",
+          "category": "Access Control",
+          "evidence_required": ["system_capability", "procedures", "logs"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Req_8",
+          "title": "Identify users and authenticate access to system components",
+          "description": "Unique IDs and strong authentication must be implemented",
+          "category": "Authentication",
+          "evidence_required": ["system_capability", "procedures", "logs"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "high",
+          "compliance_threshold": 0.95
+        },
+        {
+          "clause_id": "Req_10",
+          "title": "Log and monitor all access to system components and cardholder data",
+          "description": "Audit logs must be maintained and reviewed",
+          "category": "Audit Logging",
+          "evidence_required": ["logs", "audit_trails", "system_capability"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Req_11",
+          "title": "Test security of systems and networks regularly",
+          "description": "Vulnerability scanning and penetration testing required",
+          "category": "Security Testing",
+          "evidence_required": ["testing_records", "reports", "documentation"],
+          "sdlc_phase": ["Validation", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "Req_12",
+          "title": "Support information security with organizational policies",
+          "description": "Information security policy must be established and maintained",
+          "category": "Policy Management",
+          "evidence_required": ["policy", "procedures", "documentation"],
+          "sdlc_phase": ["All"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        }
+      ]
+    },
+    "SOX": {
+      "name": "Sarbanes-Oxley Act",
+      "version": "2002",
+      "jurisdiction": "US",
+      "clauses": [
+        {
+          "clause_id": "Section_302",
+          "title": "Corporate responsibility for financial reports",
+          "description": "CEO and CFO must certify financial reports and internal controls",
+          "category": "Financial Reporting",
+          "evidence_required": ["certifications", "documentation", "records"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Section_404",
+          "title": "Management assessment of internal controls",
+          "description": "Management must assess and report on effectiveness of internal controls",
+          "category": "Internal Controls",
+          "evidence_required": ["assessments", "documentation", "audit_reports"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Section_409",
+          "title": "Real-time issuer disclosures",
+          "description": "Material changes in financial condition must be disclosed on rapid basis",
+          "category": "Disclosure",
+          "evidence_required": ["procedures", "documentation", "logs"],
+          "sdlc_phase": ["Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "IT_Controls",
+          "title": "IT General Controls",
+          "description": "Access controls, change management, and system operations",
+          "category": "IT Controls",
+          "evidence_required": ["procedures", "logs", "documentation"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Change_Management",
+          "title": "Change management controls",
+          "description": "Changes to systems must be authorized, tested, and documented",
+          "category": "Change Management",
+          "evidence_required": ["procedures", "logs", "documentation"],
+          "sdlc_phase": ["All"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        },
+        {
+          "clause_id": "Audit_Trail",
+          "title": "Audit trail requirements",
+          "description": "Complete audit trails for financial transactions and system access",
+          "category": "Audit Logging",
+          "evidence_required": ["logs", "audit_trails", "system_capability"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "high",
+          "compliance_threshold": 0.90
+        }
+      ]
+    },
+    "CCPA": {
+      "name": "California Consumer Privacy Act",
+      "version": "2020",
+      "jurisdiction": "US (California)",
+      "clauses": [
+        {
+          "clause_id": "1798.100",
+          "title": "Right to know about personal information collected",
+          "description": "Consumers have the right to know what personal information is collected",
+          "category": "Consumer Rights",
+          "evidence_required": ["documentation", "system_capability", "policy"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "1798.105",
+          "title": "Right to delete personal information",
+          "description": "Consumers have the right to request deletion of personal information",
+          "category": "Consumer Rights",
+          "evidence_required": ["system_capability", "procedures", "logs"],
+          "sdlc_phase": ["Deployment", "Post-Market Monitoring"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "1798.110",
+          "title": "Right to opt-out of sale of personal information",
+          "description": "Consumers have the right to opt-out of sale of personal information",
+          "category": "Consumer Rights",
+          "evidence_required": ["system_capability", "procedures", "logs"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "1798.115",
+          "title": "Right to non-discrimination",
+          "description": "Businesses cannot discriminate against consumers who exercise their rights",
+          "category": "Non-Discrimination",
+          "evidence_required": ["policy", "procedures", "documentation"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        },
+        {
+          "clause_id": "1798.130",
+          "title": "Notice requirements",
+          "description": "Businesses must provide notice at or before collection of personal information",
+          "category": "Transparency",
+          "evidence_required": ["user_interface", "documentation", "policy"],
+          "sdlc_phase": ["Design", "Deployment"],
+          "risk_level": "medium",
+          "compliance_threshold": 0.85
+        }
+      ]
+    }
+  }
+}
+
