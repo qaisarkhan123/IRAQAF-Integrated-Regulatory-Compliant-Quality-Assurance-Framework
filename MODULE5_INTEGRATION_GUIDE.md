@@ -413,9 +413,61 @@ ModuleNotFoundError: No module named 'module5'
 - Check browser console for errors
 - Verify all 5 hubs are accessible via curl
 
+## Feature Roadmap: Hub vs. Core
+
+### ✅ Module 5 Hub – COMPLETE (System Orchestrator)
+
+**What Hub Shows (Deployed):**
+- ✅ Live CQS (weighted aggregate of 5 hubs)
+- ✅ Individual hub scores (L4, L2, L1, L3-Ops, L3-Fairness)
+- ✅ Hub health status & response times
+- ✅ System-level alerts
+- ✅ Cross-hub anomaly detection
+- ✅ Beautiful dashboard UI
+- ✅ REST API for integration
+
+**What Hub Does NOT Show (Expected – requires Module 5 Core):**
+- ❌ Performance drift (PSI, KS, ECE metrics)
+- ❌ Input drift graphs
+- ❌ Output drift graphs
+- ❌ Concept drift detection
+- ❌ Fairness drift trends
+- ❌ Security anomaly charts
+- ❌ Compliance drift monitoring
+- ❌ Prediction-level monitoring
+- ❌ Internal CQS (category-weighted)
+
+**Why?** These are **Module 5 Core responsibilities**, not Hub. Hub is a **meta-orchestrator** that polls existing hubs. Core is the **automation engine** that implements deep monitoring.
+
+---
+
+### 🔜 Module 5 Core – NOT YET STARTED (Automation Engine)
+
+**What Core Will Provide:**
+- [ ] Real-time metrics collection pipeline (predictions, features, outcomes)
+- [ ] Performance drift detection (PSI, KS test, expected calibration error)
+- [ ] Input distribution drift monitoring (feature drift graphs)
+- [ ] Output distribution drift monitoring (prediction drift graphs)
+- [ ] Concept drift detection (sliding window, ADWIN algorithm)
+- [ ] Fairness drift trends (demographic parity over time)
+- [ ] Security anomaly detection charts (access patterns, model tampering)
+- [ ] Compliance drift monitor (regulatory change impact)
+- [ ] Prediction-level monitoring (individual prediction explanations)
+- [ ] Internal CQS (category-weighted: 30% Performance, 20% Fairness, 15% Security/Privacy, 20% Compliance, 15% System Health)
+- [ ] Intelligent multi-level alert system
+- [ ] Automated QA reporting engine (PDF/HTML)
+
+**Integration:**
+- Core exposes REST API (e.g., port 8508 or internal)
+- Hub polls Core every 30s (same cadence as hub polling)
+- Hub blends System-Level CQS + Internal CQS into **Global CQS** (60% Hub + 40% Core)
+- All metrics exposed via `/api/module5-core/*` endpoints
+
+---
+
 ## Next Steps
 
-### Phase 1: Module 5 Hub (This Document) – IN PROGRESS ✅
+### Phase 1: Module 5 Hub (This Document) – ✅ COMPLETE
 
 - [x] Deploy Module 5 Hub (port 8507) with 5 hub integration
 - [x] Implement hub client pool + orchestrator
