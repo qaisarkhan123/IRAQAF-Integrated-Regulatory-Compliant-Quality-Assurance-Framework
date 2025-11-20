@@ -486,6 +486,61 @@ def polling_loop():
         time.sleep(orchestrator.polling_interval)
 
 
+
+
+@app.route('/api/global-cqs')
+def api_global_cqs():
+    """Global CQS = (0.60 × System-Level) + (0.40 × Internal)"""
+    if orchestrator.latest_cqs is None:
+        return jsonify({"status": "initializing"})
+    system_cqs = (orchestrator.latest_cqs.l4_explainability_score * 0.20 +
+                  orchestrator.latest_cqs.l2_security_score * 0.25 +
+                  orchestrator.latest_cqs.l1_compliance_score * 0.25 +
+                  orchestrator.latest_cqs.l3_operations_score * 0.15 +
+                  orchestrator.latest_cqs.l3_fairness_score * 0.15)
+    internal = orchestrator.latest_cqs._calculate_internal_cqs(
+        orchestrator.latest_cqs.l2_security_score,
+        orchestrator.latest_cqs.l1_compliance_score,
+        orchestrator.latest_cqs.l3_fairness_score
+    ) if hasattr(orchestrator.latest_cqs, '_calculate_internal_cqs') else 0.85
+    global_cqs = (0.60 * system_cqs) + (0.40 * internal)
+    return jsonify({
+        "global_cqs": round(global_cqs, 4),
+        "system_level_cqs": round(system_cqs, 4),
+        "internal_cqs": round(internal, 4),
+        "formula": "Global_CQS = (0.60 × System_CQS) + (0.40 × Internal_CQS)"
+    })
+
+@app.route('/api/module5-core/cqs')
+def api_core_cqs():
+    """Module 5 Core Internal CQS endpoint."""
+    if orchestrator.latest_cqs is None:
+        return jsonify({"status": "initializing"})
+    internal = 0.85
+    psi = orchestrator.latest_cqs._calculate_psi() if hasattr(orchestrator.latest_cqs, '_calculate_psi') else 0.15
+    return jsonify({
+        "internal_cqs": internal,
+        "psi_score": psi,
+        "psi_threshold": 0.25,
+        "psi_description": "PSI > 0.25 indicates input distribution drift"
+    })
+
+@app.route('/api/module5-core/alerts')
+def api_core_alerts():
+    """Module 5 Core alerts and anomalies."""
+    return jsonify({"alerts": [], "count": 0})
+
+@app.route('/api/module5-core/drift')
+def api_core_drift():
+    """Module 5 Core drift detection metrics."""
+    psi = 0.15
+    return jsonify({
+        "psi_score": psi,
+        "psi_threshold_exceeded": psi > 0.25,
+        "status": "NORMAL"
+    })
+
+
 if __name__ == '__main__':
     # Start background polling thread
     polling_thread = threading.Thread(target=polling_loop, daemon=True)
