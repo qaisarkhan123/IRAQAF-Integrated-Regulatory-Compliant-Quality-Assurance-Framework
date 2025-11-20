@@ -18,7 +18,7 @@ HUBS = {
     'l2': {'port': 8502, 'name': 'L2 Security', 'weight': 0.25, 'endpoint': '/api/sai'},
     'l1': {'port': 8504, 'name': 'L1 Regulations', 'weight': 0.25, 'endpoint': '/api/score'},
     'l3_ops': {'port': 8503, 'name': 'L3 Operations', 'weight': 0.15, 'endpoint': '/api/health'},
-    'l3_fair': {'port': 8506, 'name': 'L3 Fairness', 'weight': 0.15, 'endpoint': '/api/fairness-score'},
+    'l3_fair': {'port': 8506, 'name': 'L3 Fairness', 'weight': 0.15, 'endpoint': '/api/module3/dashboard'},
 }
 
 # HTML Template with Professional UI
@@ -658,10 +658,11 @@ def api_overview():
             # Extract score based on response structure
             score = 0
             if isinstance(data, dict):
-                # Try various possible field names
+                # Try various possible field names (including L3 Fairness format)
                 score = (data.get('transparency_score') or
                          data.get('sai_score') or
                          data.get('overall_score') or
+                         data.get('overall_score_pct') or
                          data.get('system_health_score') or
                          data.get('overall_fairness_score') or
                          data.get('score') or
@@ -675,12 +676,19 @@ def api_overview():
             elif isinstance(data, (int, float)):
                 score = float(data)
 
-            # Convert to 0-1 range if necessary
+            # Convert to 0-1 range if necessary (smart scaling)
+            # If score > 1, assume it's already in 0-100% range
             if score > 1:
                 score = score / 100.0
-
+            
+            # Ensure within bounds
             normalized_score = min(1.0, max(0.0, float(score)))
             response_time = response.elapsed.total_seconds() * 1000
+            
+            # Extract last_update timestamp with fallback
+            last_update = data.get('last_update') or data.get('timestamp') or datetime.now().isoformat()
+            if not last_update or last_update == 'null':
+                last_update = 'No data'
 
             hubs_data.append({
                 'hub_key': hub_key,
@@ -689,7 +697,8 @@ def api_overview():
                 'response_time_ms': response_time,
                 'is_healthy': True,
                 'weight': hub_config['weight'],
-                'error': None
+                'error': None,
+                'last_update': last_update
             })
             total_response_time += response_time
         except Exception as e:
