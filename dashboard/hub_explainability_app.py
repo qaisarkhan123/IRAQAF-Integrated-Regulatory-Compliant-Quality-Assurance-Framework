@@ -670,14 +670,8 @@ def compute_transparency_score(block_scores: dict) -> float:
     return round(ts, 2)
 
 
-# Calculate transparency score using formal formula
-def calculate_transparency_score():
-    """Calculate overall transparency score using formal TS formula."""
-    block_scores = get_explainability_block_scores()
-    return compute_transparency_score(block_scores)
-
-
-OVERALL_SCORE = calculate_transparency_score()
+# Calculate overall transparency score using formal formula
+OVERALL_SCORE = compute_transparency_score(get_explainability_block_scores())
 
 # Test Results
 TEST_RESULTS = {

@@ -58,6 +58,38 @@ The hubs follow a logical evaluation workflow that mirrors real-world AI governa
 🤖 Continuous Assurance Engine (CAE)
 ```
 
+### 📊 Role of Each Hub
+
+| Hub | Purpose | Output | Role in QA |
+|-----|---------|--------|------------|
+| **L1** | Regulatory compliance | CRS | Legal compliance |
+| **L2** | Security & privacy | SAI | Data protection |
+| **L3** | Fairness & ethics | FI, EML | Bias & ethics |
+| **L4** | Explainability | TS, EFI, FIC, AIx | Transparency |
+| **SOQM** | System health | OPS Score | Infra reliability |
+| **UQO** | Aggregator | CQS | Executive view |
+| **CAE** | Drift detection | Internal CQS | Continuous monitoring |
+
+### 🏗️ AI Quality Assurance Layers
+
+```
+AI Quality Assurance Layers
+-----------------------------------
+| L1 Regulatory Compliance         |
+| L2 Security & Privacy            |
+| L3 Fairness & Ethics             |
+| L4 Explainability & Transparency |
+-----------------------------------
+| SOQM  (System Operations Health) |
+-----------------------------------
+| CAE   (Drift & Anomaly Engine)   |
+-----------------------------------
+| UQO   (Unified QA Orchestrator)  |
+-----------------------------------
+| Main Dashboard (Access Layer)    |
+-----------------------------------
+```
+
 ### Architecture Overview
 
 ```
@@ -461,6 +493,8 @@ The L2 Hub provides three derived composite metrics for advanced security analys
 - Penetration testing results tracking
 
 ---
+
+# IRAQAF Multi-Hub Architecture (7 Modules)
 
 ## L1 Regulations Hub
 
@@ -1355,26 +1389,6 @@ GET  /api/health                    # Health check
 - **Configuration:** Weights configurable via `config/cqs_weights.json`
 - **Features:** Cross-hub integration, drift awareness, alert classification, QA history
 
-### L3 Fairness Index (FI)
-- **Range:** 0-100
-- **Calculation:** Average of attribute-level fairness scores
-- **Metrics per Attribute:**
-  - Demographic Parity Gap (DPG) → Score
-  - Equal Opportunity Gap (EOG) → Score
-  - Equalized Odds Gap (EOD) → Score
-  - Subgroup Accuracy Difference (SAD) → Score
-- **Gap-to-Score:** Linear mapping (0 gap = 100, ≥30% gap = 0)
-
-### L3 Ethical Maturity Level (EML)
-- **Range:** 1-5 (with 0-100 score)
-- **Levels:**
-  - Level 1: No formal governance (0-20%)
-  - Level 2: Basic processes documented (20-40%)
-  - Level 3: Partially implemented (40-60%)
-  - Level 4: Fully implemented (60-80%)
-  - Level 5: Continuous optimization (80-100%)
-- **Based on:** Ethics checklist compliance (15 items)
-
 ### CAE Internal CQS
 - **Calculation:** Internal metrics-based score
 - **Components:**
@@ -1478,6 +1492,48 @@ start_module5_core.py              # CAE launcher
 - Enable debug mode in Main Dashboard sidebar
 - Check browser console for errors
 - Review application logs in `logs/` directory
+
+---
+
+## 📊 Unified Weight Tables (Quick Reference)
+
+### Unified CQS Weight Table
+
+| Dimension | Source | Weight | Description |
+|-----------|--------|--------|-------------|
+| **Compliance** | CRS | 20% | Legal & regulatory compliance |
+| **Security** | SAI | 25% | Data protection & security |
+| **Fairness** | FI | 20% | Bias detection & fairness |
+| **Transparency** | TS | 20% | Explainability & transparency |
+| **Operations** | OPS | 10% | Infrastructure reliability |
+| **Ethics** | EML(×20) | 5% | Ethical maturity level |
+
+### L4 Transparency Score (TS) Weights
+
+| Component | Weight | Description |
+|-----------|--------|-------------|
+| **Explanation Generation** | 35% | Capability to generate explanations |
+| **Explanation Reliability** | 30% | Consistency and accuracy |
+| **Traceability & Auditability** | 25% | Logging and audit trails |
+| **Comprehensibility** | 10% | User understanding |
+
+### L2 Security Assessment Index (SAI) Weights
+
+| Category | Weight | Components |
+|----------|--------|------------|
+| **Data Protection** | 40% | DLP, encryption, access control |
+| **System Security** | 35% | Infrastructure, network security |
+| **Compliance & Governance** | 25% | Policies, audit, incident response |
+
+### L1 Compliance Readiness Score (CRS) Weights
+
+| Component | Weight | Description |
+|-----------|--------|-------------|
+| **Regulatory Alignment** | 30% | Framework compliance |
+| **Evidence Completeness** | 25% | Documentation quality |
+| **SDLC Alignment** | 20% | Development process |
+| **Governance Maturity** | 15% | Organizational maturity |
+| **Post-Market Monitoring** | 10% | Ongoing compliance |
 
 ---
 
