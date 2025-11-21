@@ -1,0 +1,117 @@
+[
+  {
+    "title": "FairLRF: Achieving Fairness through Sparse Low Rank Factorization",
+    "authors": [
+      "Yuanbo Guo",
+      "Jun Xia",
+      "Yiyu Shi"
+    ],
+    "abstract": "As deep learning (DL) techniques become integral to various applications, ensuring model fairness while maintaining high performance has become increasingly critical, particularly in sensitive fields such as medical diagnosis. Although a variety of bias-mitigation methods have been proposed, many rely on computationally expensive debiasing strategies or suffer substantial drops in model accuracy, which limits their practicality in real-world, resource-constrained settings. To address this issue, we propose a fairness-oriented low rank factorization (LRF) framework that leverages singular value decomposition (SVD) to improve DL model fairness. Unlike traditional SVD, which is mainly used for model compression by decomposing and reducing weight matrices, our work shows that SVD can also serve as an effective tool for fairness enhancement. Specifically, we observed that elements in the unitary matrices obtained from SVD contribute unequally to model bias across groups defined by sensitive attributes. Motivated by this observation, we propose a method, named FairLRF, that selectively removes bias-inducing elements from unitary matrices to reduce group disparities, thus enhancing model fairness. Extensive experiments show that our method outperforms conventional LRF methods as well as state-of-the-art fairness-enhancing techniques. Additionally, an ablation study examines how major hyper-parameters may influence the performance of processed models. To the best of our knowledge, this is the first work utilizing SVD not primarily for compression but for fairness enhancement.",
+    "url": "http://arxiv.org/abs/2511.16549v1",
+    "published_date": "2025-11-20T17:01:52Z",
+    "source": "arXiv",
+    "categories": [
+      "cs.LG"
+    ],
+    "relevance_score": 11.666666666666666,
+    "keywords_found": [
+      "fairness",
+      "bias",
+      "debiasing"
+    ]
+  },
+  {
+    "title": "Optimal Fairness under Local Differential Privacy",
+    "authors": [
+      "Hrad Ghoukasian",
+      "Shahab Asoodeh"
+    ],
+    "abstract": "We investigate how to optimally design local differential privacy (LDP) mechanisms that reduce data unfairness and thereby improve fairness in downstream classification. We first derive a closed-form optimal mechanism for binary sensitive attributes and then develop a tractable optimization framework that yields the corresponding optimal mechanism for multi-valued attributes. As a theoretical contribution, we establish that for discrimination-accuracy optimal classifiers, reducing data unfairness necessarily leads to lower classification unfairness, thus providing a direct link between privacy-aware pre-processing and classification fairness. Empirically, we demonstrate that our approach consistently outperforms existing LDP mechanisms in reducing data unfairness across diverse datasets and fairness metrics, while maintaining accuracy close to that of non-private models. Moreover, compared with leading pre-processing and post-processing fairness methods, our mechanism achieves a more favorable accuracy-fairness trade-off while simultaneously preserving the privacy of sensitive attributes. Taken together, these results highlight LDP as a principled and effective pre-processing fairness intervention technique.",
+    "url": "http://arxiv.org/abs/2511.16377v1",
+    "published_date": "2025-11-20T14:00:15Z",
+    "source": "arXiv",
+    "categories": [
+      "cs.LG",
+      "cs.CR",
+      "stat.ML"
+    ],
+    "relevance_score": 10.0,
+    "keywords_found": [
+      "fairness",
+      "discrimination"
+    ]
+  },
+  {
+    "title": "Causal Synthetic Data Generation in Recruitment",
+    "authors": [
+      "Andrea Iommi",
+      "Antonio Mastropietro",
+      "Riccardo Guidotti",
+      "Anna Monreale",
+      "Salvatore Ruggieri"
+    ],
+    "abstract": "The importance of Synthetic Data Generation (SDG) has increased significantly in domains where data quality is poor or access is limited due to privacy and regulatory constraints. One such domain is recruitment, where publicly available datasets are scarce due to the sensitive nature of information typically found in curricula vitae, such as gender, disability status, or age. %\nThis lack of accessible, representative data presents a significant obstacle to the development of fair and transparent machine learning models, particularly ranking algorithms that require large volumes of data to effectively learn how to recommend candidates. In the absence of such data, these models are prone to poor generalisation and may fail to perform reliably in real-world scenarios. %\nRecent advances in Causal Generative Models (CGMs) offer a promising solution. CGMs enable the generation of synthetic datasets that preserve the underlying causal relationships within the data, providing greater control over fairness and interpretability in the data generation process. %\nIn this study, we present a specialised SDG method involving two CGMs: one modelling job offers and the other modelling curricula. Each model is structured according to a causal graph informed by domain expertise. We use these models to generate synthetic datasets and evaluate the fairness of candidate rankings under controlled scenarios that introduce specific biases.",
+    "url": "http://arxiv.org/abs/2511.16204v1",
+    "published_date": "2025-11-20T10:14:33Z",
+    "source": "arXiv",
+    "categories": [
+      "cs.LG",
+      "stat.ME"
+    ],
+    "relevance_score": 10.0,
+    "keywords_found": [
+      "fairness",
+      "bias"
+    ]
+  },
+  {
+    "title": "Fairness in Multi-modal Medical Diagnosis with Demonstration Selection",
+    "authors": [
+      "Dawei Li",
+      "Zijian Gu",
+      "Peng Wang",
+      "Chuhan Song",
+      "Zhen Tan",
+      "Mohan Zhang",
+      "Tianlong Chen",
+      "Yu Tian",
+      "Song Wang"
+    ],
+    "abstract": "Multimodal large language models (MLLMs) have shown strong potential for medical image reasoning, yet fairness across demographic groups remains a major concern. Existing debiasing methods often rely on large labeled datasets or fine-tuning, which are impractical for foundation-scale models. We explore In-Context Learning (ICL) as a lightweight, tuning-free alternative for improving fairness. Through systematic analysis, we find that conventional demonstration selection (DS) strategies fail to ensure fairness due to demographic imbalance in selected exemplars. To address this, we propose Fairness-Aware Demonstration Selection (FADS), which builds demographically balanced and semantically relevant demonstrations via clustering-based sampling. Experiments on multiple medical imaging benchmarks show that FADS consistently reduces gender-, race-, and ethnicity-related disparities while maintaining strong accuracy, offering an efficient and scalable path toward fair medical image reasoning. These results highlight the potential of fairness-aware in-context learning as a scalable and data-efficient solution for equitable medical image reasoning.",
+    "url": "http://arxiv.org/abs/2511.15986v1",
+    "published_date": "2025-11-20T02:38:00Z",
+    "source": "arXiv",
+    "categories": [
+      "cs.CV",
+      "cs.CY",
+      "cs.LG"
+    ],
+    "relevance_score": 11.666666666666666,
+    "keywords_found": [
+      "fairness",
+      "bias",
+      "debiasing"
+    ]
+  },
+  {
+    "title": "When AI Democratizes Exploitation: LLM-Assisted Strategic Manipulation of Fair Division Algorithms",
+    "authors": [
+      "Priyanka Verma",
+      "Balagopal Unnikrishnan"
+    ],
+    "abstract": "Fair resource division algorithms, like those implemented in Spliddit platform, have traditionally been considered difficult for the end users to manipulate due to its complexities. This paper demonstrates how Large Language Models (LLMs) can dismantle these protective barriers by democratizing access to strategic expertise. Through empirical analysis of rent division scenarios on Spliddit algorithms, we show that users can obtain actionable manipulation strategies via simple conversational queries to AI assistants. We present four distinct manipulation scenarios: exclusionary collusion where majorities exploit minorities, defensive counterstrategies that backfire, benevolent subsidization of specific participants, and cost minimization coalitions. Our experiments reveal that LLMs can explain algorithmic mechanics, identify profitable deviations, and generate specific numerical inputs for coordinated preference misreporting--capabilities previously requiring deep technical knowledge. These findings extend algorithmic collective action theory from classification contexts to resource allocation scenarios, where coordinated preference manipulation replaces feature manipulation. The implications reach beyond rent division to any domain using algorithmic fairness mechanisms for resource division. While AI-enabled manipulation poses risks to system integrity, it also creates opportunities for preferential treatment of equity deserving groups. We argue that effective responses must combine algorithmic robustness, participatory design, and equitable access to AI capabilities, acknowledging that strategic sophistication is no longer a scarce resource.",
+    "url": "http://arxiv.org/abs/2511.14722v1",
+    "published_date": "2025-11-18T18:09:02Z",
+    "source": "arXiv",
+    "categories": [
+      "cs.CY",
+      "econ.GN"
+    ],
+    "relevance_score": 10.833333333333334,
+    "keywords_found": [
+      "fairness",
+      "equity",
+      "algorithmic fairness"
+    ]
+  }
+]

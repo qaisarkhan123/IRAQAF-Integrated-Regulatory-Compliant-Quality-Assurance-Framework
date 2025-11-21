@@ -1,0 +1,29 @@
+{
+  "critical": {
+    "cqs_below": 50,
+    "hub_offline": true,
+    "compliance_drift": true,
+    "security_breach": true,
+    "fairness_violation": true
+  },
+  "warning": {
+    "cqs_below": 70,
+    "performance_degradation": 10,
+    "fairness_drift": 5,
+    "data_drift_detected": true,
+    "evidence_missing": true,
+    "regulation_update_pending": true
+  },
+  "info": {
+    "cqs_below": 85,
+    "minor_drift": 2,
+    "scheduled_maintenance": true,
+    "config_change": true
+  },
+  "notification_settings": {
+    "email_enabled": true,
+    "dashboard_alerts": true,
+    "webhook_url": "",
+    "alert_retention_days": 30
+  }
+}

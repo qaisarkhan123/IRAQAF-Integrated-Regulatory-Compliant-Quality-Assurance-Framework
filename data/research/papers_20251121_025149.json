@@ -1,0 +1,74 @@
+[
+  {
+    "title": "When AI Democratizes Exploitation: LLM-Assisted Strategic Manipulation of Fair Division Algorithms",
+    "authors": [
+      "Priyanka Verma",
+      "Balagopal Unnikrishnan"
+    ],
+    "abstract": "Fair resource division algorithms, like those implemented in Spliddit platform, have traditionally been considered difficult for the end users to manipulate due to its complexities. This paper demonstrates how Large Language Models (LLMs) can dismantle these protective barriers by democratizing access to strategic expertise. Through empirical analysis of rent division scenarios on Spliddit algorithms, we show that users can obtain actionable manipulation strategies via simple conversational queries to AI assistants. We present four distinct manipulation scenarios: exclusionary collusion where majorities exploit minorities, defensive counterstrategies that backfire, benevolent subsidization of specific participants, and cost minimization coalitions. Our experiments reveal that LLMs can explain algorithmic mechanics, identify profitable deviations, and generate specific numerical inputs for coordinated preference misreporting--capabilities previously requiring deep technical knowledge. These findings extend algorithmic collective action theory from classification contexts to resource allocation scenarios, where coordinated preference manipulation replaces feature manipulation. The implications reach beyond rent division to any domain using algorithmic fairness mechanisms for resource division. While AI-enabled manipulation poses risks to system integrity, it also creates opportunities for preferential treatment of equity deserving groups. We argue that effective responses must combine algorithmic robustness, participatory design, and equitable access to AI capabilities, acknowledging that strategic sophistication is no longer a scarce resource.",
+    "url": "http://arxiv.org/abs/2511.14722v1",
+    "published_date": "2025-11-18T18:09:02Z",
+    "source": "arXiv",
+    "categories": [
+      "cs.CY",
+      "econ.GN"
+    ],
+    "relevance_score": 10.833333333333334,
+    "keywords_found": [
+      "fairness",
+      "equity",
+      "algorithmic fairness"
+    ]
+  },
+  {
+    "title": "Fairness-Aware Graph Representation Learning with Limited Demographic Information",
+    "authors": [
+      "Zichong Wang",
+      "Zhipeng Yin",
+      "Liping Yang",
+      "Jun Zhuang",
+      "Rui Yu",
+      "Qingzhao Kong",
+      "Wenbin Zhang"
+    ],
+    "abstract": "Ensuring fairness in Graph Neural Networks is fundamental to promoting trustworthy and socially responsible machine learning systems. In response, numerous fair graph learning methods have been proposed in recent years. However, most of them assume full access to demographic information, a requirement rarely met in practice due to privacy, legal, or regulatory restrictions. To this end, this paper introduces a novel fair graph learning framework that mitigates bias in graph learning under limited demographic information. Specifically, we propose a mechanism guided by partial demographic data to generate proxies for demographic information and design a strategy that enforces consistent node embeddings across demographic groups. In addition, we develop an adaptive confidence strategy that dynamically adjusts each node's contribution to fairness and utility based on prediction confidence. We further provide theoretical analysis demonstrating that our framework, FairGLite, achieves provable upper bounds on group fairness metrics, offering formal guarantees for bias mitigation. Through extensive experiments on multiple datasets and fair graph learning frameworks, we demonstrate the framework's effectiveness in both mitigating bias and maintaining model utility.",
+    "url": "http://arxiv.org/abs/2511.13540v2",
+    "published_date": "2025-11-17T16:14:28Z",
+    "source": "arXiv",
+    "categories": [
+      "cs.LG",
+      "cs.CY"
+    ],
+    "relevance_score": 13.333333333333334,
+    "keywords_found": [
+      "fairness",
+      "bias",
+      "group fairness",
+      "bias mitigation"
+    ]
+  },
+  {
+    "title": "AI Fairness Beyond Complete Demographics: Current Achievements and Future Directions",
+    "authors": [
+      "Zichong Wang",
+      "Zhipeng Yin",
+      "Roland H. C. Yap",
+      "Wenbin Zhang"
+    ],
+    "abstract": "Fairness in artificial intelligence (AI) has become a growing concern due to discriminatory outcomes in AI-based decision-making systems. While various methods have been proposed to mitigate bias, most rely on complete demographic information, an assumption often impractical due to legal constraints and the risk of reinforcing discrimination. This survey examines fairness in AI when demographics are incomplete, addressing the gap between traditional approaches and real-world challenges. We introduce a novel taxonomy of fairness notions in this setting, clarifying their relationships and distinctions. Additionally, we summarize existing techniques that promote fairness beyond complete demographics and highlight open research questions to encourage further progress in the field.",
+    "url": "http://arxiv.org/abs/2511.13525v1",
+    "published_date": "2025-11-17T15:59:25Z",
+    "source": "arXiv",
+    "categories": [
+      "cs.CY",
+      "cs.AI",
+      "cs.LG"
+    ],
+    "relevance_score": 15.0,
+    "keywords_found": [
+      "fairness",
+      "bias",
+      "discrimination"
+    ]
+  }
+]

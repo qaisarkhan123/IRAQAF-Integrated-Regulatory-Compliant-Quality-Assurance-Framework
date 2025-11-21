@@ -8,6 +8,30 @@ from flask_cors import CORS
 from datetime import datetime
 from typing import Dict, List, Optional
 import json
+import sys
+import os
+
+# Add dashboard directory to path for research tracker import
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from research_tracker import get_research_tracker
+    # Test if it actually works
+    _test_tracker = get_research_tracker()
+    print(f"Research tracker loaded successfully: {type(_test_tracker)}")
+except ImportError as e:
+    print(f"Warning: Could not import research tracker: {e}")
+    get_research_tracker = None
+except Exception as e:
+    print(f"Warning: Research tracker import failed: {e}")
+    get_research_tracker = None
+
+try:
+    from metrics_calculations import FairnessGapCalculator, AlertGenerator
+except ImportError as e:
+    print(f"Warning: Could not import advanced metrics: {e}")
+    FairnessGapCalculator = None
+    AlertGenerator = None
 import random
 
 app = Flask(__name__)
@@ -511,6 +535,80 @@ def get_protected_groups():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/research/latest", methods=["GET"])
+def get_latest_research():
+    """Get latest fairness research papers."""
+    if not get_research_tracker:
+        return jsonify({
+            "error": "Research tracker not available", 
+            "details": "Service is not configured or failed to initialize",
+            "papers": [],
+            "total_papers": 0
+        }), 200  # Return 200 so UI can handle gracefully
+    
+    try:
+        tracker = get_research_tracker()
+        papers = tracker.get_latest_research(limit=10)
+        
+        # Convert papers to dict format (they're already dicts from JSON)
+        paper_list = papers if isinstance(papers, list) else []
+        
+        return jsonify({
+            "papers": paper_list,
+            "total_papers": len(paper_list),
+            "last_update": datetime.now().isoformat(),
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to get research papers: {str(e)}"}), 500
+
+
+@app.route("/api/research/trigger", methods=["POST"])
+def trigger_research_update():
+    """Manually trigger research update."""
+    if not get_research_tracker:
+        return jsonify({
+            "error": "Research tracker not available",
+            "details": "Service is not configured or failed to initialize"
+        }), 200  # Return 200 so UI can handle gracefully
+    
+    try:
+        tracker = get_research_tracker()
+        tracker.run_research_update()
+        
+        return jsonify({
+            "message": "Research update triggered successfully",
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to trigger research update: {str(e)}"}), 500
+
+
+@app.route("/api/advanced-fairness-metrics", methods=["GET"])
+def get_advanced_fairness_metrics():
+    """Get detailed fairness metrics from advanced calculations."""
+    if not FairnessGapCalculator:
+        return jsonify({"error": "Advanced metrics not available"}), 503
+    
+    try:
+        records = load_prediction_records()
+        calculator = FairnessGapCalculator()
+        
+        # Calculate advanced metrics for each protected attribute
+        advanced_metrics = {}
+        for attr in ["gender", "age_group"]:
+            attr_data = [r for r in records if attr in r["protected"]]
+            if attr_data:
+                advanced_metrics[attr] = calculator.calculate_all_gaps(attr_data, attr)
+        
+        return jsonify({
+            "advanced_metrics": advanced_metrics,
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({"error": f"Failed to calculate advanced metrics: {str(e)}"}), 500
+
+
 @app.route("/api/summary", methods=["GET"])
 def get_summary():
     """Get summary for Module 5 integration."""
@@ -521,11 +619,77 @@ def get_summary():
         checklist = load_ethics_checklist()
         eml = compute_ethical_maturity_level(checklist)
         
+        # Add research tracker status if available
+        research_status = {"available": False}
+        if get_research_tracker:
+            try:
+                tracker = get_research_tracker()
+                research_status = {
+                    "available": True,
+                    "last_update": tracker.last_update.isoformat() if tracker.last_update else None,
+                    "paper_count": len(tracker.papers)
+                }
+            except:
+                research_status = {"available": False, "error": "Failed to get research status"}
+        
         return jsonify({
             "fairness_index": fi_result["fairness_index"],
             "eml_level": eml["eml_level"],
             "eml_score": eml["score"],
             "total_records": len(records),
+            "research_tracker": research_status,
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/research/trends", methods=["GET"])
+def get_research_trends():
+    """Get emerging fairness research trends"""
+    try:
+        if get_research_tracker is None:
+            return jsonify({"error": "Research tracker not available"}), 503
+        
+        tracker = get_research_tracker()
+        trends = tracker.get_research_trends()
+        
+        return jsonify(trends)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/research/recommendations", methods=["GET"])
+def get_research_recommendations():
+    """Get best practice recommendations from research"""
+    try:
+        if get_research_tracker is None:
+            return jsonify({"error": "Research tracker not available"}), 503
+        
+        tracker = get_research_tracker()
+        practices = tracker.get_best_practices()
+        
+        return jsonify({
+            "best_practices": practices,
+            "count": len(practices),
+            "timestamp": datetime.now().isoformat()
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/research/update", methods=["POST"])
+def admin_trigger_research_update():
+    """Manually trigger research update (admin only)"""
+    try:
+        if get_research_tracker is None:
+            return jsonify({"error": "Research tracker not available"}), 503
+        
+        tracker = get_research_tracker()
+        tracker.run_research_update()
+        
+        return jsonify({
+            "message": "Research update triggered successfully",
             "timestamp": datetime.now().isoformat()
         })
     except Exception as e:
@@ -691,6 +855,76 @@ def get_dashboard_html() -> str:
             <div class="card-title">📋 Ethical Maturity Checklist</div>
             <div id="checklist" class="loading">Loading...</div>
         </div>
+        
+        <!-- Research Tracker - Prominent Section -->
+        <div style="
+            background: linear-gradient(135deg, #1a1f2e 0%, #2d1b69 100%);
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h2 style="color: var(--primary); margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        🔬 Fairness Research Tracker
+                        <span style="
+                            background: var(--primary);
+                            color: white;
+                            padding: 4px 12px;
+                            border-radius: 20px;
+                            font-size: 0.7rem;
+                            font-weight: 600;
+                            text-transform: uppercase;
+                        ">Live</span>
+                    </h2>
+                    <p style="color: var(--muted); margin: 5px 0 0 0; font-size: 0.9rem;">
+                        Latest AI fairness research from arXiv, FAccT, NeurIPS & ACM FAT*
+                    </p>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <button onclick="triggerResearchUpdate()" style="
+                        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+                        border: none;
+                        color: #1a1f2e;
+                        padding: 12px 20px;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-size: 0.9rem;
+                        font-weight: 700;
+                        transition: transform 0.2s, box-shadow 0.2s;
+                        box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(67, 233, 123, 0.4)'" 
+                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(67, 233, 123, 0.3)'">
+                        🔄 Update Research
+                    </button>
+                    <div id="research-status" style="
+                        color: var(--muted); 
+                        font-size: 0.8rem;
+                        text-align: right;
+                        min-height: 16px;
+                    "></div>
+                </div>
+            </div>
+            
+            <!-- Research Papers Grid -->
+            <div id="research-papers" style="
+                display: grid;
+                gap: 15px;
+                min-height: 200px;
+            " class="loading">
+                <div style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: var(--muted);
+                    font-size: 1rem;
+                ">
+                    🔄 Loading latest research papers...
+                </div>
+            </div>
+        </div>
     </div>
     
     <script>
@@ -801,6 +1035,242 @@ def get_dashboard_html() -> str:
                     }
                 })
                 .catch(e => console.error('Groups error:', e));
+            
+            // Load research papers
+            loadResearchPapers();
+        }
+        
+        function loadResearchPapers() {
+            fetch(api + '/api/research/latest')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('research-papers').innerHTML = `
+                            <div style="
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                padding: 40px;
+                                background: rgba(244, 67, 54, 0.1);
+                                border: 1px dashed #f44336;
+                                border-radius: 10px;
+                                color: #f44336;
+                            ">
+                                <div style="font-size: 2rem; margin-bottom: 10px;">⚠️</div>
+                                <div style="font-weight: 600; margin-bottom: 5px;">Research Tracker Unavailable</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">Service is not configured or offline</div>
+                            </div>
+                        `;
+                        document.getElementById('research-status').innerHTML = 
+                            '<span style="color: #f44336;">● Service unavailable</span>';
+                        return;
+                    }
+                    
+                    const lastUpdate = data.last_update ? 
+                        new Date(data.last_update).toLocaleDateString() : 'Never';
+                    document.getElementById('research-status').innerHTML = 
+                        `<span style="color: var(--success);">● Online</span> | Updated: ${lastUpdate} | ${data.total_papers} papers`;
+                    
+                    let html = '';
+                    if (data.papers && data.papers.length > 0) {
+                        data.papers.slice(0, 6).forEach((paper, index) => {
+                            const gradients = [
+                                'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                                'linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%)',
+                                'linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(238, 90, 36, 0.1) 100%)',
+                                'linear-gradient(135deg, rgba(255, 170, 0, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%)',
+                                'linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(123, 31, 162, 0.1) 100%)',
+                                'linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(25, 118, 210, 0.1) 100%)'
+                            ];
+                            
+                            html += `
+                                <div style="
+                                    background: ${gradients[index % gradients.length]};
+                                    border: 1px solid rgba(102, 126, 234, 0.2);
+                                    border-radius: 12px;
+                                    padding: 20px;
+                                    transition: transform 0.2s, box-shadow 0.2s;
+                                    cursor: pointer;
+                                " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 25px rgba(102, 126, 234, 0.15)'" 
+                                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                                   onclick="window.open('${paper.url}', '_blank')">
+                                    
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                        <div style="
+                                            background: var(--primary);
+                                            color: white;
+                                            padding: 4px 10px;
+                                            border-radius: 15px;
+                                            font-size: 0.7rem;
+                                            font-weight: 600;
+                                            text-transform: uppercase;
+                                        ">${paper.source}</div>
+                                        <div style="color: var(--muted); font-size: 0.8rem;">
+                                            📅 ${paper.published_date}
+                                        </div>
+                                    </div>
+                                    
+                                    <h3 style="
+                                        color: var(--primary);
+                                        margin: 0 0 10px 0;
+                                        font-size: 1.1rem;
+                                        font-weight: 600;
+                                        line-height: 1.3;
+                                        display: -webkit-box;
+                                        -webkit-line-clamp: 2;
+                                        -webkit-box-orient: vertical;
+                                        overflow: hidden;
+                                    ">${paper.title}</h3>
+                                    
+                                    <div style="
+                                        color: var(--muted);
+                                        font-size: 0.85rem;
+                                        margin-bottom: 10px;
+                                        font-weight: 500;
+                                    ">
+                                        👥 ${paper.authors.slice(0, 3).join(', ')}${paper.authors.length > 3 ? ' et al.' : ''}
+                                    </div>
+                                    
+                                    <p style="
+                                        color: var(--text);
+                                        font-size: 0.9rem;
+                                        line-height: 1.4;
+                                        margin: 0 0 12px 0;
+                                        display: -webkit-box;
+                                        -webkit-line-clamp: 3;
+                                        -webkit-box-orient: vertical;
+                                        overflow: hidden;
+                                    ">${paper.abstract}</p>
+                                    
+                                    <div style="
+                                        display: flex;
+                                        flex-wrap: wrap;
+                                        gap: 6px;
+                                        margin-top: 12px;
+                                    ">
+                                        ${paper.categories.map(cat => `
+                                            <span style="
+                                                background: rgba(102, 126, 234, 0.2);
+                                                color: var(--primary);
+                                                padding: 3px 8px;
+                                                border-radius: 12px;
+                                                font-size: 0.75rem;
+                                                font-weight: 500;
+                                            ">${cat}</span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        // Set grid layout
+                        document.getElementById('research-papers').style.gridTemplateColumns = 'repeat(auto-fit, minmax(400px, 1fr))';
+                    } else {
+                        html = `
+                            <div style="
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                padding: 40px;
+                                background: rgba(102, 126, 234, 0.1);
+                                border: 1px dashed var(--primary);
+                                border-radius: 10px;
+                                color: var(--muted);
+                            ">
+                                <div style="font-size: 2rem; margin-bottom: 10px;">📄</div>
+                                <div style="font-weight: 600; margin-bottom: 5px;">No Recent Papers</div>
+                                <div style="font-size: 0.9rem; opacity: 0.8;">Try updating the research database</div>
+                            </div>
+                        `;
+                    }
+                    
+                    document.getElementById('research-papers').innerHTML = html;
+                })
+                .catch(e => {
+                    console.error('Research error:', e);
+                    document.getElementById('research-papers').innerHTML = `
+                        <div style="
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            padding: 40px;
+                            background: rgba(244, 67, 54, 0.1);
+                            border: 1px dashed #f44336;
+                            border-radius: 10px;
+                            color: #f44336;
+                        ">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">❌</div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">Failed to Load</div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Could not connect to research service</div>
+                        </div>
+                    `;
+                });
+        }
+        
+        function triggerResearchUpdate() {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            const originalStyle = button.style.background;
+            
+            // Update button to loading state
+            button.innerHTML = '⏳ Updating...';
+            button.style.background = 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)';
+            button.disabled = true;
+            
+            // Show loading status
+            document.getElementById('research-status').innerHTML = 
+                '<span style="color: #ff9800;">⏳ Triggering update...</span>';
+            
+            fetch(api + '/api/research/trigger', { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('research-status').innerHTML = 
+                            `<span style="color: #f44336;">❌ Update failed: ${data.error}</span>`;
+                        
+                        // Show error state on button briefly
+                        button.innerHTML = '❌ Failed';
+                        button.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+                        
+                        setTimeout(() => {
+                            button.innerHTML = originalText;
+                            button.style.background = originalStyle;
+                        }, 2000);
+                    } else {
+                        document.getElementById('research-status').innerHTML = 
+                            '<span style="color: var(--success);">✅ Update successful! Refreshing papers...</span>';
+                        
+                        // Show success state on button
+                        button.innerHTML = '✅ Success';
+                        button.style.background = 'linear-gradient(135deg, #4caf50 0%, #388e3c 100%)';
+                        
+                        // Reload research papers after a short delay
+                        setTimeout(() => {
+                            loadResearchPapers();
+                            button.innerHTML = originalText;
+                            button.style.background = originalStyle;
+                        }, 2000);
+                    }
+                })
+                .catch(e => {
+                    console.error('Research update error:', e);
+                    document.getElementById('research-status').innerHTML = 
+                        '<span style="color: #f44336;">❌ Network error occurred</span>';
+                    
+                    button.innerHTML = '❌ Error';
+                    button.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
+                    
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.style.background = originalStyle;
+                    }, 2000);
+                })
+                .finally(() => {
+                    button.disabled = false;
+                });
         }
         
         if (document.readyState === 'loading') {
@@ -822,7 +1292,7 @@ def get_dashboard_html() -> str:
 
 if __name__ == '__main__':
     print("=" * 80)
-    print("⚖️ L3 FAIRNESS & ETHICS HUB")
+    print("L3 FAIRNESS & ETHICS HUB")
     print("=" * 80)
     print("> Port: 8506")
     print("> Running on http://127.0.0.1:8506")

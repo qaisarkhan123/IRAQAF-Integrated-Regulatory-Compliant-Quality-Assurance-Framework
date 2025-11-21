@@ -1,0 +1,38 @@
+{
+  "performance_drift": {
+    "psi_threshold": 0.1,
+    "ks_threshold": 0.05,
+    "window_size": 1000,
+    "monitoring_frequency": "daily",
+    "alert_on_drift": true
+  },
+  "fairness_drift": {
+    "demographic_parity_threshold": 0.05,
+    "equal_opportunity_threshold": 0.05,
+    "equalized_odds_threshold": 0.05,
+    "monitoring_frequency": "daily",
+    "protected_attributes": ["gender", "age_group", "ethnicity"]
+  },
+  "data_drift": {
+    "feature_drift_threshold": 0.1,
+    "target_drift_threshold": 0.05,
+    "correlation_threshold": 0.8,
+    "missing_data_threshold": 0.1
+  },
+  "model_drift": {
+    "accuracy_drop_threshold": 0.05,
+    "precision_drop_threshold": 0.05,
+    "recall_drop_threshold": 0.05,
+    "f1_drop_threshold": 0.05
+  },
+  "compliance_drift": {
+    "regulation_change_alert": true,
+    "evidence_expiry_days": 365,
+    "audit_frequency_days": 90
+  },
+  "monitoring_settings": {
+    "baseline_update_frequency": "monthly",
+    "drift_history_retention_days": 365,
+    "auto_retrain_on_drift": false
+  }
+}

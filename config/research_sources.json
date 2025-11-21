@@ -1,0 +1,35 @@
+{
+  "arxiv": {
+    "enabled": true,
+    "categories": ["cs.LG", "cs.CY", "cs.AI"],
+    "keywords": [
+      "fairness",
+      "bias",
+      "discrimination",
+      "equity",
+      "algorithmic fairness",
+      "demographic parity",
+      "equal opportunity",
+      "equalized odds",
+      "disparate impact",
+      "group fairness"
+    ],
+    "frequency": "weekly",
+    "max_results": 50
+  },
+  "facct": {
+    "enabled": true,
+    "url": "https://facctconference.org/",
+    "frequency": "monthly"
+  },
+  "neurips": {
+    "enabled": true,
+    "workshop": "fairness-ml",
+    "frequency": "annual"
+  },
+  "icml": {
+    "enabled": true,
+    "workshop": "fairness-accountability-transparency",
+    "frequency": "annual"
+  }
+}

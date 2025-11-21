@@ -1,7 +1,7 @@
 # IRAQAF Platform - Comprehensive Hub Modules Guide
 
-**Version:** 1.0  
-**Last Updated:** November 2024  
+**Version:** 2.0  
+**Last Updated:** November 21, 2024  
 **Platform:** Integrated Regulatory Compliance & Quality Assurance Framework (IRAQAF)
 
 ---
@@ -988,7 +988,7 @@ RESEARCH_SOURCES = {
 📊 **Port:** 8507  
 **Technology:** Flask  
 **Access:** `http://localhost:8507`  
-**File:** `module5_hub.py`
+**File:** `simple_uqo.py` (Beautiful Enhanced Dashboard)
 
 ### Purpose
 **Enhanced unified orchestrator** that integrates metrics from all 6 hubs (L4, L2, L1, SOQM, L3 Fairness, CAE) into a **Unified Continuous QA Score (CQS)**. Provides cross-hub aggregation, drift awareness, alert classification, and comprehensive quality oversight with historical tracking.
@@ -1009,6 +1009,30 @@ RESEARCH_SOURCES = {
 - **EML** - Ethical Maturity Level from L3 Fairness (5% weight, converted from 1-5 to 20-100 scale)
 
 **Configuration:** Weights are configurable via `config/cqs_weights.json`
+
+#### Beautiful Modern Dashboard
+
+The UQO features a **stunning, modern interface** with advanced visual design:
+
+**🎨 Visual Design:**
+- **Glass Morphism:** Frosted glass effects with backdrop blur for depth
+- **Animated Background:** Floating gradient particles with smooth 20s animations
+- **Deep Space Theme:** Dark blues (#0f0f23, #1a1a2e, #16213e) with cyan accents
+- **Gradient Typography:** Beautiful color gradients on titles and scores
+- **Inter Font Family:** Modern, crisp typography for professional appearance
+
+**⚡ Interactive Features:**
+- **Hover Animations:** Cards lift 8px and shimmer on hover with light sweeps
+- **Pulsing Status Indicators:** Live status dots with breathing animation
+- **Button Effects:** Smooth hover transitions with gradient backgrounds
+- **Rotating Background:** Subtle 10s rotating gradient in CQS section
+- **Responsive Layout:** Auto-fitting hub cards (300px minimum width)
+
+**📊 Layout Enhancements:**
+- **5rem CQS Score:** Large, gradient-colored main score display
+- **Hub Cards:** Individual cards for each hub with scores and status
+- **Stats Row:** Centered statistics (Last Updated, Critical Issues, Warnings)
+- **Professional Footer:** Clean separator with integration information
 
 #### Enhanced Features
 
@@ -1044,6 +1068,14 @@ RESEARCH_SOURCES = {
    - Historical CQS tracking
    - Component score trends
    - Configurable retention limits
+
+6. **Automated Reporting Engine**
+   - **Beautiful Modal Interface:** Professional popup with gradient styling
+   - **4 Report Types:** Daily (8 AM), Weekly (Mondays 9 AM), Monthly (1st), Quarterly
+   - **4 Export Formats:** JSON, CSV, PDF, Excel with instant feedback
+   - **Visual Success Messages:** File names with timestamps shown
+   - **Technology:** APScheduler, ReportLab for PDF generation
+   - **Delivery Options:** Email (SMTP), Portal upload, REST API
 
 ### Polling Configuration
 - **Polling Interval:** 30 seconds

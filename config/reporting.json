@@ -1,0 +1,41 @@
+{
+  "daily_report": {
+    "enabled": true,
+    "time": "08:00",
+    "recipients": ["ops@company.com"],
+    "format": "pdf",
+    "include_charts": true
+  },
+  "weekly_report": {
+    "enabled": true,
+    "day": "monday",
+    "time": "09:00",
+    "recipients": ["qa@company.com", "management@company.com"],
+    "format": "pdf",
+    "include_trends": true
+  },
+  "monthly_report": {
+    "enabled": true,
+    "day": 1,
+    "time": "10:00",
+    "recipients": ["compliance@company.com", "management@company.com"],
+    "format": "pdf",
+    "detailed": true
+  },
+  "quarterly_report": {
+    "enabled": true,
+    "months": [1, 4, 7, 10],
+    "day": 1,
+    "time": "11:00",
+    "recipients": ["executives@company.com"],
+    "format": "pdf",
+    "executive_summary": true
+  },
+  "smtp": {
+    "server": "smtp.gmail.com",
+    "port": 587,
+    "username": "",
+    "password": "",
+    "use_tls": true
+  }
+}

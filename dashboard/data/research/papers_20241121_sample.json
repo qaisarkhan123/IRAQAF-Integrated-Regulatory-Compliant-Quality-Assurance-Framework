@@ -1,0 +1,68 @@
+[
+  {
+    "title": "Fairness in Machine Learning: A Comprehensive Survey",
+    "authors": ["Alice Johnson", "Bob Smith", "Carol Davis"],
+    "abstract": "This paper provides a comprehensive survey of fairness in machine learning, covering various definitions, metrics, and mitigation strategies for algorithmic bias. We examine demographic parity, equalized odds, and other fairness criteria.",
+    "url": "https://arxiv.org/abs/2021.fairness.survey",
+    "published_date": "2024-11-15",
+    "source": "arXiv",
+    "categories": ["cs.LG", "cs.CY"],
+    "keywords_found": ["fairness", "bias", "algorithmic fairness"],
+    "relevance_score": 95.5
+  },
+  {
+    "title": "Mitigating Bias in Deep Learning Models",
+    "authors": ["David Wilson", "Emma Brown"],
+    "abstract": "We propose novel techniques for reducing bias in deep neural networks through adversarial training and fairness-aware optimization methods. Our approach shows significant improvements in fairness metrics.",
+    "url": "https://arxiv.org/abs/2024.bias.mitigation",
+    "published_date": "2024-11-10",
+    "source": "arXiv",
+    "categories": ["cs.LG"],
+    "keywords_found": ["bias", "deep learning", "fairness"],
+    "relevance_score": 88.2
+  },
+  {
+    "title": "Ethical AI: Principles and Practices for Responsible Development",
+    "authors": ["Frank Miller", "Grace Lee", "Henry Chen", "Iris Wang"],
+    "abstract": "This work establishes fundamental principles for ethical AI development and provides practical guidelines for implementing responsible AI systems in production environments.",
+    "url": "https://proceedings.facct.org/2024/ethical-ai",
+    "published_date": "2024-11-05",
+    "source": "FAccT",
+    "categories": ["cs.AI", "cs.CY"],
+    "keywords_found": ["ethical AI", "responsible AI", "fairness"],
+    "relevance_score": 92.1
+  },
+  {
+    "title": "Algorithmic Fairness in Healthcare AI Systems",
+    "authors": ["John Martinez", "Sarah Kim"],
+    "abstract": "We investigate fairness challenges in healthcare AI applications and propose methods to ensure equitable treatment across different demographic groups in medical diagnosis systems.",
+    "url": "https://arxiv.org/abs/2024.healthcare.fairness",
+    "published_date": "2024-11-01",
+    "source": "arXiv",
+    "categories": ["cs.LG", "cs.CY"],
+    "keywords_found": ["algorithmic fairness", "healthcare", "bias"],
+    "relevance_score": 90.3
+  },
+  {
+    "title": "Fair Representation Learning for Multi-Modal Data",
+    "authors": ["Lisa Zhang", "Michael Rodriguez", "Nina Patel"],
+    "abstract": "This paper introduces novel approaches for learning fair representations in multi-modal data settings, addressing bias across different data modalities simultaneously.",
+    "url": "https://proceedings.neurips.cc/2024/fair-multimodal",
+    "published_date": "2024-10-28",
+    "source": "NeurIPS",
+    "categories": ["cs.LG"],
+    "keywords_found": ["fair representation", "multi-modal", "bias"],
+    "relevance_score": 87.6
+  },
+  {
+    "title": "Intersectional Fairness in Machine Learning",
+    "authors": ["Omar Hassan", "Rachel Green", "Tom Anderson"],
+    "abstract": "We explore intersectional fairness considerations in ML models, examining how multiple protected attributes interact and affect algorithmic decision-making processes.",
+    "url": "https://proceedings.facct.org/2024/intersectional-fairness",
+    "published_date": "2024-10-25",
+    "source": "FAccT",
+    "categories": ["cs.CY", "cs.LG"],
+    "keywords_found": ["intersectional fairness", "protected attributes", "algorithmic bias"],
+    "relevance_score": 94.2
+  }
+]

@@ -1,0 +1,43 @@
+{
+  "timestamp": "2025-11-21T03:40:18.780866",
+  "summary": {},
+  "hubs": {
+    "hubs": [
+      {
+        "error_message": null,
+        "hub_name": "L4 Explainability",
+        "is_healthy": true,
+        "last_update": "2025-11-21T03:40:23.557393",
+        "response_time_ms": 16.32380485534668
+      },
+      {
+        "error_message": null,
+        "hub_name": "L2 Security",
+        "is_healthy": true,
+        "last_update": "2025-11-21T03:40:23.575684",
+        "response_time_ms": 21.163463592529297
+      },
+      {
+        "error_message": null,
+        "hub_name": "L1 Regulations",
+        "is_healthy": true,
+        "last_update": "2025-11-21T03:40:23.594120",
+        "response_time_ms": 19.591569900512695
+      },
+      {
+        "error_message": null,
+        "hub_name": "L3 Operations",
+        "is_healthy": true,
+        "last_update": "2025-11-21T03:40:23.614236",
+        "response_time_ms": 14.784097671508789
+      },
+      {
+        "error_message": null,
+        "hub_name": "L3 Fairness",
+        "is_healthy": true,
+        "last_update": "2025-11-21T03:40:23.640275",
+        "response_time_ms": 50.29630661010742
+      }
+    ]
+  }
+}
