@@ -119,6 +119,32 @@ AI Quality Assurance Layers
                  └─────────────────┘
 ```
 
+### 🔄 Key Architectural Features
+
+#### **Regulatory Auto-Update & Drift Monitoring**
+
+The IRAQAF platform features **automated regulatory monitoring** as a core architectural component:
+
+- **Continuous Monitoring:** L1 Hub automatically monitors GDPR, EU AI Act, and HIPAA for changes
+- **Version Control:** All regulation changes are versioned and tracked
+- **Drift Detection:** Automatic detection of compliance drift when regulations change
+- **Admin Approval:** Semi-automatic updates with human oversight
+- **Impact Analysis:** Assessment of how regulatory changes affect compliance scores
+
+**Implementation:**
+```python
+# Regulatory monitoring workflow
+regulation_sources.json → RegulationUpdateService → 
+version_comparison → drift_detection → admin_approval → 
+compliance_recalculation → stakeholder_notification
+```
+
+**Benefits:**
+- **Proactive Compliance:** Stay ahead of regulatory changes
+- **Risk Mitigation:** Early warning of compliance gaps
+- **Audit Trail:** Complete history of regulatory updates
+- **Automated Workflows:** Reduce manual monitoring overhead
+
 ---
 
 ## Main Dashboard
@@ -904,6 +930,47 @@ Fairness gaps are converted to 0-100 scores using linear mapping:
 - Stakeholder reporting
 - Risk assessment
 
+#### 6. Fairness Research Tracker (Real-Time Updates)
+
+**Purpose:** Automatically track latest fairness research and best practices
+
+**Sources Monitored:**
+- arXiv (cs.LG, cs.CY categories)
+- FAccT Conference proceedings
+- NeurIPS/ICML fairness workshops
+- ACM FAT* conference papers
+
+**Features:**
+- Weekly scraping of new papers
+- Keyword-based relevance filtering
+- Best practice extraction
+- Integration with fairness metrics updates
+
+**Implementation:**
+```python
+# Research tracker configuration
+RESEARCH_SOURCES = {
+    "arxiv": {
+        "categories": ["cs.LG", "cs.CY"],
+        "keywords": ["fairness", "bias", "discrimination", "equity"],
+        "frequency": "weekly"
+    },
+    "facct": {
+        "url": "https://facctconference.org/proceedings/",
+        "frequency": "annual"
+    },
+    "neurips": {
+        "workshop": "fairness-ml",
+        "frequency": "annual"
+    }
+}
+```
+
+**API Endpoints:**
+- `GET /api/research/latest` - Recent fairness research papers
+- `GET /api/research/trends` - Emerging fairness trends
+- `GET /api/research/recommendations` - Best practice updates
+
 ### Integration with Module 5
 - **UQO (Unified QA Orchestrator)** polls L3 Fairness Hub at `/api/summary` for:
   - Fairness Index (FI) - used in CQS calculation (20% weight)
@@ -1022,6 +1089,140 @@ Fairness gaps are converted to 0-100 scores using linear mapping:
 - Individual hub score breakdowns
 - Last update timestamps
 - Critical issue and warning counts
+
+#### Enhanced Dashboard Capabilities
+
+##### **WebSocket Implementation**
+- **Real-time Updates:** Live data streaming without page refresh
+- **Connection Management:** Automatic reconnection on network issues
+- **Event-driven Updates:** Push notifications for critical alerts
+- **Bandwidth Optimization:** Delta updates for changed data only
+
+```javascript
+// WebSocket implementation example
+const ws = new WebSocket('ws://localhost:8507/ws');
+ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    updateDashboard(data);
+};
+```
+
+##### **Export Functionality**
+- **PDF Reports:** Professional formatted reports with charts
+- **Excel Export:** Detailed data with multiple worksheets
+- **JSON API:** Programmatic data access for integrations
+- **CSV Export:** Raw data for analysis tools
+- **Scheduled Exports:** Automated report generation and delivery
+
+##### **Interactive Charts**
+- **Drill-down Capabilities:** Click to explore detailed metrics
+- **Chart.js Integration:** Responsive, animated visualizations
+- **Plotly Support:** Advanced statistical charts
+- **Custom Time Series:** Historical trend analysis
+- **Comparative Views:** Side-by-side hub comparisons
+
+```javascript
+// Interactive chart configuration
+const chartConfig = {
+    type: 'line',
+    data: {
+        datasets: [{
+            label: 'CQS Trend',
+            data: cqsHistoryData,
+            borderColor: '#667eea'
+        }]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        onClick: (event, elements) => {
+            if (elements.length > 0) {
+                drillDownToDetails(elements[0].index);
+            }
+        }
+    }
+};
+```
+
+##### **Time-Range Filtering**
+- **Custom Date Ranges:** Flexible period selection
+- **Preset Ranges:** Last 24h, 7d, 30d, 90d options
+- **Real-time Updates:** Dynamic chart updates on range change
+- **Performance Optimization:** Efficient data querying
+- **Bookmark Support:** Save and share filtered views
+
+##### **Responsive Design**
+- **Mobile Optimized:** Touch-friendly interface for tablets/phones
+- **Adaptive Layout:** Automatic layout adjustment for screen size
+- **Progressive Enhancement:** Core functionality on all devices
+- **Offline Support:** Cached data for limited connectivity
+
+##### **Theme Management**
+- **Dark/Light Mode:** User preference persistence
+- **High Contrast:** Accessibility compliance
+- **Custom Themes:** Organizational branding support
+- **Dynamic Switching:** Real-time theme changes without reload
+
+### Automated Reporting Engine
+
+**Report Types:**
+1. **Daily Operations Report** (8 AM)
+   - Hub health status
+   - Critical alerts summary
+   - Performance metrics
+   - System availability
+
+2. **Weekly QA Report** (Mondays, 9 AM)
+   - CQS trends and analysis
+   - Hub performance comparison
+   - Compliance status updates
+   - Risk assessment summary
+
+3. **Monthly Compliance Report** (1st of month)
+   - Regulatory compliance status
+   - Evidence completeness
+   - Audit trail summary
+   - Governance maturity assessment
+
+4. **Quarterly Executive Report**
+   - Strategic QA overview
+   - ROI analysis
+   - Risk mitigation effectiveness
+   - Regulatory landscape changes
+
+**Technology Stack:**
+- **Scheduler:** APScheduler for automated generation
+- **PDF Generation:** ReportLab for professional reports
+- **Charts:** Matplotlib/Plotly for visualizations
+- **Templates:** Jinja2 for dynamic content
+
+**Delivery Methods:**
+- **Email:** SMTP integration with attachments
+- **Portal Upload:** Automatic upload to dashboard
+- **REST API:** Programmatic access for integrations
+- **File System:** Local storage with retention policies
+
+**Configuration:**
+```python
+# config/reporting.json
+{
+    "daily_report": {
+        "enabled": true,
+        "time": "08:00",
+        "recipients": ["ops@company.com"],
+        "format": "pdf"
+    },
+    "weekly_report": {
+        "enabled": true,
+        "day": "monday",
+        "time": "09:00",
+        "recipients": ["qa@company.com", "management@company.com"]
+    }
+}
+```
 
 ### Use Cases
 - Executive dashboards
@@ -1346,6 +1547,147 @@ GET  /api/health                    # Health check
 - **ARI (Attack Robustness Index):** 0-100 scale (higher is better)
   - Multiplicative combination of adversarial robustness, attack success rate, model integrity
 
+### 💻 Code Examples
+
+#### **PSI (Population Stability Index) Calculation**
+```python
+import numpy as np
+
+def calculate_psi(expected, actual, buckets=10):
+    """Calculate Population Stability Index for drift detection"""
+    
+    # Create buckets based on expected distribution
+    breakpoints = np.arange(0, buckets + 1) / buckets * 100
+    
+    # Calculate expected and actual percentages
+    expected_percents = np.histogram(expected, breakpoints)[0] / len(expected)
+    actual_percents = np.histogram(actual, breakpoints)[0] / len(actual)
+    
+    # Avoid division by zero
+    expected_percents = np.where(expected_percents == 0, 0.0001, expected_percents)
+    actual_percents = np.where(actual_percents == 0, 0.0001, actual_percents)
+    
+    # Calculate PSI
+    psi = np.sum((actual_percents - expected_percents) * 
+                 np.log(actual_percents / expected_percents))
+    
+    return psi
+
+# Usage example
+baseline_data = np.random.normal(0, 1, 1000)
+current_data = np.random.normal(0.2, 1.1, 1000)  # Slight drift
+psi_score = calculate_psi(baseline_data, current_data)
+print(f"PSI Score: {psi_score:.4f}")  # > 0.1 indicates drift
+```
+
+#### **KS Test Implementation**
+```python
+from scipy import stats
+
+def ks_drift_test(reference_data, current_data, threshold=0.05):
+    """Kolmogorov-Smirnov test for distribution drift"""
+    
+    # Perform KS test
+    ks_statistic, p_value = stats.ks_2samp(reference_data, current_data)
+    
+    # Determine if drift detected
+    drift_detected = p_value < threshold
+    
+    return {
+        'ks_statistic': ks_statistic,
+        'p_value': p_value,
+        'drift_detected': drift_detected,
+        'threshold': threshold
+    }
+
+# Usage example
+reference = np.random.normal(0, 1, 1000)
+current = np.random.normal(0.3, 1.2, 1000)
+result = ks_drift_test(reference, current)
+print(f"Drift detected: {result['drift_detected']}")
+```
+
+#### **Fairness Gap Calculation**
+```python
+def calculate_demographic_parity_gap(y_pred, protected_attr):
+    """Calculate demographic parity gap between groups"""
+    
+    groups = np.unique(protected_attr)
+    positive_rates = {}
+    
+    for group in groups:
+        group_mask = protected_attr == group
+        group_predictions = y_pred[group_mask]
+        positive_rate = np.mean(group_predictions)
+        positive_rates[group] = positive_rate
+    
+    # Calculate maximum gap between any two groups
+    rates = list(positive_rates.values())
+    gap = max(rates) - min(rates)
+    
+    return {
+        'gap': gap,
+        'group_rates': positive_rates,
+        'max_acceptable_gap': 0.05  # 5% threshold
+    }
+
+# Usage example
+predictions = np.random.binomial(1, 0.7, 1000)
+gender = np.random.choice(['M', 'F'], 1000)
+fairness_result = calculate_demographic_parity_gap(predictions, gender)
+print(f"Demographic parity gap: {fairness_result['gap']:.3f}")
+```
+
+#### **Alert Generation Logic**
+```python
+class AlertManager:
+    def __init__(self):
+        self.thresholds = {
+            'critical': {'cqs_below': 50, 'hub_offline': True},
+            'warning': {'cqs_below': 70, 'drift_detected': True}
+        }
+    
+    def generate_alerts(self, metrics):
+        """Generate alerts based on current metrics"""
+        alerts = []
+        
+        # Critical alerts
+        if metrics['cqs'] < self.thresholds['critical']['cqs_below']:
+            alerts.append({
+                'severity': 'critical',
+                'type': 'low_cqs',
+                'message': f"CQS critically low: {metrics['cqs']:.1f}%",
+                'timestamp': datetime.now().isoformat()
+            })
+        
+        # Warning alerts
+        if metrics['cqs'] < self.thresholds['warning']['cqs_below']:
+            alerts.append({
+                'severity': 'warning',
+                'type': 'cqs_degradation',
+                'message': f"CQS below threshold: {metrics['cqs']:.1f}%",
+                'timestamp': datetime.now().isoformat()
+            })
+        
+        # Drift alerts
+        if metrics.get('drift_detected', False):
+            alerts.append({
+                'severity': 'warning',
+                'type': 'data_drift',
+                'message': "Data drift detected in model inputs",
+                'timestamp': datetime.now().isoformat()
+            })
+        
+        return alerts
+
+# Usage example
+alert_manager = AlertManager()
+current_metrics = {'cqs': 45.2, 'drift_detected': True}
+alerts = alert_manager.generate_alerts(current_metrics)
+for alert in alerts:
+    print(f"{alert['severity'].upper()}: {alert['message']}")
+```
+
 ### L1 Compliance Score
 - Framework-specific compliance percentages
 - Clause-level pass/fail tracking
@@ -1492,6 +1834,112 @@ start_module5_core.py              # CAE launcher
 - Enable debug mode in Main Dashboard sidebar
 - Check browser console for errors
 - Review application logs in `logs/` directory
+
+---
+
+## ⚙️ Configuration Management
+
+### Key Configuration Files
+
+The IRAQAF platform uses JSON configuration files for flexible parameter tuning and system customization:
+
+#### **Core Configuration Files:**
+
+1. **`config/cqs_weights.json`** - CQS weight tuning
+   ```json
+   {
+     "crs": 0.20,
+     "sai": 0.25,
+     "ts": 0.20,
+     "fi": 0.20,
+     "ops_score": 0.10,
+     "eml_score": 0.05
+   }
+   ```
+
+2. **`config/alert_thresholds.json`** - Alert severity thresholds
+   ```json
+   {
+     "critical": {
+       "cqs_below": 50,
+       "hub_offline": true,
+       "compliance_drift": true
+     },
+     "warning": {
+       "cqs_below": 70,
+       "performance_degradation": 10,
+       "fairness_drift": 5
+     }
+   }
+   ```
+
+3. **`config/drift_thresholds.json`** - Drift detection parameters
+   ```json
+   {
+     "performance_drift": {
+       "psi_threshold": 0.1,
+       "ks_threshold": 0.05,
+       "window_size": 1000
+     },
+     "fairness_drift": {
+       "demographic_parity_threshold": 0.05,
+       "equal_opportunity_threshold": 0.05,
+       "monitoring_frequency": "daily"
+     }
+   }
+   ```
+
+4. **`config/regulation_sources.json`** - Regulatory scraping sources
+   ```json
+   [
+     {
+       "framework": "GDPR",
+       "source_type": "html",
+       "url": "https://gdpr-info.eu/",
+       "poll_interval_hours": 24
+     },
+     {
+       "framework": "EU_AI_ACT",
+       "source_type": "pdf",
+       "url": "https://eur-lex.europa.eu/ai-act",
+       "poll_interval_hours": 24
+     }
+   ]
+   ```
+
+#### **Historical Data Files:**
+
+5. **`qa_history/qa_history.jsonl`** - Historical QA metrics
+   ```json
+   {"timestamp": "2024-11-21T10:00:00", "cqs": 85.2, "crs": 87.5, "sai": 84.1, "ts": 85.0, "fi": 78.3, "ops": 92.1}
+   {"timestamp": "2024-11-21T11:00:00", "cqs": 86.1, "crs": 88.2, "sai": 85.3, "ts": 85.5, "fi": 79.1, "ops": 91.8}
+   ```
+
+#### **Authentication Configuration:**
+
+6. **`dashboard/data/auth/users.json`** - User management
+7. **`dashboard/data/auth/sessions.json`** - Session tracking
+
+#### **Evidence and Compliance:**
+
+8. **`dashboard/evidence/evidence.db`** - Evidence metadata (SQLite)
+9. **`dashboard/evidence/regulation_versions.db`** - Regulation versioning (SQLite)
+
+### Configuration Best Practices
+
+- **Version Control:** All config files are tracked in Git
+- **Environment-Specific:** Use separate configs for dev/staging/prod
+- **Validation:** Schema validation on config file loading
+- **Hot Reload:** Most configs support runtime updates without restart
+- **Backup:** Automatic backup before config changes
+- **Audit Trail:** All config changes are logged
+
+### Configuration API Endpoints
+
+- `GET /api/config/weights` - Current CQS weights
+- `POST /api/config/weights` - Update CQS weights (admin only)
+- `GET /api/config/thresholds` - Current alert thresholds
+- `POST /api/config/thresholds` - Update thresholds (admin only)
 
 ---
 
