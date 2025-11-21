@@ -336,7 +336,12 @@ def render_hub_overview_tab():
             # Check hub status
             try:
                 import requests
-                response = requests.get(f"http://localhost:{port}/health", timeout=2)
+                # Try /health first, then fallback to root /
+                try:
+                    response = requests.get(f"http://localhost:{port}/health", timeout=5)
+                except:
+                    response = requests.get(f"http://localhost:{port}/", timeout=5)
+                
                 online = response.status_code == 200
                 response_time = response.elapsed.total_seconds() * 1000
             except:

@@ -1516,25 +1516,9 @@ def get_html_template():
 # ============================================================================
 
 if __name__ == '__main__':
-    print("""
-    ╔════════════════════════════════════════════════════════════════╗
-    ║                                                                ║
-    ║     ⚖️ L1 REGULATIONS & GOVERNANCE HUB - ENHANCED V2          ║
-    ║                                                                ║
-    ║  Features:                                                     ║
-    ║    ✓ 8 Regulatory Frameworks (GDPR, EU AI Act, ISO 13485,   ║
-    ║      HIPAA, NIST 800, PCI-DSS, SOX, CCPA)                     ║
-    ║    ✓ Compliance Readiness Score (CRS)                         ║
-    ║    ✓ SDLC Compliance Tracker                                 ║
-    ║    ✓ Governance Maturity Index (GMI)                         ║
-    ║    ✓ EU AI Act Risk Classification                            ║
-    ║    ✓ Compliance Drift Monitoring                             ║
-    ║    ✓ Evidence Management System                              ║
-    ║    ✓ Module 5 Integration                                     ║
-    ║                                                                ║
-    ║  Access: http://127.0.0.1:8504                               ║
-    ║                                                                ║
-    ╚════════════════════════════════════════════════════════════════╝
-    """)
+    print("L1 REGULATIONS & GOVERNANCE HUB - Starting...")
+    print("Features: 8 Regulatory Frameworks, CRS, SDLC Tracker, GMI, Risk Classification")
+    print("Evidence Management, Compliance Drift Monitoring, Module 5 Integration")
+    print("Access: http://127.0.0.1:8504")
     
     app.run(host='127.0.0.1', port=8504, debug=False, use_reloader=False, threaded=True)

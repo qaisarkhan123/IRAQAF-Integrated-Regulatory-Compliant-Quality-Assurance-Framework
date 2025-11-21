@@ -671,7 +671,7 @@ def dashboard():
 if __name__ == '__main__':
     print('Starting Continuous Assurance Engine (CAE) - QA Automation Engine')
     print('Access dashboard at: http://localhost:8508')
-    print('🔍 API endpoints:')
+    print('API endpoints:')
     print('   GET /api/internal-cqs         - Internal CQS with categories')
     print('   GET /api/drift/performance    - Performance drift (PSI, KS, ECE)')
     print('   GET /api/drift/fairness       - Fairness drift monitoring')
