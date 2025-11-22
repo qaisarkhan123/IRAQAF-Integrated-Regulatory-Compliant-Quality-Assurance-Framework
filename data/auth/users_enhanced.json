@@ -1,0 +1,27 @@
+{
+  "admin": {
+    "username": "admin",
+    "email": "admin@iraqaf.com",
+    "role": "admin",
+    "password_hash": "30f35045810b6f6788e6ef104ff4e9efdbea6e7dce3d09a81809342026623668",
+    "salt": "e91e3391809dca5987d1195f7d63996c8944ac130e518adf0c3cef5dd41cb893",
+    "created_at": "2025-11-22T05:02:46.870185",
+    "last_login": "2025-11-22T06:58:16.771505",
+    "failed_attempts": 0,
+    "account_locked": false,
+    "two_fa_enabled": false,
+    "two_fa_secret": "",
+    "backup_codes": [],
+    "permissions": [
+      "view_all_reports",
+      "export_data",
+      "create_alerts",
+      "manage_users",
+      "manage_settings",
+      "manage_compliance_rules",
+      "access_audit_logs",
+      "manage_2fa",
+      "view_security_logs"
+    ]
+  }
+}

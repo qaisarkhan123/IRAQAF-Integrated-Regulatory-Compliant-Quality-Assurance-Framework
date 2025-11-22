@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="password-managers" content="disabled">
+    <title>Login - IRAQAF Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+        
+        .login-subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .form-control {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .input-group-text {
+            background: transparent;
+            border: none;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            color: #6b7280;
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            color: white;
+        }
+        
+        .form-check {
+            margin: 20px 0;
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .alert {
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 20px;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        
+        .two-fa-section {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+        
+        .two-fa-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+        
+        .default-credentials {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .default-credentials h6 {
+            color: #1e40af;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .default-credentials small {
+            color: #3730a3;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">🛡️</div>
+                <h1 class="login-title">IRAQAF Dashboard</h1>
+                <p class="login-subtitle">Integrated Regulatory Compliance & Quality Assurance</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('login') }}" autocomplete="off" autocapitalize="off" spellcheck="false">
+                <div class="form-group">
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user me-2"></i>Username
+                    </label>
+                    <input type="text" 
+                           class="form-control" 
+                           id="username" 
+                           name="username" 
+                           required 
+                           autocomplete="one-time-code"
+                           readonly onfocus="this.removeAttribute('readonly');"
+                           data-lpignore="true"
+                           data-form-type="other"
+                           placeholder="Enter your username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Password
+                    </label>
+                    <div class="input-group">
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               required 
+                               autocomplete="one-time-code"
+                               readonly onfocus="this.removeAttribute('readonly');"
+                               data-lpignore="true"
+                               data-form-type="other"
+                               placeholder="Enter your password">
+                        <span class="input-group-text" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                        </span>
+                    </div>
+                </div>
+
+                {% if requires_2fa %}
+                <div class="two-fa-section">
+                    <div class="two-fa-title">
+                        <i class="fas fa-shield-alt me-2"></i>Two-Factor Authentication
+                    </div>
+                    <div class="form-group">
+                        <label for="two_fa_token" class="form-label">Authentication Code</label>
+                        <input type="text" 
+                               class="form-control text-center" 
+                               id="two_fa_token" 
+                               name="two_fa_token" 
+                               required 
+                               placeholder="000000"
+                               maxlength="6"
+                               pattern="[0-9]{6}"
+                               autocomplete="one-time-code">
+                        <small class="text-muted">Enter the 6-digit code from your authenticator app</small>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me">
+                    <label class="form-check-label" for="remember_me">
+                        Remember me for 30 days
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    {% if requires_2fa %}Verify & Login{% else %}Login{% endif %}
+                </button>
+            </form>
+
+            <!-- Default Credentials Info -->
+            <div class="default-credentials">
+                <h6><i class="fas fa-info-circle me-2"></i>Default Login</h6>
+                <small>
+                    <strong>Username:</strong> admin<br>
+                    <strong>Password:</strong> admin123
+                </small>
+            </div>
+
+            <div class="login-footer">
+                <p>&copy; 2024 IRAQAF Dashboard. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Advanced password manager prevention
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const inputs = document.querySelectorAll('input');
+            
+            // Method 1: Dynamic form recreation
+            function recreateForm() {
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                
+                // Re-add event listeners to new form
+                const newInputs = newForm.querySelectorAll('input');
+                newInputs.forEach(input => {
+                    input.setAttribute('data-lpignore', 'true');
+                    input.setAttribute('autocomplete', 'one-time-code');
+                });
+            }
+            
+            // Method 2: Intercept and prevent password manager detection
+            const originalAddEventListener = EventTarget.prototype.addEventListener;
+            EventTarget.prototype.addEventListener = function(type, listener, options) {
+                if (type === 'input' || type === 'change' || type === 'blur') {
+                    // Don't allow external listeners on form inputs
+                    if (this.tagName === 'INPUT' && (this.type === 'password' || this.type === 'text')) {
+                        return;
+                    }
+                }
+                return originalAddEventListener.call(this, type, listener, options);
+            };
+            
+            // Method 3: Disable form autocomplete detection
+            inputs.forEach(input => {
+                input.setAttribute('data-lpignore', 'true');
+                input.setAttribute('data-form-type', 'other');
+                
+                // Prevent value detection
+                Object.defineProperty(input, 'value', {
+                    get: function() { return this.getAttribute('data-value') || ''; },
+                    set: function(val) { this.setAttribute('data-value', val); }
+                });
+            });
+            
+            // Method 4: Clear form data after submission
+            form.addEventListener('submit', function(e) {
+                setTimeout(() => {
+                    inputs.forEach(input => {
+                        input.value = '';
+                        input.removeAttribute('data-value');
+                    });
+                    // Recreate form to break any lingering references
+                    recreateForm();
+                }, 50);
+            });
+            
+            // Method 5: Prevent Google's password check API
+            if (window.google && window.google.accounts) {
+                window.google.accounts = undefined;
+            }
+        });
+        
+        // Override any Google password manager APIs
+        window.addEventListener('load', function() {
+            if (window.google) {
+                window.google = undefined;
+            }
+        });
+    </script>
+    
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Auto-focus on 2FA field if present
+        {% if requires_2fa %}
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('two_fa_token').focus();
+        });
+        {% endif %}
+
+        // Format 2FA input
+        document.addEventListener('DOMContentLoaded', function() {
+            const twoFaInput = document.getElementById('two_fa_token');
+            if (twoFaInput) {
+                twoFaInput.addEventListener('input', function(e) {
+                    // Only allow numbers
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

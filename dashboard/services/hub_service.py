@@ -32,7 +32,7 @@ class HubService:
                 url="http://localhost:8504",
                 icon="⚖️",
                 description="Compliance requirements foundation",
-                health_endpoint="/health",
+                health_endpoint="/",  # No health endpoint, use root
                 api_endpoints={
                     'summary': '/api/summary',
                     'crs': '/api/crs',
@@ -45,7 +45,7 @@ class HubService:
                 url="http://localhost:8502",
                 icon="🔐",
                 description="Privacy/security requirements",
-                health_endpoint="/health",
+                health_endpoint="/",  # No health endpoint, use root
                 api_endpoints={
                     'metrics': '/api/metrics',
                     'sai': '/api/sai'
@@ -77,18 +77,18 @@ class HubService:
                 }
             ),
             'soqm': HubInfo(
-                name="System Operations & QA Monitor",
+                name="System Operations & QA Monitor (SOQM)",
                 port=8503,
                 url="http://localhost:8503",
                 icon="⚙️",
                 description="System operations & QA monitoring",
-                health_endpoint="/health",
+                health_endpoint="/api/health",  # Uses /api/health
                 api_endpoints={
                     'status': '/api/status'
                 }
             ),
             'uqo': HubInfo(
-                name="Unified QA Orchestrator",
+                name="Unified QA Orchestrator (UQO)",
                 port=8507,
                 url="http://localhost:8507",
                 icon="📊",
@@ -100,12 +100,12 @@ class HubService:
                 }
             ),
             'cae': HubInfo(
-                name="Continuous Assurance Engine",
+                name="Continuous Assurance Engine (CAE)",
                 port=8508,
                 url="http://localhost:8508",
                 icon="🤖",
                 description="Continuous assurance engine",
-                health_endpoint="/health",
+                health_endpoint="/api/health",  # Uses /api/health
                 api_endpoints={
                     'cqs': '/api/internal-cqs',
                     'alerts': '/api/alerts'

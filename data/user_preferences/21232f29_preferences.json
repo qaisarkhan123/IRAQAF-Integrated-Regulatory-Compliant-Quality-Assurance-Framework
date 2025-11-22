@@ -1,0 +1,36 @@
+{
+  "theme": "light",
+  "layout": "focused",
+  "default_tab": "Hub Overview",
+  "favorite_hubs": [
+    "L1 Regulations & Governance",
+    "L2 Privacy & Security"
+  ],
+  "dashboard_widgets": {
+    "show_metrics": true,
+    "show_alerts": true,
+    "show_charts": true,
+    "show_trends": true
+  },
+  "notification_settings": {
+    "critical_alerts": true,
+    "warning_alerts": true,
+    "info_alerts": false,
+    "email_notifications": false,
+    "sound_notifications": true
+  },
+  "display_settings": {
+    "compact_mode": false,
+    "show_animations": true,
+    "auto_refresh": true,
+    "refresh_interval": 30,
+    "chart_theme": "plotly"
+  },
+  "role_permissions": {
+    "role": "admin",
+    "can_modify_settings": true,
+    "can_view_analytics": true,
+    "can_manage_alerts": true,
+    "can_export_data": true
+  }
+}

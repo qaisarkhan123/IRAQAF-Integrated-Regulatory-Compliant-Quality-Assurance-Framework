@@ -1,6 +1,7 @@
 """
-Enhanced Authentication Manager
+Flask Enhanced Authentication Manager
 Advanced security features including 2FA, session management, and audit logging
+Adapted for Flask from the Streamlit version
 """
 
 import json
@@ -13,9 +14,10 @@ import qrcode
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-import streamlit as st
+from flask import session, request, redirect, url_for, render_template
 from io import BytesIO
 import base64
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 
@@ -117,8 +119,14 @@ class SecurityAuditLogger:
         self.log_file.parent.mkdir(parents=True, exist_ok=True)
     
     def log_event(self, event_type: str, username: str, details: Dict = None, 
-                  ip_address: str = "unknown", user_agent: str = "unknown"):
+                  ip_address: str = None, user_agent: str = None):
         """Log security event"""
+        
+        # Get IP and user agent from Flask request if available
+        if ip_address is None:
+            ip_address = request.remote_addr if request else "unknown"
+        if user_agent is None:
+            user_agent = request.headers.get('User-Agent', 'unknown') if request else "unknown"
         
         log_entry = {
             "timestamp": datetime.now().isoformat(),
@@ -127,7 +135,7 @@ class SecurityAuditLogger:
             "ip_address": ip_address,
             "user_agent": user_agent,
             "details": details or {},
-            "session_id": st.session_state.get("session_id", "unknown")
+            "session_id": session.get("session_id", "unknown") if session else "unknown"
         }
         
         try:
@@ -206,8 +214,8 @@ class TwoFactorAuth:
         """Generate backup codes for 2FA recovery"""
         return [secrets.token_hex(4).upper() for _ in range(count)]
 
-class EnhancedAuthenticationManager:
-    """Enhanced authentication manager with advanced security features"""
+class FlaskAuthenticationManager:
+    """Flask Enhanced authentication manager with advanced security features"""
     
     def __init__(self, users_file: str = "data/auth/users_enhanced.json"):
         self.users_file = Path(users_file)
@@ -228,7 +236,7 @@ class EnhancedAuthenticationManager:
             
             # Set default password
             salt = secrets.token_hex(32)
-            password_hash = self._hash_password("admin_default_123", salt)
+            password_hash = self._hash_password("admin123", salt)
             admin_user.salt = salt
             admin_user.password_hash = password_hash
             
@@ -236,16 +244,16 @@ class EnhancedAuthenticationManager:
             users_data = {"admin": admin_user.to_dict()}
             self._save_users(users_data)
             
-            logger.info("Created default admin user")
+            logger.info("Created default admin user (admin/admin123)")
     
     def _hash_password(self, password: str, salt: str) -> str:
         """Hash password with salt using PBKDF2"""
-        return hashlib.pbkdf2_hex(
+        return hashlib.pbkdf2_hmac(
+            'sha256',
             password.encode('utf-8'),
             salt.encode('utf-8'),
-            100000,  # iterations
-            64       # key length
-        )
+            100000   # iterations
+        ).hex()
     
     def _load_users(self) -> Dict[str, Dict]:
         """Load users from file"""
@@ -423,94 +431,6 @@ class EnhancedAuthenticationManager:
         
         return True, "2FA enabled successfully"
     
-    def disable_2fa(self, username: str, password: str) -> Tuple[bool, str]:
-        """Disable 2FA with password confirmation"""
-        
-        users_data = self._load_users()
-        
-        if username not in users_data:
-            return False, "User not found"
-        
-        user_data = users_data[username]
-        user = EnhancedUser.from_dict(user_data)
-        
-        # Verify password
-        password_hash = self._hash_password(password, user.salt)
-        if password_hash != user.password_hash:
-            return False, "Invalid password"
-        
-        # Disable 2FA
-        user.two_fa_enabled = False
-        user.two_fa_secret = ""
-        user.backup_codes = []
-        
-        users_data[username] = user.to_dict()
-        self._save_users(users_data)
-        
-        self.audit_logger.log_event("2FA_DISABLED", username)
-        
-        return True, "2FA disabled successfully"
-    
-    def unlock_account(self, username: str) -> Tuple[bool, str]:
-        """Unlock user account (admin function)"""
-        
-        users_data = self._load_users()
-        
-        if username not in users_data:
-            return False, "User not found"
-        
-        user_data = users_data[username]
-        user = EnhancedUser.from_dict(user_data)
-        
-        user.account_locked = False
-        user.failed_attempts = 0
-        
-        users_data[username] = user.to_dict()
-        self._save_users(users_data)
-        
-        self.audit_logger.log_event("ACCOUNT_UNLOCKED", username)
-        
-        return True, "Account unlocked successfully"
-    
-    def change_password(self, username: str, old_password: str, 
-                       new_password: str) -> Tuple[bool, str]:
-        """Change user password"""
-        
-        users_data = self._load_users()
-        
-        if username not in users_data:
-            return False, "User not found"
-        
-        user_data = users_data[username]
-        user = EnhancedUser.from_dict(user_data)
-        
-        # Verify old password
-        old_password_hash = self._hash_password(old_password, user.salt)
-        if old_password_hash != user.password_hash:
-            return False, "Current password is incorrect"
-        
-        # Validate new password
-        if len(new_password) < 8:
-            return False, "New password must be at least 8 characters"
-        
-        # Update password
-        new_salt = secrets.token_hex(32)
-        new_password_hash = self._hash_password(new_password, new_salt)
-        
-        user.salt = new_salt
-        user.password_hash = new_password_hash
-        
-        users_data[username] = user.to_dict()
-        self._save_users(users_data)
-        
-        self.audit_logger.log_event("PASSWORD_CHANGED", username)
-        
-        return True, "Password changed successfully"
-    
-    def get_security_events(self, username: str = None, hours: int = 24) -> List[Dict]:
-        """Get recent security events"""
-        return self.audit_logger.get_recent_events(hours, username)
-    
     def get_user_info(self, username: str) -> Optional[Dict]:
         """Get user information"""
         
@@ -530,3 +450,44 @@ class EnhancedAuthenticationManager:
         safe_data.pop("backup_codes", None)
         
         return safe_data
+
+# Flask decorators
+def login_required(f):
+    """Decorator to require authentication"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated') or not session.get('username'):
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def permission_required(permission: str):
+    """Decorator to require specific permission"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not session.get('authenticated'):
+                return redirect(url_for('login'))
+            
+            user_permissions = session.get('permissions', [])
+            if permission not in user_permissions:
+                return render_template('error.html', 
+                                     error_code=403, 
+                                     error_message="Access denied - insufficient permissions"), 403
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def admin_required(f):
+    """Decorator to require admin role"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('authenticated'):
+            return redirect(url_for('login'))
+        
+        if session.get('role') != 'admin':
+            return render_template('error.html', 
+                                 error_code=403, 
+                                 error_message="Access denied - admin role required"), 403
+        return f(*args, **kwargs)
+    return decorated_function

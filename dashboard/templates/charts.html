@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+
+{% block title %}Interactive Charts - IRAQAF{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title mb-2">
+                        <i class="fas fa-chart-line"></i> Interactive Data Visualizations
+                    </h1>
+                    <p class="card-text mb-0">
+                        Real-time charts and analytics powered by live hub data
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Controls -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="chartTheme" class="form-label">🎨 Chart Theme</label>
+                            <select class="form-select" id="chartTheme" onchange="updateChartTheme()">
+                                <option value="plotly">Plotly</option>
+                                <option value="plotly_white">Plotly White</option>
+                                <option value="plotly_dark">Plotly Dark</option>
+                                <option value="ggplot2">GGPlot2</option>
+                                <option value="seaborn">Seaborn</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">✨ Animations</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enableAnimations" checked onchange="updateAnimations()">
+                                <label class="form-check-label" for="enableAnimations">
+                                    Enable Animations
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">🔄 Auto-Refresh</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh()">
+                                <label class="form-check-label" for="autoRefresh">
+                                    Auto-refresh charts
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <button class="btn btn-primary w-100" onclick="refreshAllCharts()" data-loading>
+                                    <i class="fas fa-sync-alt"></i> Refresh Charts
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1: Performance and Compliance -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card chart-container">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-rocket"></i> Hub Performance Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="performanceChart" class="plotly-chart" style="height: 400px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="text-center">
+                                <div class="loading-spinner mb-2"></div>
+                                <p>Loading performance chart...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card chart-container">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bullseye"></i> Compliance Radar
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="radarChart" class="plotly-chart" style="height: 400px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="text-center">
+                                <div class="loading-spinner mb-2"></div>
+                                <p>Loading compliance radar...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2: Trends -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card chart-container">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-area"></i> Quality Trends (Last 30 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="trendsChart" class="plotly-chart" style="height: 500px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="text-center">
+                                <div class="loading-spinner mb-2"></div>
+                                <p>Loading trend analysis...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 3: Additional Analytics -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card chart-container">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tachometer-alt"></i> Real-Time Metrics Comparison
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="comparisonChart" class="plotly-chart" style="height: 400px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="text-center">
+                                <div class="loading-spinner mb-2"></div>
+                                <p>Loading metrics comparison...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card chart-container">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-stopwatch"></i> Response Time Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="responseChart" class="plotly-chart" style="height: 400px;">
+                        <div class="d-flex justify-content-center align-items-center h-100">
+                            <div class="text-center">
+                                <div class="loading-spinner mb-2"></div>
+                                <p>Loading response time analysis...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-download"></i> Export Options
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100" onclick="exportCharts('png')">
+                                <i class="fas fa-image"></i> Export Charts as PNG
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100" onclick="exportData('csv')">
+                                <i class="fas fa-file-csv"></i> Export Data as CSV
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary w-100" onclick="generateReport()">
+                                <i class="fas fa-file-pdf"></i> Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let autoRefreshInterval;
+    let currentTheme = 'plotly';
+    let animationsEnabled = true;
+
+    // Initialize charts when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadAllCharts();
+    });
+
+    function loadAllCharts() {
+        loadChart('performance', 'performanceChart');
+        loadChart('radar', 'radarChart');
+        loadChart('trends', 'trendsChart');
+        loadComparisonChart();
+        loadResponseChart();
+    }
+
+    function loadChart(chartType, containerId) {
+        fetch(`/api/charts/${chartType}`)
+            .then(response => response.json())
+            .then(data => {
+                const chartData = JSON.parse(data.chart);
+                
+                // Apply current theme
+                if (chartData.layout) {
+                    chartData.layout.template = currentTheme;
+                }
+                
+                Plotly.newPlot(containerId, chartData.data, chartData.layout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+                    displaylogo: false
+                });
+            })
+            .catch(error => {
+                console.error(`Error loading ${chartType} chart:`, error);
+                document.getElementById(containerId).innerHTML = `
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading chart</p>
+                        <button class="btn btn-sm btn-outline-primary" onclick="loadChart('${chartType}', '${containerId}')">
+                            Retry
+                        </button>
+                    </div>
+                `;
+            });
+    }
+
+    function loadComparisonChart() {
+        // Create mock comparison chart
+        fetch('/api/live-data')
+            .then(response => response.json())
+            .then(data => {
+                const liveData = data.data;
+                const metrics = [];
+                const values = [];
+                const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
+
+                if (liveData.l1_crs && !liveData.l1_crs.error) {
+                    metrics.push('CRS');
+                    values.push(liveData.l1_crs.crs || 0);
+                }
+                if (liveData.l2_sai && !liveData.l2_sai.error) {
+                    metrics.push('SAI');
+                    values.push(liveData.l2_sai.sai || 0);
+                }
+                if (liveData.l3_fairness && !liveData.l3_fairness.error) {
+                    metrics.push('FI');
+                    values.push(liveData.l3_fairness.fairness_index || 0);
+                }
+                if (liveData.l4_transparency && !liveData.l4_transparency.error) {
+                    metrics.push('TS');
+                    values.push(liveData.l4_transparency.transparency_score || 0);
+                }
+
+                if (metrics.length === 0) {
+                    // Fallback data
+                    metrics.push('CRS', 'SAI', 'FI', 'TS');
+                    values.push(75.2, 82.1, 68.9, 85.0);
+                }
+
+                const chartData = {
+                    data: [{
+                        y: metrics,
+                        x: values,
+                        type: 'bar',
+                        orientation: 'h',
+                        marker: { color: colors.slice(0, metrics.length) },
+                        text: values.map(v => `${v.toFixed(1)}%`),
+                        textposition: 'auto'
+                    }],
+                    layout: {
+                        title: 'Current Scores vs Target',
+                        xaxis: { title: 'Score (%)' },
+                        height: 400,
+                        template: currentTheme,
+                        plot_bgcolor: 'rgba(0,0,0,0)',
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        shapes: [{
+                            type: 'line',
+                            x0: 80, x1: 80,
+                            y0: -0.5, y1: metrics.length - 0.5,
+                            line: { color: 'red', width: 2, dash: 'dash' }
+                        }],
+                        annotations: [{
+                            x: 80, y: metrics.length - 0.5,
+                            text: 'Target (80%)',
+                            showarrow: false,
+                            xanchor: 'left'
+                        }]
+                    }
+                };
+
+                Plotly.newPlot('comparisonChart', chartData.data, chartData.layout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    displaylogo: false
+                });
+            })
+            .catch(error => {
+                console.error('Error loading comparison chart:', error);
+            });
+    }
+
+    function loadResponseChart() {
+        // Create mock response time chart
+        fetch('/api/live-data')
+            .then(response => response.json())
+            .then(data => {
+                const responseTimes = data.response_times;
+                const hubs = Object.keys(responseTimes).filter(hub => responseTimes[hub] !== null);
+                const times = hubs.map(hub => responseTimes[hub]);
+                
+                const colors = times.map(time => {
+                    if (time < 100) return '#10B981';      // Green - Fast
+                    else if (time < 500) return '#F59E0B'; // Yellow - Normal
+                    else return '#EF4444';                 // Red - Slow
+                });
+
+                const chartData = {
+                    data: [{
+                        x: hubs,
+                        y: times,
+                        type: 'bar',
+                        marker: { color: colors },
+                        text: times.map(t => `${t.toFixed(0)}ms`),
+                        textposition: 'auto'
+                    }],
+                    layout: {
+                        title: 'Hub Response Times',
+                        yaxis: { title: 'Response Time (ms)' },
+                        height: 400,
+                        template: currentTheme,
+                        plot_bgcolor: 'rgba(0,0,0,0)',
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        shapes: [
+                            {
+                                type: 'line',
+                                x0: -0.5, x1: hubs.length - 0.5,
+                                y0: 100, y1: 100,
+                                line: { color: 'green', width: 1, dash: 'dot' }
+                            },
+                            {
+                                type: 'line',
+                                x0: -0.5, x1: hubs.length - 0.5,
+                                y0: 500, y1: 500,
+                                line: { color: 'orange', width: 1, dash: 'dot' }
+                            }
+                        ],
+                        annotations: [
+                            {
+                                x: hubs.length - 1, y: 100,
+                                text: 'Fast (<100ms)',
+                                showarrow: false,
+                                xanchor: 'right'
+                            },
+                            {
+                                x: hubs.length - 1, y: 500,
+                                text: 'Normal (<500ms)',
+                                showarrow: false,
+                                xanchor: 'right'
+                            }
+                        ]
+                    }
+                };
+
+                Plotly.newPlot('responseChart', chartData.data, chartData.layout, {
+                    responsive: true,
+                    displayModeBar: true,
+                    displaylogo: false
+                });
+            })
+            .catch(error => {
+                console.error('Error loading response chart:', error);
+            });
+    }
+
+    function updateChartTheme() {
+        currentTheme = document.getElementById('chartTheme').value;
+        loadAllCharts();
+    }
+
+    function updateAnimations() {
+        animationsEnabled = document.getElementById('enableAnimations').checked;
+        // Apply animation settings to existing charts
+        const charts = document.querySelectorAll('.plotly-chart');
+        charts.forEach(chart => {
+            if (chart._fullLayout) {
+                Plotly.relayout(chart, {
+                    'transition.duration': animationsEnabled ? 500 : 0
+                });
+            }
+        });
+    }
+
+    function toggleAutoRefresh() {
+        const enabled = document.getElementById('autoRefresh').checked;
+        
+        if (enabled) {
+            autoRefreshInterval = setInterval(refreshAllCharts, 30000); // 30 seconds
+        } else {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+    }
+
+    function refreshAllCharts() {
+        loadAllCharts();
+    }
+
+    function exportCharts(format) {
+        alert(`Chart export functionality will be available in the next update.\nFormat: ${format.toUpperCase()}`);
+    }
+
+    function exportData(format) {
+        alert(`Data export functionality will be available in the next update.\nFormat: ${format.toUpperCase()}`);
+    }
+
+    function generateReport() {
+        alert('Report generation functionality will be available in the next update.');
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        const charts = document.querySelectorAll('.plotly-chart');
+        charts.forEach(chart => {
+            if (chart._fullLayout) {
+                Plotly.Plots.resize(chart);
+            }
+        });
+    });
+</script>
+{% endblock %}

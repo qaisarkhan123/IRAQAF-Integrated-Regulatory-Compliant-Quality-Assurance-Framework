@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Hub Overview - IRAQAF{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="card-title mb-2">
+                        <i class="fas fa-network-wired"></i> Hub Status Overview
+                    </h1>
+                    <p class="card-text mb-0">
+                        Real-time monitoring of all IRAQAF hub modules and their operational status
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row mb-4">
+        {% set online_hubs = health_status.values() | selectattr('online') | list | length %}
+        {% set total_hubs = health_status | length %}
+        {% set uptime_pct = (online_hubs / total_hubs * 100) if total_hubs > 0 else 0 %}
+        
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-label">🏢 Total Hubs</div>
+                <div class="metric-value">{{ total_hubs }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-label">✅ Online Hubs</div>
+                <div class="metric-value">{{ online_hubs }}/{{ total_hubs }}</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <div class="metric-label">📊 System Uptime</div>
+                <div class="metric-value">{{ "%.1f"|format(uptime_pct) }}%</div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="metric-card">
+                <button class="btn btn-primary w-100" onclick="location.reload()" data-loading>
+                    <i class="fas fa-sync-alt"></i> Refresh Status
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Hub Status -->
+    <div class="row">
+        {% for name, status in health_status.items() %}
+        <div class="col-md-6 mb-4">
+            <div class="card hub-status-card {{ 'hub-status-online' if status.online else 'hub-status-offline' }}">
+                <div class="card-body">
+                    <!-- Hub Header -->
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center">
+                            <span style="font-size: 2rem; margin-right: 15px;">{{ status.icon }}</span>
+                            <div>
+                                <h5 class="card-title mb-1">{{ name }}</h5>
+                                <small class="text-muted">Port: {{ status.port }}</small>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="mb-2">
+                                {% if status.online %}
+                                    <span class="badge bg-success">🟢 Online</span>
+                                {% else %}
+                                    <span class="badge bg-danger">🔴 Offline</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hub Metrics -->
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="border-end">
+                                <div class="fw-bold">Response Time</div>
+                                <div class="mt-1">
+                                    {% if status.online and status.response_time %}
+                                        {% set rt = status.response_time %}
+                                        {% if rt < 100 %}
+                                            <span class="text-success">{{ "%.0f"|format(rt) }}ms</span>
+                                        {% elif rt < 500 %}
+                                            <span class="text-warning">{{ "%.0f"|format(rt) }}ms</span>
+                                        {% else %}
+                                            <span class="text-danger">{{ "%.0f"|format(rt) }}ms</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border-end">
+                                <div class="fw-bold">Performance</div>
+                                <div class="mt-1">
+                                    {% if status.online and status.response_time %}
+                                        {% set rt = status.response_time %}
+                                        {% if rt < 100 %}
+                                            <span class="text-success">🚀 Fast</span>
+                                        {% elif rt < 500 %}
+                                            <span class="text-warning">⚡ Normal</span>
+                                        {% else %}
+                                            <span class="text-danger">🐌 Slow</span>
+                                        {% endif %}
+                                    {% elif status.online %}
+                                        <span class="text-info">❓ Unknown</span>
+                                    {% else %}
+                                        <span class="text-danger">❌ Disconnected</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="fw-bold">Status Code</div>
+                            <div class="mt-1">
+                                {% if status.status_code %}
+                                    {% if status.status_code == 200 %}
+                                        <span class="text-success">{{ status.status_code }}</span>
+                                    {% else %}
+                                        <span class="text-warning">{{ status.status_code }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Information -->
+                    {% if not status.online and status.error %}
+                    <div class="alert alert-danger mb-3">
+                        <small><strong>Error:</strong> {{ status.error }}</small>
+                    </div>
+                    {% endif %}
+
+                    <!-- Hub Actions -->
+                    <div class="d-flex gap-2">
+                        <a href="http://localhost:{{ status.port }}" target="_blank" 
+                           class="btn btn-primary btn-sm flex-grow-1 {{ 'disabled' if not status.online }}">
+                            <i class="fas fa-external-link-alt"></i> Open Hub
+                        </a>
+                        
+                        {% if status.online %}
+                        <button class="btn btn-outline-info btn-sm" 
+                                onclick="testHub('{{ name }}', {{ status.port }})" 
+                                id="test-{{ loop.index }}">
+                            <i class="fas fa-vial"></i> Test
+                        </button>
+                        {% else %}
+                        <button class="btn btn-outline-warning btn-sm" 
+                                onclick="diagnoseHub('{{ name }}', {{ status.port }})" 
+                                id="diagnose-{{ loop.index }}">
+                            <i class="fas fa-stethoscope"></i> Diagnose
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Hub Architecture Diagram -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-sitemap"></i> IRAQAF Hub Architecture
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="architecture-diagram">
+                            <!-- Main Dashboard -->
+                            <div class="arch-node main-dashboard mb-4">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body py-2">
+                                        <strong>🎯 Main Dashboard (Port 8501)</strong><br>
+                                        <small>Authentication + Unified Interface</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Layer 1: Core Hubs -->
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body py-2 text-center">
+                                            <strong>⚖️ L1 (8504)</strong><br>
+                                            <small>Regulations</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body py-2 text-center">
+                                            <strong>🔐 L2 (8502)</strong><br>
+                                            <small>Privacy & Security</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body py-2 text-center">
+                                            <strong>⚖️ L3 (8506)</strong><br>
+                                            <small>Fairness & Ethics</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-secondary text-white">
+                                        <div class="card-body py-2 text-center">
+                                            <strong>🔍 L4 (5000)</strong><br>
+                                            <small>Explainability</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Layer 2: Operations -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="card bg-dark text-white">
+                                        <div class="card-body py-2 text-center">
+                                            <strong>⚙️ SOQM (8503)</strong><br>
+                                            <small>System Operations</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body py-2 text-center">
+                                            <strong>📊 UQO (8507)</strong><br>
+                                            <small>QA Orchestrator</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-danger text-white">
+                                        <div class="card-body py-2 text-center">
+                                            <strong>🤖 CAE (8508)</strong><br>
+                                            <small>Continuous Assurance</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Flow Arrows -->
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-arrow-down"></i> Data Flow: L1 → L2 → L3 → L4 → SOQM → UQO → CAE <i class="fas fa-arrow-down"></i>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function testHub(hubName, port) {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        
+        button.innerHTML = '<span class="loading-spinner"></span> Testing...';
+        button.disabled = true;
+        
+        fetch(`http://localhost:${port}/health`)
+            .then(response => {
+                if (response.ok) {
+                    button.innerHTML = '<i class="fas fa-check text-success"></i> OK';
+                    button.className = 'btn btn-success btn-sm';
+                } else {
+                    button.innerHTML = '<i class="fas fa-times text-danger"></i> Error';
+                    button.className = 'btn btn-danger btn-sm';
+                }
+            })
+            .catch(error => {
+                button.innerHTML = '<i class="fas fa-times text-danger"></i> Failed';
+                button.className = 'btn btn-danger btn-sm';
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.className = 'btn btn-outline-info btn-sm';
+                    button.disabled = false;
+                }, 3000);
+            });
+    }
+
+    function diagnoseHub(hubName, port) {
+        const button = event.target;
+        const originalText = button.innerHTML;
+        
+        button.innerHTML = '<span class="loading-spinner"></span> Diagnosing...';
+        button.disabled = true;
+        
+        // Simulate diagnosis
+        setTimeout(() => {
+            alert(`Diagnosis for ${hubName}:\n\n` +
+                  `• Port ${port} is not responding\n` +
+                  `• Check if the hub service is running\n` +
+                  `• Verify network connectivity\n` +
+                  `• Review hub logs for errors`);
+            
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }, 2000);
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+        location.reload();
+    }, 30000);
+</script>
+{% endblock %}

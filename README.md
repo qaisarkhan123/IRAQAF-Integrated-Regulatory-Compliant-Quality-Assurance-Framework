@@ -6,7 +6,7 @@
 
 ## 🎯 Project Status
 
-**✅ PRODUCTION READY** | **7 Operational Hubs** | **Unified QA Orchestration** | **Continuous Assurance**
+**✅ PRODUCTION READY** | **7 Operational Hubs** | **Flask Dashboard** | **Enhanced Authentication**
 
 ### The 7-Hub Ecosystem
 
@@ -16,52 +16,45 @@
 | **L2 Privacy & Security** | 8502 | Privacy/security requirements | ✅ Live |
 | **L3 Fairness & Ethics** | 8506 | Fairness evaluation & ethics | ✅ Live |
 | **L4 Explainability & Transparency** | 5000 | AI transparency & explainability | ✅ Live |
-| **SOQM** | 8503 | System operations & QA monitoring | ✅ Live |
-| **UQO** | 8507 | Unified QA orchestration | ✅ Live |
-| **CAE** | 8508 | Continuous assurance engine | ✅ Live |
+| **System Operations & QA Monitor (SOQM)** | 8503 | System operations & QA monitoring | ✅ Live |
+| **Unified QA Orchestrator (UQO)** | 8507 | Unified QA orchestration | ✅ Live |
+| **Continuous Assurance Engine (CAE)** | 8508 | Continuous assurance engine | ✅ Live |
 
 ---
 
 ## 🚀 Quick Start
 
-### Start Main Dashboard
+### Start Main Flask Dashboard
 ```bash
-streamlit run dashboard/app.py --server.port 8501
+python dashboard/flask_app.py
 ```
+**Access**: http://localhost:8510
+**Login**: admin / admin
 
-### Start All Hubs (Individual Terminals)
+### Start All Hubs (Automated)
 ```bash
-# L1 Regulations & Governance
+# Windows
+start_all_hubs.bat
+
+# Or individually:
 python dashboard/l1_regulations_governance_hub.py
-
-# L2 Privacy & Security  
 python dashboard/privacy_security_hub.py
-
-# L3 Fairness & Ethics
 python dashboard/l3_fairness_ethics_hub.py
-
-# L4 Explainability & Transparency
 python dashboard/hub_explainability_app.py
-
-# SOQM
 python dashboard/l3_operations_control_center.py
-
-# UQO
-python module5_hub.py
-
-# CAE
+python simple_uqo.py
 python module5_core.py
 ```
 
 ### Access Points
-- **Main Dashboard**: http://localhost:8501
-- **L1 Regulations & Governance**: http://localhost:8504
-- **L2 Privacy & Security**: http://localhost:8502
-- **L3 Fairness & Ethics**: http://localhost:8506
-- **L4 Explainability & Transparency**: http://localhost:5000
-- **SOQM**: http://localhost:8503
-- **UQO**: http://localhost:8507
-- **CAE**: http://localhost:8508
+- **🎛️ Main Flask Dashboard**: http://localhost:8510 (Enhanced UI/UX)
+- **⚖️ L1 Regulations & Governance**: http://localhost:8504
+- **🔐 L2 Privacy & Security**: http://localhost:8502
+- **⚖️ L3 Fairness & Ethics**: http://localhost:8506
+- **🔍 L4 Explainability & Transparency**: http://localhost:5000
+- **⚙️ SOQM**: http://localhost:8503
+- **📊 UQO**: http://localhost:8507
+- **🤖 CAE**: http://localhost:8508
 
 ---
 
@@ -84,6 +77,31 @@ The hubs follow a logical evaluation workflow:
            ↓
 🤖 Continuous Assurance Engine (CAE)
 ```
+
+---
+
+## 🎨 Flask Dashboard Features
+
+### 🔐 Enhanced Authentication System
+- **2FA Support**: Time-based OTP with QR codes
+- **Role-based Access**: Admin, Analyst, Viewer roles
+- **Account Security**: Lockout protection, audit logging
+- **Password Security**: PBKDF2 hashing, breach detection
+- **Session Management**: Secure session handling
+
+### 🎛️ Modern UI/UX
+- **Dark Theme Sidebar**: Professional glass morphism design
+- **Real-time Monitoring**: Live hub status and metrics
+- **Interactive Charts**: Plotly-powered visualizations
+- **Responsive Design**: Mobile-friendly interface
+- **Quick Actions**: Direct hub access and management
+
+### 📊 Dashboard Components
+- **Hub Status Overview**: Real-time health monitoring
+- **Key Performance Metrics**: CRS, SAI, FI, TS scores
+- **Alert Management**: System-wide alert aggregation
+- **Analytics**: Interactive charts and trend analysis
+- **Settings**: User preferences and configuration
 
 ---
 
@@ -147,13 +165,14 @@ The hubs follow a logical evaluation workflow:
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: Streamlit (Main Dashboard)
-- **Backend**: Flask (All Hubs)
-- **Database**: SQLite (Evidence, Versioning)
+- **Frontend**: Flask with Jinja2 templates
+- **Backend**: Flask (Main Dashboard + All Hubs)
+- **Database**: SQLite (Evidence, Versioning, User Management)
 - **APIs**: RESTful JSON endpoints
+- **Authentication**: Enhanced 2FA with PyOTP
 - **Monitoring**: Real-time metrics collection
-- **Security**: Bearer token authentication
-- **Visualization**: Chart.js, custom CSS/HTML
+- **Security**: PBKDF2 password hashing, session management
+- **Visualization**: Plotly.js, Bootstrap 5, custom CSS
 
 ---
 
@@ -183,10 +202,34 @@ The hubs follow a logical evaluation workflow:
 
 1. **Clone Repository**
 2. **Install Dependencies**: `pip install -r requirements.txt`
-3. **Start Main Dashboard**: `streamlit run dashboard/app.py --server.port 8501`
-4. **Launch Hubs**: Follow the hub navigation order
-5. **Access Documentation**: Review `IRAQAF_HUBS_COMPREHENSIVE_GUIDE.md`
+3. **Start Flask Dashboard**: `python dashboard/flask_app.py`
+4. **Access Dashboard**: http://localhost:8510 (Login: admin/admin)
+5. **Launch Hubs**: Use `start_all_hubs.bat` or start individually
+6. **Review Documentation**: `IRAQAF_HUBS_COMPREHENSIVE_GUIDE.md`
 
 ---
 
-**Enterprise AI Governance Made Simple** | **IRAQAF Platform v1.0**
+## 🔧 Project Structure
+
+```
+projectttt/
+├── dashboard/
+│   ├── flask_app.py              # Main Flask dashboard
+│   ├── flask_auth_enhanced.py    # Enhanced authentication system
+│   ├── templates/                # Jinja2 templates
+│   │   ├── base.html            # Base template with modern UI
+│   │   ├── dashboard.html       # Main dashboard
+│   │   ├── login.html           # Authentication page
+│   │   └── ...
+│   ├── services/
+│   │   └── hub_service.py       # Hub management service
+│   └── ...
+├── README.md                     # This file
+├── IRAQAF_HUBS_COMPREHENSIVE_GUIDE.md
+├── requirements.txt
+└── start_all_hubs.bat           # Automated hub launcher
+```
+
+---
+
+**Enterprise AI Governance Made Simple** | **IRAQAF Platform v2.0 - Flask Edition**

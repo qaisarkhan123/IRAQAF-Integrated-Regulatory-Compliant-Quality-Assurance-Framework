@@ -1,7 +1,7 @@
 # IRAQAF Platform - Comprehensive Hub Modules Guide
 
-**Version:** 2.0  
-**Last Updated:** November 21, 2024  
+**Version:** 2.1 - Flask Edition  
+**Last Updated:** November 22, 2025  
 **Platform:** Integrated Regulatory Compliance & Quality Assurance Framework (IRAQAF)
 
 ---
@@ -9,7 +9,7 @@
 ## 📋 Table of Contents
 
 1. [Overview](#overview)
-2. [Main Dashboard](#main-dashboard)
+2. [Flask Dashboard](#flask-dashboard)
 3. [L1 Regulations & Governance Hub](#l1-regulations--governance-hub)
 4. [L2 Privacy & Security Hub](#l2-privacy--security-hub)
 5. [L3 Fairness & Ethics Hub](#l3-fairness--ethics-hub)
@@ -24,7 +24,13 @@
 
 ## Overview
 
-The IRAQAF platform consists of **7 specialized hub modules** plus 1 main dashboard that together provide comprehensive quality assurance, compliance monitoring, and regulatory oversight for AI systems. Each hub focuses on specific aspects of quality, security, compliance, and operational excellence.
+The IRAQAF platform consists of **7 specialized hub modules** plus 1 Flask-based main dashboard that together provide comprehensive quality assurance, compliance monitoring, and regulatory oversight for AI systems. Each hub focuses on specific aspects of quality, security, compliance, and operational excellence.
+
+### 🎛️ Flask Dashboard (NEW)
+- **URL**: http://localhost:8510
+- **Technology**: Flask with enhanced authentication
+- **Features**: Modern UI/UX, real-time monitoring, 2FA support
+- **Login**: admin / admin (default credentials)
 
 ### 🚀 Hub Navigation Order
 
@@ -147,15 +153,15 @@ compliance_recalculation → stakeholder_notification
 
 ---
 
-## Main Dashboard
+## Flask Dashboard
 
-**Port:** 8501  
-**Technology:** Streamlit  
-**Access:** `http://localhost:8501`  
-**Requires:** Authentication (Login required)
+**Port:** 8510  
+**Technology:** Flask with Jinja2 templates  
+**Access:** `http://localhost:8510`  
+**Requires:** Enhanced Authentication (2FA support)
 
 ### Purpose
-Central hub providing unified access to all IRAQAF modules with authentication, session management, and integrated navigation.
+Modern Flask-based central hub providing unified access to all IRAQAF modules with enhanced authentication, real-time monitoring, and professional UI/UX.
 
 ### Key Features
 - **Authentication System**: User login, role-based access control (Admin, Analyst, Viewer)
@@ -1433,10 +1439,24 @@ python module5_core.py
 
 ## API Endpoints Summary
 
-### Main Dashboard (Port 8501)
-- Streamlit-based, no REST API
-- Uses session state for data
-- File upload/download endpoints internally
+### Flask Dashboard (Port 8510)
+```
+GET  /                              # Root - redirects to login
+GET  /login                         # Authentication page
+POST /login                         # Login processing
+GET  /logout                        # Logout
+GET  /dashboard                     # Main dashboard (protected)
+GET  /hub-overview                  # Hub status overview
+GET  /charts                        # Interactive analytics
+GET  /alerts                        # Alert management
+GET  /settings                      # User settings
+GET  /setup-2fa                     # 2FA setup
+POST /verify-2fa                    # 2FA verification
+GET  /api/live-data                 # Real-time hub data
+GET  /api/dashboard-data            # Dashboard metrics
+GET  /api/health-status             # Hub health status
+GET  /api/alerts                    # System alerts
+```
 
 ### L4 Explainability Hub (Port 5000)
 ```
